@@ -48,5 +48,5 @@ bindump [options] -f [path to file]
     H. Display Hex.
   File options:
     F. Load file.
-                                          Q-Exit.;
+                                Q-Exit.
 ```
