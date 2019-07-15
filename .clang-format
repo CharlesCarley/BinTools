@@ -1,0 +1,46 @@
+---
+BasedOnStyle:       Google
+IndentWidth:        4
+TabWidth:           4
+UseTab:             Never
+
+Language:           Cpp
+BreakBeforeBraces:  Allman
+ColumnLimit:        0
+IndentCaseLabels:   false
+
+AlwaysBreakTemplateDeclarations:     true
+AlignConsecutiveDeclarations:        true
+AlignConsecutiveAssignments:         true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine:    false
+
+MaxEmptyLinesToKeep:                 3
+KeepEmptyLinesAtTheStartOfBlocks:   false
+
+
+IndentPPDirectives:   None
+IncludeBlocks:        Merge
+AccessModifierOffset: -4
+NamespaceIndentation: All
+PointerAlignment:     Left
+SpaceBeforeParens:    ControlStatements
+
+Standard: Auto
+AlignTrailingComments: true
+AlignOperands: true
+BinPackParameters: false
+BinPackArguments:  false
+
+AllowShortLoopsOnASingleLine: false
+
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+BreakConstructorInitializersBeforeComma: true
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerIndentWidth: 4
+
+BreakBeforeTernaryOperators: true
+AllowShortCaseLabelsOnASingleLine: false
+AlignEscapedNewlines: Left
+
+...
