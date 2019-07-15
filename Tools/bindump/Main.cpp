@@ -164,8 +164,8 @@ void HexDump_Usage(void)
     skPrintf("    -m [0-255] mark specific code.\n");
     skPrintf("    -b  -- convert output to binary.\n");
     skPrintf("    -a  -- display ASCII listings.\n");
-    skPrintf("    -xh -- remove the default hex display.\n");
     skPrintf("    -h  -- display this help message.\n");
+    skPrintf("    -i  -- interactive mode.\n");
     skPrintf("    -c  -- separate output into colors in order to see it better.\n");
 }
 
