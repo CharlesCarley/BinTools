@@ -111,7 +111,11 @@ void skSection::dissemble(void)
         for (j = 0; j < count; j++)
         {
             cs_insn &i = insn[j];
+#if SK_PLATFORM == SK_PLATFORM_WIN32
             skPrintf("0x%I64u:\t%s\t\t%s\n", i.address, i.mnemonic, i.op_str);
+#else
+            skPrintf("0x%u:\t%s\t\t%s\n", i.address, i.mnemonic, i.op_str);
+#endif
         }
 
         cs_free(insn, count);

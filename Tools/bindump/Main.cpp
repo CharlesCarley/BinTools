@@ -348,6 +348,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
             prog.m_flags &= ~PF_BINARY;
         skPrintUtils::clear();
     }
+    break;
     case 'D':
     case 'd':
     {

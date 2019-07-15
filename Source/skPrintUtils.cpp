@@ -25,6 +25,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "Utils/Config/skConfig.h"
 #if SK_PLATFORM == SK_PLATFORM_WIN32
 #include "conio.h"
