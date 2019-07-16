@@ -13,7 +13,6 @@ This project is an experimental repository for examining executable file formats
 
 #### TODO
 - [ ] Abstract PE file.
-- [ ] Add a default unknown file type.
 - [ ] Handle 32 and 64 bit elf types.
 - [ ] Convert more relevant infomation.
 
