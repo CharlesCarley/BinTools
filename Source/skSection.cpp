@@ -109,7 +109,7 @@ void skSection::dissemble(int flags)
             if (flags & PF_COLORIZE)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
-            skPrintf("0x%08x: ", i.address);
+            skPrintf("0x%08x: ", (unsigned int)(i.address));
             skPrintUtils::dumpHex(i.bytes, i.size, PF_HEXDIS, -1, false);
 
             skPrintUtils::writeColor(CS_WHITE);

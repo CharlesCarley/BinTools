@@ -22,9 +22,6 @@
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
 option(BinTools_USE_FOLDERS "Organize into folders" ON)
-option(BinTools_CLANG_TIDY  "Use clang_tidy" ON)
-
-
 
 
 # -----------------------------------------------------------------------------
@@ -47,6 +44,7 @@ macro(log_config)
     message(STATUS "-----------------------------------------------------------")
     message(STATUS " ")
     message(STATUS "---------- Utils --------")
+    message(STATUS "Print using printf                      : ${Utils_NO_DEBUGGER}")
     message(STATUS "Using Memory allocator                  : ${Utils_USE_MEMORY_ALLOCATOR}")
     message(STATUS "Using int size_t                        : ${Utils_USE_SIGNED_SIZE_T}")
     message(STATUS "Using standard strings                  : ${Utils_USE_STD_STRING_FUNCS}")

@@ -24,7 +24,9 @@
 cmake_minimum_required(VERSION 3.6)
 project(BinTools)
 
-set(CMAKE_MODULE_PATH ${BinTools_SOURCE_DIR}/CMake)
+set(CMAKE_MODULE_PATH 
+    ${BinTools_SOURCE_DIR}/CMake
+)
 include(Configure)
 subdirs(CMake)
 
