@@ -25,9 +25,10 @@
 */
 #include "skSection.h"
 #include "skBinaryFile.h"
+#include "skPrintUtils.h"
+
 #include "Utils/skMemoryUtils.h"
 #include "Utils/skDebugger.h"
-
 
 #include "capstone/capstone.h"
 
@@ -51,11 +52,7 @@ skSection::skSection(skBinaryFile *owner, const skString &name, void *data, SKsi
 skSection::~skSection()
 {
     if (m_handle != -1)
-    {
-        // free capstone info 
-
         cs_close(&m_handle);
-    }
 
     if (m_data)
     {
@@ -93,7 +90,7 @@ void skSection::initialize(void *ptr, SKsize size)
 
 
 
-void skSection::dissemble(void)
+void skSection::dissemble(int flags)
 {
     if (m_handle == -1)
     {
@@ -111,18 +108,18 @@ void skSection::dissemble(void)
         for (j = 0; j < count; j++)
         {
             cs_insn &i = insn[j];
-#if SK_PLATFORM == SK_PLATFORM_WIN32
-            skPrintf("0x%I64u:\t%s\t\t%s\n", i.address, i.mnemonic, i.op_str);
-#else
-            skPrintf("0x%u:\t%s\t\t%s\n", i.address, i.mnemonic, i.op_str);
-#endif
-        }
+            if (flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_LIGHT_GREY);
 
+            skPrintf("0x%010X ", i.address);
+            skPrintUtils::dumpHex(i.bytes, i.size, PF_HEXDIS, -1, false);
+
+            skPrintUtils::writeColor(CS_WHITE);
+            skPrintf("%s\t%s\n", i.mnemonic, i.op_str);
+        }
         cs_free(insn, count);
     }
 }
-
-
 
 cs_arch skSection_getCapStoneArch(skInstructionSet set)
 {

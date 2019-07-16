@@ -480,7 +480,7 @@ void skPrintUtils_doMarkColor(int c, int mark)
 }
 
 
-void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int mark)
+void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int mark, bool nl)
 {
     char* cp = (char*)ptr;
     for (SKsize i = start; i < stop; i += 16)
@@ -496,12 +496,13 @@ void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int m
             skPrintUtils_writeBinary(cp, i, stop, flags, mark);
         if (flags & PF_ASCII)
             skPrintUtils_writeAscii(cp, i, stop, flags, mark);
-        skPrintf("\n");
+        if (nl)
+            skPrintf("\n");
     }
 }
 
 
-void skPrintUtils::dumpHex(void* ptr, size_t len, int flags, int mark)
+void skPrintUtils::dumpHex(void* ptr, size_t len, int flags, int mark, bool nl)
 {
-    skPrintUtils_Hexdump(ptr, 0, len, flags, mark);
+    skPrintUtils_Hexdump(ptr, 0, len, flags, mark, nl);
 }

@@ -76,10 +76,8 @@ public:
         return m_size;
     }
 
-
-
     // print the disassembly to stdout
-    void dissemble(void);
+    void dissemble(int flags = 0);
 
 
 private:

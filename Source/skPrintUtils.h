@@ -61,6 +61,7 @@ enum skPrintFlags
     PF_DISASEMBLE = (1 << 5), // ignores hex in place of disassembly
     PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
     PF_BIN        = PF_COLORIZE | PF_BINARY,
+    PF_HEXDIS     = PF_COLORIZE | PF_HEX,
 };
 
 
@@ -85,7 +86,7 @@ public:
     static void clear(void);
     static void pause(void);
     static int  charHexToInt(char ch);
-    static void dumpHex(void* ptr, size_t len, int flags = PF_DEFAULT, int mark=0);
+    static void dumpHex(void* ptr, size_t len, int flags = PF_DEFAULT, int mark=0, bool nl = true);
 };
 
 #endif  //_skPrintUtils_h_

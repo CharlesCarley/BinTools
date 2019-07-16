@@ -61,9 +61,7 @@ void skElfFile::loadImpl(void)
         return;
     }
 
-
     skMemcpy(&m_inf, ((char*)m_data), sizeof(skElfHeaderInfo64));
-
     if (m_inf.m_id[EMN_CLASS] == 1)
         m_fileFormatType = FFT_32BIT;
     else if (m_inf.m_id[EMN_CLASS] == 2)
@@ -113,18 +111,19 @@ void skElfFile::loadImpl(void)
         break;
     }
 
-
-
     if (m_instructionSetType == IS_NONE)
     {
         skPrintf("Unknown machine architecture found in the file header");
         return;
     }
 
-
     // The section headers are packed in m_data[start:end]
     offs = getSectionHeaderStart();
     offe = getSectionHeaderEnd();
+
+    if (offe > m_len)
+        return;
+
 
     // Offset to the start section
     skElfSectionHeader64* sp = reinterpret_cast<skElfSectionHeader64*>(m_data + offs);
@@ -146,8 +145,7 @@ void skElfFile::loadImpl(void)
         m_symtab = m_sections.back().m_offset;
     else
     {
-        // this is an error, it should have sections
-        // TODO: handle errors
+        // This is an error, it should have sections TODO: handle errors
         skPrintf("Exception: No sections extracted from the file!");
         return;
     }
@@ -156,7 +154,6 @@ void skElfFile::loadImpl(void)
     SKsize si = 0, sl = m_sections.size(), sn;
 
     Sections::PointerType p = m_sections.ptr();
-
     while (si < sl)
     {
         skElfSectionHeader64& sh = p[si++];
@@ -165,7 +162,6 @@ void skElfFile::loadImpl(void)
         if (sn < m_len)
         {
             elfName name = (elfName)(m_data + sn);
-
             if (name != 0 && (*name) == '\0')
                 continue;
 
@@ -188,8 +184,5 @@ void skElfFile::loadImpl(void)
             }
         }
     }
-
-
-    // now that everything is mapped, sort needed information
 }
 

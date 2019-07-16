@@ -47,7 +47,7 @@ struct HexDump_ProgramInfo
     int           m_state;
     skBinaryFile* m_fp;
     int           m_flags;
-    char*         m_code;
+    int           m_code;
     string        m_fileName;
 };
 
@@ -60,7 +60,7 @@ void HexDump_PrintAll(HexDump_ProgramInfo& prog);
 
 int main(int argc, char** argv)
 {
-    HexDump_ProgramInfo prog = {MS_EXIT, 0, PF_DEFAULT, 0};
+    HexDump_ProgramInfo prog = {MS_EXIT, 0, PF_DEFAULT, -1};
     HexDump_ParseCommandLine(prog, argc, argv);
 
 
@@ -120,7 +120,7 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    prog.m_code = argv[i];
+                    prog.m_code = (int)std::strtol(argv[i], 0, 16);
             }
             break;
             case 0x62:
@@ -174,7 +174,10 @@ void HexDump_PrintAll(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skPrintUtils::dumpHex((void*)prog.m_fp->ptr(), prog.m_fp->length(), prog.m_flags);
+        skPrintUtils::dumpHex((void*)prog.m_fp->ptr(),
+                              prog.m_fp->length(),
+                              prog.m_flags,
+                              prog.m_code);
     }
 }
 
@@ -189,7 +192,7 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
         while (it.hasMoreElements())
         {
             skString& str = it.getNext();
-            skPrintf("%02i -- %s\n", i, str.c_str());
+            skPrintf("%-2i\t%s\n", i, str.c_str());
             ++i;
         }
         skPrintf("\n\n");
@@ -210,17 +213,17 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
             const skString& name = sec->getname();
 
             skPrintUtils::writeSeperator();
-            skPrintUtils::writeColor(CS_DARKYELLOW);
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_DARKYELLOW);
             skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
             skPrintUtils::writeSeperator();
 
-
-            skPrintUtils::writeColor(CS_WHITE);
-
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_WHITE);
             if (prog.m_flags & PF_DISASEMBLE)
-                sec->dissemble();
+                sec->dissemble(prog.m_flags);
             else
-                skPrintUtils::dumpHex(sec->ptr(), sec->size(), prog.m_flags);
+                skPrintUtils::dumpHex(sec->ptr(), sec->size(), prog.m_flags, prog.m_code);
         }
     }
 }
@@ -238,19 +241,21 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, const std::string& name)
         if (sec != 0)
         {
             const skString& name = sec->getname();
-
             skPrintUtils::writeSeperator();
-            skPrintUtils::writeColor(CS_DARKYELLOW);
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_DARKYELLOW);
+
             skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
             skPrintUtils::writeSeperator();
 
 
-            skPrintUtils::writeColor(CS_WHITE);
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_WHITE);
 
             if (prog.m_flags & PF_DISASEMBLE)
-                sec->dissemble();
+                sec->dissemble(prog.m_flags);
             else
-                skPrintUtils::dumpHex(sec->ptr(), sec->size(), prog.m_flags);
+                skPrintUtils::dumpHex(sec->ptr(), sec->size(), prog.m_flags, prog.m_code);
         }
     }
 }
@@ -352,17 +357,17 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     case 'D':
     case 'd':
     {
-            cout << "Display disassembly? (Y|N)>";
-            char ans;
-            cin >> ans;
+        cout << "Display disassembly? (Y|N)>";
+        char ans;
+        cin >> ans;
 
-            if (ans == 'y' || ans == 'Y')
-                prog.m_flags |= PF_DISASEMBLE;
-            else if (ans == 'n' || ans == 'N')
-                prog.m_flags &= ~PF_DISASEMBLE;
-            skPrintUtils::clear();
-        }
-        break;
+        if (ans == 'y' || ans == 'Y')
+            prog.m_flags |= PF_DISASEMBLE;
+        else if (ans == 'n' || ans == 'N')
+            prog.m_flags &= ~PF_DISASEMBLE;
+        skPrintUtils::clear();
+    }
+    break;
     case 'H':
     case 'h':
     {
@@ -386,8 +391,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         string sn;
         cin >> sn;
 
-        //if (!sn.empty())
-        //    prog.m_fp->markCode((char*)sn.c_str());
+        prog.m_code = (int)std::strtol(sn.c_str(), 0, 16);
         skPrintUtils::clear();
     }
     break;

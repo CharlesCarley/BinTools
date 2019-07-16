@@ -106,6 +106,6 @@ void skBinaryFile::load(skStream &fstream)
     m_data[m_len] = 0;
     
 
-    // Convert the rest in derrived classes.
+    // Convert the rest in derived classes.
     loadImpl();
 }
