@@ -27,10 +27,16 @@
 #define _skPortableFile_h_
 
 #include "skBinaryFile.h"
+#include "PE/skPortableTypes.h"
 
 
 class skPortableFile : public skBinaryFile
 {
+private:
+    COFFHeader m_header;
+
+
+
 private:
     friend class skBinaryFile;
     skPortableFile();

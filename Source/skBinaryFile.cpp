@@ -26,11 +26,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits>
+#include "ELF/skElf.h"
+#include "PE/skPortableFile.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skFileStream.h"
 #include "skDefaultFile.h"
-#include "ELF/skElf.h"
-#include "PE/skPortableFile.h"
 #include "skPrintUtils.h"
 
 
@@ -38,7 +38,6 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
 {
     if (!file || !(*file))
         return 0;
-
 
     skFileStream fs;
     fs.open(file, skStream::READ);
@@ -53,7 +52,6 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
     char magic[4];
     fs.read(magic, 4);
 
-
     skBinaryFile *rval;
 
     // rewind
@@ -64,7 +62,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
 
     if (strncmp("\177ELF", magic, 4) == 0)
         rval = new skElfFile();
-    else if (strncmp("MZ", magic, 2)==0)
+    else if (strncmp("MZ", magic, 2) == 0)
     {
         fs.seek(0x3C, SEEK_SET);
 
@@ -75,7 +73,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
         {
             fs.seek(pe_offset, SEEK_SET);
             fs.read(magic, 4);
-            
+
             // seek back to the start of the PE header
             fs.seek(pe_offset, SEEK_SET);
 

@@ -27,10 +27,10 @@
 #ifndef _skElfFileHeader_h_
 #define _skElfFileHeader_h_
 
+#include "ELF/skElfTypes.h"
 #include "Utils/skArray.h"
 #include "Utils/skMap.h"
 #include "skBinaryFile.h"
-#include "skElfTypes.h"
 
 class skElfFile : public skBinaryFile
 {

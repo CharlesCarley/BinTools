@@ -36,6 +36,7 @@ set(TargetName_SRC
     ELF/skElfUtils.h
 
     PE/skPortableFile.h
+    PE/skPortableTypes.h
     
     skBinaryFile.cpp
     skDefaultFile.cpp
@@ -46,6 +47,7 @@ set(TargetName_SRC
     ELF/skElf.cpp
 
     PE/skPortableFile.cpp
+    PE/skPortableTypes.cpp
 )
 
 

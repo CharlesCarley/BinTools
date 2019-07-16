@@ -22,45 +22,55 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
+
+    See: https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
+
 */
-#include "skPortableFile.h"
-#include "Utils/skDebugger.h"
+#ifndef _skPortableTypes_h_
+#define _skPortableTypes_h_
 
+#include "Utils/Config/skConfig.h"
 
-skPortableFile::skPortableFile()
+enum COFFMagic
 {
-}
+    COFF_MAG_PE32 = 0x010B,
+    COFF_MAG_PE64 = 0x020B,  // PE32+
+};
 
-skPortableFile ::~skPortableFile()
+enum COFFMachineType
 {
-}
+    CMT_NONE  = 0,
+    CMT_AMD64 = 0x01D3,
+    CMT_ARM   = 0x01C0,
+    CMT_ARM64 = 0xAA64,
+    CMT_I386  = 0x014C,
+    CMT_IA64  = 0x0200,
+};
 
-
-void skPortableFile::loadImpl(void)
+struct COFFHeader
 {
-    if (m_data == 0)
-    {
-        skPrintf("No data was loaded prior to calling load\n");
-        return;
-    }
-
-    // The PE signature is not part of the defined structure (+4)
-    char* ptr = m_data + 4;
-    skMemcpy(&m_header, m_data+4, sizeof(COFFHeader));
-
-
-    COFFMachineType mt = (COFFMachineType)m_header.m_machine;
-
-    ptr += sizeof(COFFHeader);
+    SKuint16 m_machine;
+    SKuint16 m_sectionCount;
+    SKuint32 m_timeDateStamp;
+    SKuint32 m_symbolTableOffset;
+    SKuint32 m_symbolCount;
+    SKuint16 m_optionalHeaderSize;  // required for images
+    SKuint16 m_characteristics;
+};
 
 
-    if (m_header.m_optionalHeaderSize > 0) // it's an image 
-    {
-        COFFOptionalHeaderStandard* optstd = (COFFOptionalHeaderStandard*)ptr;
+struct COFFOptionalHeaderStandard
+{
+    SKuint16 m_magic;  // PE32 | PE32+ format
+    SKuint8  m_majorVersion;
+    SKuint8  m_minorVersion;
+    SKuint32 m_sizeofCode;
+    SKuint32 m_sizeofInitData;
+    SKuint32 m_sizeofBSSdData;
+    SKuint32 m_entryPoint;
+    SKuint32 m_baseOfCode;
+};
 
 
-        skPrintf("%i\n", optstd->m_magic);
 
-
-    }
-}
+#endif  //_skPortableTypes_h_
