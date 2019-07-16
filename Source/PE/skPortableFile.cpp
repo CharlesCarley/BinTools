@@ -116,38 +116,39 @@ void skPortableFile::loadImpl(void)
     }
 
 
-
-    SKsize si = 0, sl = m_sectionHeaders.size(), sn;
+        SKsize si = 0,
+               sl = m_sectionHeaders.size(), sn;
 
     Sections::PointerType p = m_sectionHeaders.ptr();
     while (si < sl)
     {
         COFFSectionHeader &sh = p[si++];
 
-        sn = sh.m_virtualAddress;
-        if (sn < m_len)
+        char *name = (char *)sh.m_name;
+        if ((*name) == '\0')
+            continue;
+
+        if (m_sectionLookup.find(name) == SK_NPOS)
         {
-            char *name = (char *)sh.m_name;
-            if ((*name) == '\0')
-                continue;
+            m_sectionTable.insert(name, sh);
+            m_sectionHeaderStringTable.push_back(name);
 
-            if (m_sectionLookup.find(name) == SK_NPOS)
+            sn = sh.m_pointerToRawData;
+
+            if (sn < m_len)  // make sure the requested memory is in range
             {
-                m_sectionTable.insert(name, sh);
-                m_sectionHeaderStringTable.push_back(name);
-
-
-                if (sh.m_virtualAddress + sh.m_virtualSize < m_len)  // make sure the requested memory is in range
-                {
-                    m_sectionLookup.insert(name,
-                                           new skSection(this, name, m_data + sh.m_virtualAddress, (SKsize)sh.m_virtualSize));
-                }
+                m_sectionLookup.insert(name,
+                                       new skSection(this, name, m_data + sn, (SKsize)sh.m_virtualSize));
             }
             else
             {
-                // this is an error, it shouldn't have duplicate symbols
-                skPrintf("Exception: duplicate symbol name!");
+                skPrintf("!!");
             }
+        }
+        else
+        {
+            // this is an error, it shouldn't have duplicate symbols
+            skPrintf("Exception: duplicate symbol name!");
         }
     }
 }

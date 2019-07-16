@@ -51,6 +51,9 @@ public:
     virtual ~skPortableFile();
 
 protected:
+
+    SKuint64 getSectionOffset(COFFSectionHeader& header);
+
     virtual void loadImpl(void);
 };
 

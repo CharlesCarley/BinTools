@@ -107,6 +107,8 @@ skBinaryFile::~skBinaryFile()
     skPrintUtils::writeColor(CS_WHITE);
 }
 
+
+
 void skBinaryFile::load(skStream &fstream)
 {
     if (!fstream.isOpen())

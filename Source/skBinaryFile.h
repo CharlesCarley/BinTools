@@ -126,6 +126,8 @@ public:
 
 protected:
 
+
+
     /// called from createInstance
     /// loadImpl is responsible for converting 
     /// the underlying data into this interface.
