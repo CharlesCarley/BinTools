@@ -57,6 +57,7 @@ void skPortableFile::loadImpl(void)
 
     COFFMachineType mt = (COFFMachineType)m_header.m_machine;
 
+
     m_instructionSetType = IS_X86;
     m_fileFormatType     = FFT_32BIT;
 
@@ -109,40 +110,33 @@ void skPortableFile::loadImpl(void)
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
     m_sectionHeaders.reserve(m_header.m_sectionCount);
+    m_sectionLookup.reserve(m_header.m_sectionCount);
+
 
 
     SKuint16 i16;
     for (i16 = 0; i16 < m_header.m_sectionCount; ++i16, ++sectionPtr)
     {
-        COFFSectionHeader hdr;
-        skMemcpy(&hdr, sectionPtr, sizeof(COFFSectionHeader));
-        m_sectionHeaders.push_back(hdr);
-    }
-
-
-    SKsize si = 0,
-           sl = m_sectionHeaders.size(), sn;
-
-    Sections::PointerType p = m_sectionHeaders.ptr();
-    while (si < sl)
-    {
-        COFFSectionHeader &sh = p[si++];
+        COFFSectionHeader sh;
+        skMemcpy(&sh, sectionPtr, sizeof(COFFSectionHeader));
+        m_sectionHeaders.push_back(sh);
 
         char *name = (char *)sh.m_name;
         if ((*name) == '\0')
             continue;
+
 
         if (m_sectionLookup.find(name) == SK_NPOS)
         {
             m_sectionTable.insert(name, sh);
             m_sectionHeaderStringTable.push_back(name);
 
-            sn = sh.m_pointerToRawData - m_imageBase;
+            size_t sectionOffset = getSectionOffset(sh);
 
-            if (sn < m_len)  // make sure the requested memory is in range
+            if (sectionOffset < m_len)
             {
-                m_sectionLookup.insert(name,
-                                       new skSection(this, name, m_data + sn, (SKsize)sh.m_virtualSize));
+                skSection *section = new skSection(this, name, m_data + sectionOffset, (SKsize)sh.m_virtualSize, sectionOffset);
+                m_sectionLookup.insert(name, section);
             }
         }
         else

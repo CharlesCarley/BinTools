@@ -44,16 +44,24 @@ private:
     Sections                  m_sectionHeaders;
     SectionMap                m_sectionTable;
 
-private:
+
     friend class skBinaryFile;
     skPortableFile(SKint16 dos_offset);
-
 public:
     virtual ~skPortableFile();
 
-protected:
 
-    SKuint64 getSectionOffset(COFFSectionHeader& header);
+
+
+private:
+
+    inline size_t getSectionOffset(COFFSectionHeader& header)
+    {
+        // m_imageBase is the offset past the DOS stub program
+        // m_pointerToRawData is the location in the file
+        // m_data only points to the PE data
+        return (size_t)(header.m_pointerToRawData - m_imageBase);
+    }
 
     virtual void loadImpl(void);
 };

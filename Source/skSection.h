@@ -38,14 +38,15 @@ public:
 
 private:
     PointerType   m_data;
-    SKsize        m_size;
+    size_t        m_size;
     skString      m_name;
     skBinaryFile *m_owner;
-    size_t        m_handle; // capstone handle
+    size_t        m_handle;  // capstone handle
+    size_t        m_startAddress;
 
 
 public:
-    skSection(skBinaryFile* owner, const skString &name, void *data, SKsize size);
+    skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset);
     ~skSection();
 
 
@@ -70,8 +71,8 @@ public:
         return m_data;
     }
 
-    /// returns amount of allocated memory in bytes 
-    inline SKsize size(void)
+    /// returns amount of allocated memory in bytes
+    inline size_t size(void)
     {
         return m_size;
     }
@@ -81,7 +82,7 @@ public:
 
 
 private:
-    void initialize(void *ptr, SKsize size);
+    void initialize(void *ptr, size_t size);
 };
 
 #endif  //_skBinaryFile_h_

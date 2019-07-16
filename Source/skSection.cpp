@@ -24,13 +24,11 @@
 -------------------------------------------------------------------------------
 */
 #include "skSection.h"
+#include "Utils/skDebugger.h"
+#include "Utils/skMemoryUtils.h"
+#include "capstone/capstone.h"
 #include "skBinaryFile.h"
 #include "skPrintUtils.h"
-
-#include "Utils/skMemoryUtils.h"
-#include "Utils/skDebugger.h"
-
-#include "capstone/capstone.h"
 
 
 
@@ -38,13 +36,13 @@ cs_arch skSection_getCapStoneArch(skInstructionSet set);
 
 
 
-
-skSection::skSection(skBinaryFile *owner, const skString &name, void *data, SKsize size) :
+skSection::skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset) :
     m_name(name),
     m_data(0),
     m_size(0),
     m_owner(owner),
-    m_handle(-1)
+    m_handle(-1),
+    m_startAddress(offset)
 {
     initialize(data, size);
 }
@@ -63,16 +61,16 @@ skSection::~skSection()
 }
 
 
-void skSection::initialize(void *ptr, SKsize size)
+void skSection::initialize(void *ptr, size_t size)
 {
-    if (!ptr || size == 0 || size == SK_NPOS)
+    if (!ptr || size == 0)
         return;
 
     m_data = new ValueType[size + 1];
     skMemcpy(m_data, ptr, size);
 
     m_data[size] = 0;
-    m_size   = size;
+    m_size       = size;
 
 
     cs_arch arch = skSection_getCapStoneArch(m_owner->getInstructionSet());
@@ -101,7 +99,7 @@ void skSection::dissemble(int flags)
 
     cs_insn *insn;
 
-    size_t count = cs_disasm(m_handle, (uint8_t *)m_data, (size_t)m_size, 0x100000, 0, &insn);
+    size_t count = cs_disasm(m_handle, (uint8_t *)m_data, (size_t)m_size, m_startAddress, 0, &insn);
     if (count > 0)
     {
         size_t j;
@@ -111,7 +109,7 @@ void skSection::dissemble(int flags)
             if (flags & PF_COLORIZE)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
-            skPrintf("0x%010X ", i.address);
+            skPrintf("0x%08x: ", i.address);
             skPrintUtils::dumpHex(i.bytes, i.size, PF_HEXDIS, -1, false);
 
             skPrintUtils::writeColor(CS_WHITE);

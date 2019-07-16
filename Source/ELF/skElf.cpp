@@ -170,7 +170,7 @@ void skElfFile::loadImpl(void)
                 if (sh.m_offset + sh.m_size < m_len)  // make sure the requested memory is in range
                 {
                     m_sectionLookup.insert(name,
-                                           new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size));
+                                           new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size, (size_t)sh.m_offset));
                 }
             }
             else

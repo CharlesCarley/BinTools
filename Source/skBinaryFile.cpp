@@ -64,6 +64,8 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
         rval = new skElfFile();
     else if (strncmp("MZ", magic, 2) == 0)
     {
+        // Seek to the 4 byte variable containing the 
+        // offset to the PE signature
         fs.seek(0x3C, SEEK_SET);
 
         SKuint32 pe_offset;
@@ -74,12 +76,15 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
             fs.seek(pe_offset, SEEK_SET);
             fs.read(magic, 4);
 
-            // seek back to the start of the PE header
+            // seek back to the start of the PE signature
             fs.seek(pe_offset, SEEK_SET);
 
             if (strncmp("PE\0\0", magic, 4) == 0)
-            {
                 rval = new skPortableFile(pe_offset);
+            else
+            {
+                // defaults to the generic skDefaultFile. 
+                skPrintf("skBinaryFile::createInstance: - PE signature was not found.\n");
             }
         }
         else

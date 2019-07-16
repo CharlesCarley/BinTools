@@ -188,7 +188,7 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
     {
         skBinaryFile::StringArray::Iterator it = prog.m_fp->getSectionHeaderNames().iterator();
 
-        int i = 0;
+        int i = 1;
         while (it.hasMoreElements())
         {
             skString& str = it.getNext();
