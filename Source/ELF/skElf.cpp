@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ELF/skElfUtils.h"
+#include "ELF/skElfSection.h"
 #include "Utils/skString.h"
 #include "skSection.h"
 
@@ -166,7 +167,9 @@ void skElfFile::loadImpl(void)
 
                 if (sh.m_offset + sh.m_size < m_len)
                 {
-                    skSection* section = new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size, (size_t)sh.m_offset);
+                    skSection* section = new skElfSection(
+                        this, name, m_data + sh.m_offset, (SKsize)sh.m_size, (size_t)sh.m_offset, sh);
+
                     m_sectionLookup.insert(name, section);
                 }
                 else

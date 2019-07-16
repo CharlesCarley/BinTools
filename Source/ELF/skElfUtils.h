@@ -33,7 +33,6 @@
 #define sk_strncpy(dest, size, source, count) skStringUtils::copyn(dest, source, size)
 
 
-
 class skElfUtils
 {
 public:
@@ -325,9 +324,6 @@ public:
     static void printSectionHeader(skElfSectionHeader<T>& sh)
     {
         char tmpBuf[32];
-
-        writeSeperator();
-
         skPrintf("  Name:     %u\n", sh.m_name);
         getSectionType(sh, tmpBuf, 32);
         skPrintf("  Type:     %s\n", tmpBuf);
@@ -340,9 +336,8 @@ public:
         skPrintf("  AddrAln:  %u\n", (int)sh.m_addrAlign);
         skPrintf("  EntSize:  %u\n", (int)sh.m_entSize);
         skPrintf("  sizeof:   %u\n", (int)sizeof(sh));
-
-        writeSeperator();
     }
 };
+
 
 #endif  //_skElfUtils_h_

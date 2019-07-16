@@ -200,6 +200,31 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 }
 
 
+void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
+{
+    if (!section)
+        return;
+
+    const skString& name = section->getname();
+
+    skPrintUtils::writeSeperator();
+    if (prog.m_flags & PF_COLORIZE)
+        skPrintUtils::writeColor(CS_DARKYELLOW);
+    skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
+    skPrintUtils::writeSeperator();
+
+    section->printHeader();
+    skPrintUtils::writeSeperator();
+
+    if (prog.m_flags & PF_COLORIZE)
+        skPrintUtils::writeColor(CS_WHITE);
+    if (prog.m_flags & PF_DISASEMBLE)
+        section->dissemble(prog.m_flags);
+    else
+        skPrintUtils::dumpHex(section->ptr(), section->size(), prog.m_flags, prog.m_code);
+}
+
+
 void HexDump_PrintSections(HexDump_ProgramInfo& prog)
 {
     skBinaryFile* bin = prog.m_fp;
@@ -208,22 +233,7 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
         skBinaryFile::SectionMap::Iterator it = bin->getSectionIterator();
         while (it.hasMoreElements())
         {
-            skSection* sec = it.getNext().second;
-
-            const skString& name = sec->getname();
-
-            skPrintUtils::writeSeperator();
-            if (prog.m_flags & PF_COLORIZE)
-                skPrintUtils::writeColor(CS_DARKYELLOW);
-            skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
-            skPrintUtils::writeSeperator();
-
-            if (prog.m_flags & PF_COLORIZE)
-                skPrintUtils::writeColor(CS_WHITE);
-            if (prog.m_flags & PF_DISASEMBLE)
-                sec->dissemble(prog.m_flags);
-            else
-                skPrintUtils::dumpHex(sec->ptr(), sec->size(), prog.m_flags, prog.m_code);
+            HexDump_PrintSection(prog, it.getNext().second);
         }
     }
 }
@@ -240,22 +250,7 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, const std::string& name)
         skSection* sec = bin->getSection(name.c_str());
         if (sec != 0)
         {
-            const skString& name = sec->getname();
-            skPrintUtils::writeSeperator();
-            if (prog.m_flags & PF_COLORIZE)
-                skPrintUtils::writeColor(CS_DARKYELLOW);
-
-            skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
-            skPrintUtils::writeSeperator();
-
-
-            if (prog.m_flags & PF_COLORIZE)
-                skPrintUtils::writeColor(CS_WHITE);
-
-            if (prog.m_flags & PF_DISASEMBLE)
-                sec->dissemble(prog.m_flags);
-            else
-                skPrintUtils::dumpHex(sec->ptr(), sec->size(), prog.m_flags, prog.m_code);
+            HexDump_PrintSection(prog, sec);
         }
     }
 }

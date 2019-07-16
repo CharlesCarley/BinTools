@@ -24,6 +24,7 @@
 -------------------------------------------------------------------------------
 */
 #include "PE/skPortableFile.h"
+#include "PE/skPortableSection.h"
 #include "Utils/skDebugger.h"
 #include "skSection.h"
 
@@ -150,7 +151,8 @@ void skPortableFile::loadImpl(void)
 
             if (sectionOffset + sh.m_virtualSize < m_len)
             {
-                skSection *section = new skSection(this, name, m_data + sectionOffset, (SKsize)sh.m_virtualSize, sectionOffset);
+                skSection *section = new skPortableSection(
+                    this, name, m_data + sectionOffset, (SKsize)sh.m_virtualSize, sectionOffset, sh);
                 m_sectionLookup.insert(name, section);
             }
             else

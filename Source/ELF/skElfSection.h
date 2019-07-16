@@ -23,46 +23,36 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#ifndef _skPortableFile_h_
-#define _skPortableFile_h_
+#ifndef _skElfSection_h_
+#define _skElfSection_h_
 
-#include "skBinaryFile.h"
-#include "PE/skPortableTypes.h"
+#include "ELF/skElfTypes.h"
+#include "skSection.h"
 
 
-class skPortableFile : public skBinaryFile
+class skElfSection : public skSection
 {
-public:
-    typedef skArray<COFFSectionHeader>              Sections;
-    typedef skHashTable<char*, COFFSectionHeader>   SectionMap;
-
 private:
-    COFFHeader                m_header;
-    COFFOptionalHeaderCommon* m_imageHeader;
-    SKuint16                  m_imageBase;
-    SKuint64                  m_sectionStart;
-    Sections                  m_sectionHeaders;
-    SectionMap                m_sectionTable;
+    skElfSectionHeader64 m_header;
 
-
-    friend class skBinaryFile;
-    skPortableFile(SKint16 dos_offset);
 public:
-    virtual ~skPortableFile();
+    skElfSection(skBinaryFile*         owner,
+                 const skString&       name,
+                 void*                 data,
+                 size_t                size,
+                 size_t                offset,
+                 skElfSectionHeader64& hdr);
+
+    virtual ~skElfSection();
 
 
-private:
-
-    inline size_t getSectionOffset(COFFSectionHeader& header)
+    inline skElfSectionHeader64& getHeader(void)
     {
-        // m_imageBase is the offset past the DOS stub program.
-        // m_pointerToRawData points to the section location in the file.
-        // m_data only points to the PE data
-        return (size_t)(header.m_pointerToRawData - m_imageBase);
+        return m_header;
     }
 
+    virtual void printHeader(void);
 
-    virtual void loadImpl(void);
 };
 
-#endif  //_skPortableFile_h_
+#endif  //_skElfSection_h_

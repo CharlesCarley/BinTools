@@ -30,7 +30,6 @@
 #include "skBinaryFileCommon.h"
 
 
-// TODO this should be used a a base class for the underlying section
 class skSection
 {
 public:
@@ -48,8 +47,7 @@ private:
 
 public:
     skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset);
-    ~skSection();
-
+    virtual ~skSection();
 
 
     /// returns a pointer to the file that owns this section.
@@ -78,9 +76,14 @@ public:
         return m_size;
     }
 
+
+
     // print the disassembly to stdout
     void dissemble(int flags = 0);
 
+
+    // print the section header to stdout
+    virtual void printHeader(void) {}
 
 private:
     void initialize(void *ptr, size_t size);
