@@ -58,7 +58,7 @@ public:
 
 
     /// Create instances based on the supplied file's magic.
-    /// Returns NULL if the file format is not supported, or if the
+    /// Returns skDefaultFile if the file format is not supported, or if the
     /// file can not be loaded.
     static skBinaryFile *createInstance(const char *file);
 
