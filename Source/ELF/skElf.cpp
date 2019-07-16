@@ -23,18 +23,18 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "skElf.h"
+#include "ELF/skElf.h"
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
+#include "ELF/skElfUtils.h"
 #include "Utils/skString.h"
-#include "skElfUtils.h"
 #include "skSection.h"
 
 
 skElfFile::skElfFile()
 {
-    // make sure this type of instance 
+    // make sure this type of instance
     // is visible in base class
     m_fileFormat = FF_ELF;
 
@@ -169,9 +169,8 @@ void skElfFile::loadImpl(void)
 
                 if (sh.m_offset + sh.m_size < m_len)  // make sure the requested memory is in range
                 {
-                    m_sectionLookup.insert(name, 
-                        new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size)
-                    );
+                    m_sectionLookup.insert(name,
+                                           new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size));
                 }
             }
             else
@@ -182,4 +181,3 @@ void skElfFile::loadImpl(void)
         }
     }
 }
-
