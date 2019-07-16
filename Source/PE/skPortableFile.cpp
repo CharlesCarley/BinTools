@@ -57,9 +57,6 @@ void skPortableFile::loadImpl(void)
     char *ptr = m_data + 4;
     skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
-
-    m_instructionSetType = IS_NONE;
-
     switch (m_header.m_machine)
     {
     case CMT_AMD64:
@@ -151,10 +148,14 @@ void skPortableFile::loadImpl(void)
 
             size_t sectionOffset = getSectionOffset(sh);
 
-            if (sectionOffset < m_len)
+            if (sectionOffset + sh.m_virtualSize < m_len)
             {
                 skSection *section = new skSection(this, name, m_data + sectionOffset, (SKsize)sh.m_virtualSize, sectionOffset);
                 m_sectionLookup.insert(name, section);
+            }
+            else
+            {
+                skPrintf("Exception: Section size exceeds the amount of memory allocated.\n");
             }
         }
         else

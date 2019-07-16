@@ -102,7 +102,11 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
 
 skBinaryFile::skBinaryFile() :
     m_data(0),
-    m_len(0)
+    m_len(0),
+    m_fileFormat(FF_UNKNOWN),
+    m_fileFormatType(FFT_UNKNOWN),
+    m_instructionSetType(IS_NONE)
+
 {
 }
 
@@ -129,7 +133,5 @@ void skBinaryFile::load(skStream &fstream)
 
     m_data[m_len] = 0;
 
-
-    // Convert the rest in derived classes.
     loadImpl();
 }

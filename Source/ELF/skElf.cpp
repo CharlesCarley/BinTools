@@ -38,9 +38,6 @@ skElfFile::skElfFile()
     // is visible in base class
     m_fileFormat = FF_ELF;
 
-    // set in loadImpl
-    m_fileFormatType = FFT_UNKNOWN;
-
     m_symtab = 0;
     memset(&m_inf, 0, sizeof(skElfHeaderInfo64));
 }
@@ -167,10 +164,14 @@ void skElfFile::loadImpl(void)
                 m_sectionTable.insert(name, sh);
                 m_sectionHeaderStringTable.push_back(name);
 
-                if (sh.m_offset + sh.m_size < m_len)  // make sure the requested memory is in range
+                if (sh.m_offset + sh.m_size < m_len)
                 {
-                    m_sectionLookup.insert(name,
-                                           new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size, (size_t)sh.m_offset));
+                    skSection* section = new skSection(this, name, m_data + sh.m_offset, (SKsize)sh.m_size, (size_t)sh.m_offset);
+                    m_sectionLookup.insert(name, section);
+                }
+                else
+                {
+                    skPrintf("Exception: Section size exceeds the amount of memory allocated.\n");
                 }
             }
             else
