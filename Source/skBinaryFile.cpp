@@ -79,7 +79,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
 
             if (strncmp("PE\0\0", magic, 4) == 0)
             {
-                rval = new skPortableFile();
+                rval = new skPortableFile(pe_offset);
             }
         }
         else
@@ -117,6 +117,7 @@ void skBinaryFile::load(skStream &fstream)
         return;
     }
 
+   
     m_len  = fstream.size();
     m_data = new char[m_len + 1];
     m_len  = fstream.read(m_data, m_len);

@@ -28,9 +28,10 @@
 #include "skSection.h"
 
 
-skPortableFile::skPortableFile() :
+skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_sectionStart(0),
-    m_imageHeader(0)
+    m_imageHeader(0),
+    m_imageBase(dos_offset)
 {
     skMemset(&m_header, 0, sizeof(COFFHeader));
 }
@@ -55,6 +56,9 @@ void skPortableFile::loadImpl(void)
 
 
     COFFMachineType mt = (COFFMachineType)m_header.m_machine;
+
+    m_instructionSetType = IS_X86;
+    m_fileFormatType     = FFT_32BIT;
 
     ptr += sizeof(COFFHeader);
 
@@ -116,8 +120,8 @@ void skPortableFile::loadImpl(void)
     }
 
 
-        SKsize si = 0,
-               sl = m_sectionHeaders.size(), sn;
+    SKsize si = 0,
+           sl = m_sectionHeaders.size(), sn;
 
     Sections::PointerType p = m_sectionHeaders.ptr();
     while (si < sl)
@@ -133,16 +137,12 @@ void skPortableFile::loadImpl(void)
             m_sectionTable.insert(name, sh);
             m_sectionHeaderStringTable.push_back(name);
 
-            sn = sh.m_pointerToRawData;
+            sn = sh.m_pointerToRawData - m_imageBase;
 
             if (sn < m_len)  // make sure the requested memory is in range
             {
                 m_sectionLookup.insert(name,
                                        new skSection(this, name, m_data + sn, (SKsize)sh.m_virtualSize));
-            }
-            else
-            {
-                skPrintf("!!");
             }
         }
         else

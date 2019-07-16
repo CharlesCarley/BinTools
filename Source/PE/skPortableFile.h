@@ -39,13 +39,14 @@ public:
 private:
     COFFHeader                m_header;
     COFFOptionalHeaderCommon* m_imageHeader;
+    SKuint16                  m_imageBase;
     SKuint64                  m_sectionStart;
     Sections                  m_sectionHeaders;
     SectionMap                m_sectionTable;
 
 private:
     friend class skBinaryFile;
-    skPortableFile();
+    skPortableFile(SKint16 dos_offset);
 
 public:
     virtual ~skPortableFile();
