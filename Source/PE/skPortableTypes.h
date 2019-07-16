@@ -80,7 +80,7 @@ struct COFFOptionalHeaderCommonPE32 : COFFOptionalHeaderCommon
 
 struct COFFOptionalHeaderCommonPE64 : COFFOptionalHeaderCommon
 {
-    // blank baseOfData is absent in PE32+ 
+    // Intentionally blank. The member baseOfData is absent in PE32+ 
 };
 
 
@@ -135,15 +135,6 @@ typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE32, SKuint32> COFFOptionalH
 typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE64, SKuint64> COFFOptionalHeader64;
 
 
-// Define Utils_USE_COMPILER_CHECKS via CMake to check computed sizes during build.
-// If any of these fail the compiler will spit a negative subscript error.
-SK_ASSERTCOMP(COFFOptionalHeaderCommon_sizeof, sizeof(COFFOptionalHeaderCommon) == 24);
-SK_ASSERTCOMP(COFFOptionalHeader32_sizeof, sizeof(COFFOptionalHeader32) == 224);
-SK_ASSERTCOMP(COFFOptionalHeader64_sizeof, sizeof(COFFOptionalHeader64) == 240);
-SK_ASSERTCOMP(COFFOptionalHeaderCommonPE32_sizeof, sizeof(COFFOptionalHeaderCommonPE32) == 28);
-SK_ASSERTCOMP(COFFOptionalHeaderCommonPE64_sizeof, sizeof(COFFOptionalHeaderCommonPE64) == 24);
-SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
-
 
 struct COFFSectionHeader
 {
@@ -161,4 +152,15 @@ struct COFFSectionHeader
 
 
 
+// Define Utils_USE_COMPILER_CHECKS via CMake to check computed sizes during build.
+// If any of these fail the compiler will spit a negative subscript error.
+SK_ASSERTCOMP(COFFOptionalHeaderCommon_sizeof, sizeof(COFFOptionalHeaderCommon) == 24);
+SK_ASSERTCOMP(COFFOptionalHeader32_sizeof, sizeof(COFFOptionalHeader32) == 224);
+SK_ASSERTCOMP(COFFOptionalHeader64_sizeof, sizeof(COFFOptionalHeader64) == 240);
+SK_ASSERTCOMP(COFFOptionalHeaderCommonPE32_sizeof, sizeof(COFFOptionalHeaderCommonPE32) == 28);
+SK_ASSERTCOMP(COFFOptionalHeaderCommonPE64_sizeof, sizeof(COFFOptionalHeaderCommonPE64) == 24);
+SK_ASSERTCOMP(COFFSectionHeader_sizeof, sizeof(COFFSectionHeader) == 40);
+SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
+
 #endif  //_skPortableTypes_h_
+

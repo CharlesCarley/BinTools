@@ -52,7 +52,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
     char magic[4];
     fs.read(magic, 4);
 
-    skBinaryFile *rval;
+    skBinaryFile *rval = 0;
 
     // rewind
     fs.seek(0, SEEK_SET);
