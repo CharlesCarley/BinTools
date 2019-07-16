@@ -29,7 +29,6 @@
 
 
 
-
 skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_sectionStart(0),
     m_imageHeader(0),
@@ -52,63 +51,84 @@ void skPortableFile::loadImpl(void)
         return;
     }
 
+    SKuint16 optMagic;
+
     // The PE signature is not part of the defined structure (+4)
     char *ptr = m_data + 4;
     skMemcpy(&m_header, m_data + 4, sizeof(COFFHeader));
 
 
+    m_instructionSetType = IS_NONE;
+
     COFFMachineType mt = (COFFMachineType)m_header.m_machine;
-
-
-    m_instructionSetType = IS_X86;
-    m_fileFormatType     = FFT_32BIT;
-
-    ptr += sizeof(COFFHeader);
-
-
-    if (m_header.m_optionalHeaderSize > 0)  // it's not an object file
+    switch (mt)
     {
-        if (*(SKuint16 *)ptr == COFF_MAG_PE32)
-        {
-            // runtime sanity check
-            if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
-            {
-                skPrintf("COFFOptionalHeader32 not properly aligned %u-%u\n",
-                         sizeof(COFFOptionalHeader32),
-                         m_header.m_optionalHeaderSize);
-
-                return;
-            }
-
-            m_imageHeader = new COFFOptionalHeader32;
-            skMemcpy(m_imageHeader, (COFFOptionalHeader32 *)ptr, sizeof(COFFOptionalHeader32));
-
-            m_sectionStart = 4 + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
-        }
-        else if (*(SKuint16 *)ptr == COFF_MAG_PE64)
-        {
-            // runtime sanity check
-            if (sizeof(COFFOptionalHeader64) != m_header.m_optionalHeaderSize)
-            {
-                skPrintf("COFFOptionalHeader64 not properly aligned %u-%u\n",
-                         sizeof(COFFOptionalHeader64),
-                         m_header.m_optionalHeaderSize);
-
-                return;
-            }
-
-            m_imageHeader = new COFFOptionalHeader64;
-            skMemcpy(m_imageHeader, ptr, sizeof(COFFOptionalHeader64));
-
-            m_sectionStart = 4 + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
-        }
-        else
-        {
-            skPrintf("COFFOptionalHeader: Unknown header type!\n");
-            return;
-        }
+    case CMT_AMD64:
+    case CMT_IA64:
+    case CMT_I386:
+        m_instructionSetType = IS_X86;
+        break;
+    default:
+        break;
     }
 
+    if (m_instructionSetType == IS_NONE)
+    {
+        skPrintf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
+        return;
+    }
+    ptr += sizeof(COFFHeader);
+
+    if (m_header.m_optionalHeaderSize <= 0)
+    {
+        // The optional header is required for images.
+        skPrintf("Invalid optional header size %u\n", m_header.m_optionalHeaderSize);
+        return;
+    }
+
+    optMagic = (*(SKuint16 *)ptr);
+    if (optMagic == COFF_MAG_PE32)
+    {
+        // runtime sanity check
+        if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
+        {
+            skPrintf("COFFOptionalHeader32 not properly aligned %u-%u\n",
+                     sizeof(COFFOptionalHeader32),
+                     m_header.m_optionalHeaderSize);
+
+            return;
+        }
+
+        m_imageHeader = new COFFOptionalHeader32;
+        skMemcpy(m_imageHeader, (COFFOptionalHeader32 *)ptr, sizeof(COFFOptionalHeader32));
+
+        m_sectionStart = 4 + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
+    }
+    else if (optMagic == COFF_MAG_PE64)
+    {
+        // runtime sanity check
+        if (sizeof(COFFOptionalHeader64) != m_header.m_optionalHeaderSize)
+        {
+            skPrintf("COFFOptionalHeader64 not properly aligned %u-%u\n",
+                     sizeof(COFFOptionalHeader64),
+                     m_header.m_optionalHeaderSize);
+
+            return;
+        }
+
+        m_imageHeader = new COFFOptionalHeader64;
+        skMemcpy(m_imageHeader, ptr, sizeof(COFFOptionalHeader64));
+
+        m_sectionStart = 4 + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
+    }
+    else
+    {
+        skPrintf("COFFOptionalHeader: Unknown header type!\n");
+        return;
+    }
+
+    // Set the file format type, now that it's known to be one or the other.
+    m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
     m_sectionHeaders.reserve(m_header.m_sectionCount);

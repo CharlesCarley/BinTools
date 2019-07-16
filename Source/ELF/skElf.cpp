@@ -62,7 +62,7 @@ void skElfFile::loadImpl(void)
     if (m_inf.m_id[EMN_CLASS] == 1)
         m_fileFormatType = FFT_32BIT;
     else if (m_inf.m_id[EMN_CLASS] == 2)
-        m_fileFormatType = FTT_64BIT;
+        m_fileFormatType = FFT_64BIT;
     else
     {
         skPrintf("Unknown class descriptor found in the file header.\n");

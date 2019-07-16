@@ -58,7 +58,7 @@ enum skFileFormatType
 {
     FFT_UNKNOWN,
     FFT_32BIT, 
-    FTT_64BIT,  
+    FFT_64BIT,  
 };
 
 class skStream;
