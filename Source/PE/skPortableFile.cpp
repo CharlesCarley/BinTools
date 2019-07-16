@@ -55,7 +55,7 @@ void skPortableFile::loadImpl(void)
 
     // The PE signature is not part of the defined structure (+4)
     char *ptr = m_data + 4;
-    skMemcpy(&m_header, m_data + 4, sizeof(COFFHeader));
+    skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
 
     m_instructionSetType = IS_NONE;
