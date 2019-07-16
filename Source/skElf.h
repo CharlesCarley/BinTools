@@ -44,8 +44,11 @@ private:
     SectionMap        m_sectionTable;
     elf64             m_symtab;
 
-public:
+
+    friend class skBinaryFile;
     skElfFile();
+
+public:
     virtual ~skElfFile();
 
 

@@ -33,6 +33,7 @@
 #include <string.h>
 #include "Utils/skDebugger.h"
 #include "Utils/skFileStream.h"
+#include "skDefaultFile.h"
 #include "skElf.h"
 #include "skPrintUtils.h"
 
@@ -60,20 +61,24 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
 
     skBinaryFile *rval;
 
+    // rewind
+    fs.seek(0, SEEK_SET);
+
     // TODO: separate into 32/64bit files
     //       this only loads 64 bit at the moment.
 
     if (strncmp("\177ELF", magic, 4) == 0)
     {
-        // rewind
-        fs.seek(0, SEEK_SET);
-
         rval = new skElfFile();
         rval->load(fs);
-
-        return rval;
     }
-    return 0;
+    else
+    {
+        rval = new skDefaultFile();
+        rval->load(fs);
+    }
+
+    return rval;
 }
 
 
@@ -104,7 +109,7 @@ void skBinaryFile::load(skStream &fstream)
     m_len  = fstream.read(m_data, m_len);
 
     m_data[m_len] = 0;
-    
+
 
     // Convert the rest in derived classes.
     loadImpl();

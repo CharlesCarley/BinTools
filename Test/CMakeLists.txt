@@ -21,20 +21,22 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.6)
-project(BinTools)
+set(TargetName          helloworld)
+set(TargetName_GRP      "TestFiles")
 
-set(CMAKE_MODULE_PATH ${BinTools_SOURCE_DIR}/CMake)
-include(Configure)
-subdirs(CMake)
-
-set(FOLDER_NAME "External")
-set(USE_FOLDERS TRUE)
-subdirs(Extern/Utils)
-subdirs(Extern/capstone)
+set(TargetName_SRC
+    test.c
+)
 
 
-subdirs(Source)
-subdirs(Test)
-subdirs(Tools/bindump)
+include_directories(. 
+    ${CMAKE_SOURCE_DIR}/Extern
+    ${CAPSTONE_INCLUDE}
+)
+
+add_executable(${TargetName} ${TargetName_SRC})
+
+if (BinTools_USE_FOLDERS)
+    set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
+endif()
 

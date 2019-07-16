@@ -27,19 +27,18 @@ set(TargetName_GRP      "")
 set(TargetName_SRC
     skBinaryFile.h
     skBinaryFileCommon.h
-    skSection.h
-
-    skPrintUtils.h
-
+    skDefaultFile.h
     skElf.h
     skElfTypes.h
     skElfUtils.h
+    skPrintUtils.h
+    skSection.h
 
+    skBinaryFile.cpp
+    skDefaultFile.cpp
     skElfUtils.cpp
     skElf.cpp
-
     skPrintUtils.cpp
-    skBinaryFile.cpp
     skSection.cpp
 )
 
