@@ -131,10 +131,13 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
             case 0x61:
                 prog.m_flags |= PF_ASCII;
                 break;
+            case 0x64:
+                prog.m_flags |= PF_DISASEMBLE;
+                break;
             case 0x68:
                 HexDump_Usage();
                 return -1;
-            case 'i':
+            case 0x69:
                 prog.m_state = MS_MAIN;
                 break;
             case 0x78:
@@ -164,6 +167,7 @@ void HexDump_Usage(void)
     skPrintf("    -m [0-255] mark specific code.\n");
     skPrintf("    -b  -- convert output to binary.\n");
     skPrintf("    -a  -- display ASCII listings.\n");
+    skPrintf("    -d  -- display disassembly.\n");
     skPrintf("    -h  -- display this help message.\n");
     skPrintf("    -i  -- interactive mode.\n");
     skPrintf("    -c  -- separate output into colors in order to see it better.\n");

@@ -24,6 +24,9 @@
 -------------------------------------------------------------------------------
 */
 #include "PE/skPortableSection.h"
+#include "skPrintUtils.h"
+#include "Utils/skDebugger.h"
+
 
 
 skPortableSection::skPortableSection(skBinaryFile*      owner,
@@ -35,6 +38,9 @@ skPortableSection::skPortableSection(skBinaryFile*      owner,
     skSection(owner, name, data, size, offset)
 {
     skMemcpy(&m_header, &hdr, sizeof(COFFSectionHeader));
+
+    //  Fix the header offset so that it points to the correct location
+    m_header.m_pointerToRawData = offset;
 }
 
 skPortableSection::~skPortableSection()
@@ -44,5 +50,16 @@ skPortableSection::~skPortableSection()
 
 void skPortableSection::printHeader(void)
 {
+    skPrintf("  Name:                  %s\n", m_header.m_name);
+    skPrintf("  Virtual Size:          %u\n", m_header.m_virtualSize);
+    skPrintf("  Virtual Address:       0x%08x\n", m_header.m_virtualAddress);
+    skPrintf("  Size of Raw Data:      %u\n", m_header.m_sizeOfRawData);
+    skPrintf("  Pointer To Raw Data:   %u\n", m_header.m_pointerToRawData);
+    skPrintf("  Relocation table:      %u\n", m_header.m_pointerToRelocations);
+    skPrintf("  Relocation count:      %u\n", m_header.m_numberOfRelocations);
+    skPrintf("  Line numbers:          %u\n", m_header.m_pointerToLineNumbers);
+    skPrintf("  Line number count:     %u\n", m_header.m_numberOfLineNumbers);
+    skPrintf("  Characteristics:       0x%08x\n", m_header.m_characteristics);
+    skPrintf("  Size of Header:        %u\n", sizeof(COFFSectionHeader));
 }
 
