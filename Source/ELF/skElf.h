@@ -1,0 +1,104 @@
+/*
+-------------------------------------------------------------------------------
+
+    Copyright (c) 2019 Charles Carley.
+
+    Contributor(s): none yet.
+
+-------------------------------------------------------------------------------
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+-------------------------------------------------------------------------------
+*/
+
+#ifndef _skElfFileHeader_h_
+#define _skElfFileHeader_h_
+
+#include "Utils/skArray.h"
+#include "Utils/skMap.h"
+#include "skBinaryFile.h"
+#include "skElfTypes.h"
+
+class skElfFile : public skBinaryFile
+{
+public:
+    typedef skArray<skElfSectionHeader64>              Sections;
+    typedef skHashTable<elfName, skElfSectionHeader64> SectionMap;
+
+private:
+    skElfHeaderInfo64 m_inf;
+    Sections          m_sections;
+    SectionMap        m_sectionTable;
+    elf64             m_symtab;
+
+
+    friend class skBinaryFile;
+    skElfFile();
+
+public:
+    virtual ~skElfFile();
+
+
+    inline skElfHeaderInfo64& info(void)
+    {
+        return m_inf;
+    }
+
+    inline bool is64Bit(void)
+    {
+        return m_inf.m_id[EMN_CLASS] == 0x02;
+    }
+
+    inline ElfInstructionArch getInstructionArchitecture(void)
+    {
+        return (ElfInstructionArch)m_inf.m_machine;
+    }
+
+    inline ElfType getElfType(void)
+    {
+        return (ElfType)m_inf.m_type;
+    }
+
+    inline elf64 getOffset(void)
+    {
+        return m_inf.m_entry;
+    }
+
+    /// Returns the starting offset to the section header
+    inline elf64 getSectionHeaderStart(void)
+    {
+        return m_inf.m_sectionOffset;
+    }
+
+    /// Returns the starting offset to the section header
+    inline elf64 getSectionHeaderEnd(void)
+    {
+        return m_inf.m_sectionOffset + m_inf.m_sectionTableEntryCount * m_inf.m_sectionTableEntrySize;
+    }
+
+    
+protected:
+    inline elf64 getNameOffset(const skElfSectionHeader64& header)
+    {
+        // return the offset in the symbol table for
+        // the supplied header
+        return m_symtab + header.m_name;
+    }
+
+    virtual void loadImpl(void);
+};
+
+#endif  //_skElfFileHeader_h_

@@ -23,23 +23,23 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#ifndef _skDefaultFile_h_
-#define _skDefaultFile_h_
+#ifndef _skPortableFile_h_
+#define _skPortableFile_h_
 
 #include "skBinaryFile.h"
 
-/// Any file
-class skDefaultFile : public skBinaryFile
+
+class skPortableFile : public skBinaryFile
 {
 private:
     friend class skBinaryFile;
-    skDefaultFile();
+    skPortableFile();
 
 public:
-    virtual ~skDefaultFile();
+    virtual ~skPortableFile();
 
 protected:
     virtual void loadImpl(void);
 };
 
-#endif  //_skDefaultFile_h_
+#endif  //_skPortableFile_h_

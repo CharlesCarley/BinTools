@@ -23,20 +23,15 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#
-#include "skBinaryFile.h"
-#if SK_PLATFORM == SK_PLATFORM_WIN32
-#include <windows.h>
-#endif
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
+#include <limits>
 #include "Utils/skDebugger.h"
 #include "Utils/skFileStream.h"
 #include "skDefaultFile.h"
-#include "skElf.h"
+#include "ELF/skElf.h"
+#include "PE/skPortableFile.h"
 #include "skPrintUtils.h"
-
 
 
 skBinaryFile *skBinaryFile::createInstance(const char *file)
@@ -55,7 +50,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
     }
 
 
-    char magic[5];
+    char magic[4];
     fs.read(magic, 4);
 
 
@@ -68,16 +63,35 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
     //       this only loads 64 bit at the moment.
 
     if (strncmp("\177ELF", magic, 4) == 0)
-    {
         rval = new skElfFile();
-        rval->load(fs);
-    }
-    else
+    else if (strncmp("MZ", magic, 2)==0)
     {
-        rval = new skDefaultFile();
-        rval->load(fs);
+        fs.seek(0x3C, SEEK_SET);
+
+        SKuint32 pe_offset;
+        fs.read(&pe_offset, sizeof(SKuint32));
+
+        if (pe_offset > 0 && pe_offset < std::numeric_limits<SKuint32>::max())
+        {
+            fs.seek(pe_offset, SEEK_SET);
+            fs.read(magic, 4);
+            
+            // seek back to the start of the PE header
+            fs.seek(pe_offset, SEEK_SET);
+
+            if (strncmp("PE\0\0", magic, 4) == 0)
+            {
+                rval = new skPortableFile();
+            }
+        }
+        else
+            skPrintf("Invalid PE offset\n");
     }
 
+    if (!rval)
+        rval = new skDefaultFile();
+
+    rval->load(fs);
     return rval;
 }
 
@@ -102,7 +116,6 @@ void skBinaryFile::load(skStream &fstream)
         skPrintf("load called on a closed file\n");
         return;
     }
-
 
     m_len  = fstream.size();
     m_data = new char[m_len + 1];

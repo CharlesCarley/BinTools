@@ -28,18 +28,24 @@ set(TargetName_SRC
     skBinaryFile.h
     skBinaryFileCommon.h
     skDefaultFile.h
-    skElf.h
-    skElfTypes.h
-    skElfUtils.h
     skPrintUtils.h
     skSection.h
 
+    ELF/skElf.h
+    ELF/skElfTypes.h
+    ELF/skElfUtils.h
+
+    PE/skPortableFile.h
+    
     skBinaryFile.cpp
     skDefaultFile.cpp
-    skElfUtils.cpp
-    skElf.cpp
     skPrintUtils.cpp
     skSection.cpp
+
+    ELF/skElfUtils.cpp
+    ELF/skElf.cpp
+
+    PE/skPortableFile.cpp
 )
 
 
