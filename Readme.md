@@ -22,11 +22,13 @@ This project is an experimental repository for examining executable file formats
 ##### Command line usage
 ```
 bindump [options] -f [path to file]
+  -m [0-255] mark specific code.
   -b  -- convert output to binary.
   -a  -- display ASCII listings.
+  -d  -- display disassembly.
   -h  -- display this help message.
   -i  -- interactive mode.
-  -c  -- separate output into colors in order to see it better.
+  -c  -- separate output into colors in order to see it better.;
 ```
 
 
