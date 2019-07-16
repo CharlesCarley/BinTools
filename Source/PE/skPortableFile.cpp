@@ -28,6 +28,8 @@
 #include "skSection.h"
 
 
+
+
 skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_sectionStart(0),
     m_imageHeader(0),
@@ -71,7 +73,7 @@ void skPortableFile::loadImpl(void)
             // runtime sanity check
             if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
             {
-                skPrintf("COFFOptionalHeader32 not properly aligned %u %u-%u\n",
+                skPrintf("COFFOptionalHeader32 not properly aligned %u-%u\n",
                          sizeof(COFFOptionalHeader32),
                          m_header.m_optionalHeaderSize);
 
@@ -110,9 +112,6 @@ void skPortableFile::loadImpl(void)
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
     m_sectionHeaders.reserve(m_header.m_sectionCount);
-    m_sectionLookup.reserve(m_header.m_sectionCount);
-
-
 
     SKuint16 i16;
     for (i16 = 0; i16 < m_header.m_sectionCount; ++i16, ++sectionPtr)
@@ -122,9 +121,8 @@ void skPortableFile::loadImpl(void)
         m_sectionHeaders.push_back(sh);
 
         char *name = (char *)sh.m_name;
-        if ((*name) == '\0')
+        if ((*name) == '\0' || name[7] != '\0')
             continue;
-
 
         if (m_sectionLookup.find(name) == SK_NPOS)
         {

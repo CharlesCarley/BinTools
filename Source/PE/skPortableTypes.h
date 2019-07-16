@@ -71,27 +71,22 @@ struct COFFOptionalHeaderCommon
     SKuint32 m_baseOfCode;
 };
 
-SK_ASSERTCOMP(COFFOptionalHeaderCommon_sizeof, sizeof(COFFOptionalHeaderCommon) == 24);
 
 struct COFFOptionalHeaderCommonPE32 : COFFOptionalHeaderCommon
 {
     SKuint32 m_baseOfData;
 };
 
-SK_ASSERTCOMP(COFFOptionalHeaderCommonPE32_sizeof, sizeof(COFFOptionalHeaderCommonPE32) == 28);
 
 struct COFFOptionalHeaderCommonPE64 : COFFOptionalHeaderCommon
 {
     // blank baseOfData is absent in PE32+ 
 };
 
-SK_ASSERTCOMP(COFFOptionalHeaderCommonPE64_sizeof, sizeof(COFFOptionalHeaderCommonPE64) == 24);
-
-SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
 
 
-template <typename P, typename SKuintV>
-struct COFFOptionalHeader : P
+template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
+struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
 {
     SKuintV  m_imageBase;
     SKuint32 m_sectionAlignment;
@@ -114,6 +109,8 @@ struct COFFOptionalHeader : P
     SKuintV  m_sizeOfHeapCommit;
     SKuint32 m_loaderFlags;
     SKuint32 m_numberOfRvaAndSizes;
+
+
     // Header Data Directories
     SKuint64 m_exportTable;
     SKuint64 m_importTable;
@@ -124,7 +121,7 @@ struct COFFOptionalHeader : P
     SKuint64 m_debug;
     SKuint64 m_architecture;
     SKuint64 m_globPtrReg;
-    SKuint64 m_tls;  // thread local storage
+    SKuint64 m_threadLocalStorage;
     SKuint64 m_loadConfigTable;
     SKuint64 m_boundImport;
     SKuint64 m_importAddressTable;
@@ -135,10 +132,17 @@ struct COFFOptionalHeader : P
 
 
 typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE32, SKuint32> COFFOptionalHeader32;
-SK_ASSERTCOMP(COFFOptionalHeader32_sizeof, sizeof(COFFOptionalHeader32) == 224);
-
 typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE64, SKuint64> COFFOptionalHeader64;
+
+
+// Define Utils_USE_COMPILER_CHECKS via CMake to check computed sizes during build.
+// If any of these fail the compiler will spit a negative subscript error.
+SK_ASSERTCOMP(COFFOptionalHeaderCommon_sizeof, sizeof(COFFOptionalHeaderCommon) == 24);
+SK_ASSERTCOMP(COFFOptionalHeader32_sizeof, sizeof(COFFOptionalHeader32) == 224);
 SK_ASSERTCOMP(COFFOptionalHeader64_sizeof, sizeof(COFFOptionalHeader64) == 240);
+SK_ASSERTCOMP(COFFOptionalHeaderCommonPE32_sizeof, sizeof(COFFOptionalHeaderCommonPE32) == 28);
+SK_ASSERTCOMP(COFFOptionalHeaderCommonPE64_sizeof, sizeof(COFFOptionalHeaderCommonPE64) == 24);
+SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
 
 
 struct COFFSectionHeader

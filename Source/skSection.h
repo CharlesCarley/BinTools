@@ -30,6 +30,7 @@
 #include "skBinaryFileCommon.h"
 
 
+// TODO this should be used a a base class for the underlying section
 class skSection
 {
 public:
