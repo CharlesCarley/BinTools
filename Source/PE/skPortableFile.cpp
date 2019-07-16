@@ -60,8 +60,7 @@ void skPortableFile::loadImpl(void)
 
     m_instructionSetType = IS_NONE;
 
-    COFFMachineType mt = (COFFMachineType)m_header.m_machine;
-    switch (mt)
+    switch (m_header.m_machine)
     {
     case CMT_AMD64:
     case CMT_IA64:
@@ -127,8 +126,9 @@ void skPortableFile::loadImpl(void)
         return;
     }
 
-    // Set the file format type, now that it's known to be one or the other.
+    // Set the file format type now that it's known to be one or the other.
     m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
+
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
     m_sectionHeaders.reserve(m_header.m_sectionCount);
