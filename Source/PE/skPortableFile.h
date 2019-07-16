@@ -32,10 +32,16 @@
 
 class skPortableFile : public skBinaryFile
 {
+public:
+    typedef skArray<COFFSectionHeader>              Sections;
+    typedef skHashTable<char*, COFFSectionHeader>   SectionMap;
+
 private:
-    COFFHeader m_header;
-
-
+    COFFHeader                m_header;
+    COFFOptionalHeaderCommon* m_imageHeader;
+    SKuint64                  m_sectionStart;
+    Sections                  m_sectionHeaders;
+    SectionMap                m_sectionTable;
 
 private:
     friend class skBinaryFile;

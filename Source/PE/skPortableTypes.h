@@ -59,7 +59,7 @@ struct COFFHeader
 };
 
 
-struct COFFOptionalHeaderStandard
+struct COFFOptionalHeaderCommon
 {
     SKuint16 m_magic;  // PE32 | PE32+ format
     SKuint8  m_majorVersion;
@@ -69,6 +69,90 @@ struct COFFOptionalHeaderStandard
     SKuint32 m_sizeofBSSdData;
     SKuint32 m_entryPoint;
     SKuint32 m_baseOfCode;
+};
+
+SK_ASSERTCOMP(COFFOptionalHeaderCommon_sizeof, sizeof(COFFOptionalHeaderCommon) == 24);
+
+struct COFFOptionalHeaderCommonPE32 : COFFOptionalHeaderCommon
+{
+    SKuint32 m_baseOfData;
+};
+
+SK_ASSERTCOMP(COFFOptionalHeaderCommonPE32_sizeof, sizeof(COFFOptionalHeaderCommonPE32) == 28);
+
+struct COFFOptionalHeaderCommonPE64 : COFFOptionalHeaderCommon
+{
+    // blank baseOfData is absent in PE32+ 
+};
+
+SK_ASSERTCOMP(COFFOptionalHeaderCommonPE64_sizeof, sizeof(COFFOptionalHeaderCommonPE64) == 24);
+
+SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
+
+
+template <typename P, typename SKuintV>
+struct COFFOptionalHeader : P
+{
+    SKuintV  m_imageBase;
+    SKuint32 m_sectionAlignment;
+    SKuint32 m_fileAlignment;
+    SKuint16 m_majOpSysVersion;
+    SKuint16 m_minOpSysVersion;
+    SKuint16 m_majImSysVersion;
+    SKuint16 m_minImSysVersion;
+    SKuint16 m_majSubSysVersion;
+    SKuint16 m_minSubSysVersion;
+    SKuint32 m_wi32VerReserved;
+    SKuint32 m_sizeOfImage;
+    SKuint32 m_sizeOfHeaders;
+    SKuint32 m_checkSum;
+    SKuint16 m_subsystem;
+    SKuint16 m_dllCharacteristics;
+    SKuintV  m_sizeOfStackReserve;
+    SKuintV  m_sizeOfStackCommit;
+    SKuintV  m_sizeOfHeapReserve;
+    SKuintV  m_sizeOfHeapCommit;
+    SKuint32 m_loaderFlags;
+    SKuint32 m_numberOfRvaAndSizes;
+    // Header Data Directories
+    SKuint64 m_exportTable;
+    SKuint64 m_importTable;
+    SKuint64 m_resourceTable;
+    SKuint64 m_exceptionTable;
+    SKuint64 m_certificateTable;
+    SKuint64 m_baseRelocationTable;
+    SKuint64 m_debug;
+    SKuint64 m_architecture;
+    SKuint64 m_globPtrReg;
+    SKuint64 m_tls;  // thread local storage
+    SKuint64 m_loadConfigTable;
+    SKuint64 m_boundImport;
+    SKuint64 m_importAddressTable;
+    SKuint64 m_delayImportDescriptor;
+    SKuint64 m_crtRuntimeHeader;
+    SKuint64 m_reserved;
+};
+
+
+typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE32, SKuint32> COFFOptionalHeader32;
+SK_ASSERTCOMP(COFFOptionalHeader32_sizeof, sizeof(COFFOptionalHeader32) == 224);
+
+typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE64, SKuint64> COFFOptionalHeader64;
+SK_ASSERTCOMP(COFFOptionalHeader64_sizeof, sizeof(COFFOptionalHeader64) == 240);
+
+
+struct COFFSectionHeader
+{
+    SKuint8  m_name[8];
+    SKuint32 m_virtualSize;
+    SKuint32 m_virtualAddress;
+    SKuint32 m_sizeOfRawData;
+    SKuint32 m_pointerToRawData;
+    SKuint32 m_pointerToRelocations;
+    SKuint32 m_pointerToLineNumbers;
+    SKuint16 m_numberOfRelocations;
+    SKuint16 m_numberOfLineNumbers;
+    SKuint32 m_characteristics;
 };
 
 
