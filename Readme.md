@@ -12,7 +12,6 @@ This project is an experimental repository for examining executable file formats
 
 
 #### TODO
-- [ ] Abstract PE file.
 - [ ] Handle 32 and 64 bit elf types.
 - [ ] Convert more relevant infomation.
 
