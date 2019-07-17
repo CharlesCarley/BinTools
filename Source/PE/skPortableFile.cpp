@@ -76,13 +76,6 @@ void skPortableFile::loadImpl(void)
     }
     ptr += sizeof(COFFHeader);
 
-    if (m_header.m_optionalHeaderSize <= 0)
-    {
-        // The optional header is required for images.
-        skPrintf("Invalid optional header size %u\n", m_header.m_optionalHeaderSize);
-        return;
-    }
-
     optMagic = (*(SKuint16 *)ptr);
     if (optMagic == COFF_MAG_PE32)
     {
@@ -109,7 +102,6 @@ void skPortableFile::loadImpl(void)
             skPrintf("COFFOptionalHeader64 not properly aligned %u-%u\n",
                      sizeof(COFFOptionalHeader64),
                      m_header.m_optionalHeaderSize);
-
             return;
         }
 

@@ -37,12 +37,6 @@ typedef char*              elfName;
 class skBinaryFile;
 
 
-enum ElfCurrentArchPointer
-{
-    ELF_POINTER_LEN_IS_8 = sizeof(void*) == 8,
-    ELF_POINTER_LEN_IS_4 = sizeof(void*) == 4,
-};
-
 enum ElfMagicNumbers
 {
     EMN_0X7F  = 0,

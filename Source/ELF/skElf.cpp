@@ -140,7 +140,7 @@ void skElfFile::loadImpl(void)
         m_symtab = m_sections.back().m_offset;
     else
     {
-        // This is an error, it should have sections TODO: handle errors
+        // This is an error, it should have sections
         skPrintf("Exception: No sections extracted from the file!");
         return;
     }

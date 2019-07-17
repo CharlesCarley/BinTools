@@ -46,6 +46,7 @@ enum skConsoleColorSpace
     CS_MAGENTA,
     CS_YELLOW,
     CS_WHITE,
+    CS_COLOR_MAX
 };
 
 
@@ -78,14 +79,16 @@ private:
 #endif
 
 public:
-    static void writeColor(int cs, int back = CS_BLACK);
+    static void writeColor(int fg, int bg = CS_BLACK);
     static void writeSeperator(bool color = true);
+
+    static void writeAddress(SKuint64 addr);
 
     static void dumpColors();
 
     static void clear(void);
     static void pause(void);
-    static int  charHexToInt(char ch);
+
     static void dumpHex(void* ptr, size_t len, int flags = PF_DEFAULT, int mark=0, bool nl = true);
 };
 

@@ -61,10 +61,18 @@ void HexDump_PrintAll(HexDump_ProgramInfo& prog);
 int main(int argc, char** argv)
 {
     HexDump_ProgramInfo prog = {MS_EXIT, 0, PF_DEFAULT, -1};
-    HexDump_ParseCommandLine(prog, argc, argv);
+    
+    if (HexDump_ParseCommandLine(prog, argc, argv) == -1)
+    {
+        HexDump_Usage();
+        
+        if (prog.m_fp)
+            delete prog.m_fp;
 
+        return -1;
+    }
 
-
+    
     if (prog.m_state == MS_MAIN)
     {
         // enter into interactive mode
@@ -81,19 +89,23 @@ int main(int argc, char** argv)
     return 0;
 }
 
+
 int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
 {
-    size_t alen, offs = 0;
-    char*  ch = 0;
-    char   sw;
+    if (argc <= 1)
+        return -1;
 
-    for (int i = 0; i < argc; i++)
+    size_t alen, offs = 0;
+    int   i;
+    char* ch = 0;
+    char  sw;
+
+    for (i = 0; i < argc; i++)
     {
         ch = argv[i];
         if (ch && *ch == '-')
         {
             offs = 1;
-
             alen = ::strlen(ch);
             sw   = 0x00;
             if (offs < alen)
@@ -107,7 +119,8 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
                 if (i < argc)
                 {
                     prog.m_fileName = argv[i];
-                    prog.m_fp       = skBinaryFile::createInstance(argv[i]);
+
+                    prog.m_fp = skBinaryFile::createInstance(argv[i]);
                 }
                 else
                 {
@@ -164,13 +177,12 @@ void HexDump_Usage(void)
 {
     skPrintf("Usage: bindump [options] -f [path to file]\n");
     skPrintf("  Options:\n");
-    skPrintf("    -m [0-255] mark specific code.\n");
-    skPrintf("    -b  -- convert output to binary.\n");
     skPrintf("    -a  -- display ASCII listings.\n");
+    skPrintf("    -b  -- convert output to binary.\n");
     skPrintf("    -d  -- display disassembly.\n");
     skPrintf("    -h  -- display this help message.\n");
     skPrintf("    -i  -- interactive mode.\n");
-    skPrintf("    -c  -- separate output into colors in order to see it better.\n");
+    skPrintf("    -m [0-255] mark specific code.\n");
 }
 
 
@@ -214,6 +226,7 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
     skPrintUtils::writeSeperator();
     if (prog.m_flags & PF_COLORIZE)
         skPrintUtils::writeColor(CS_DARKYELLOW);
+
     skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
     skPrintUtils::writeSeperator();
 
@@ -236,9 +249,7 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
     {
         skBinaryFile::SectionMap::Iterator it = bin->getSectionIterator();
         while (it.hasMoreElements())
-        {
             HexDump_PrintSection(prog, it.getNext().second);
-        }
     }
 }
 
@@ -249,15 +260,12 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, const std::string& name)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
-        skBinaryFile* bin = prog.m_fp;
-
         skSection* sec = bin->getSection(name.c_str());
         if (sec != 0)
-        {
             HexDump_PrintSection(prog, sec);
-        }
     }
 }
+
 
 
 void HexDump_Interactive(HexDump_ProgramInfo& prog)
@@ -265,17 +273,20 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     cout << "                                                     \n";
     cout << " Please Select From The Following Menu:              \n";
     cout << "                                                     \n";
-    cout << "   1. Print hex dump.                                \n";
-    cout << "   2. Print section headers and the hex dump of each.\n";
-    cout << "   3. Print section names.                           \n";
-    cout << "   4. Display specific section name.                 \n";
+    cout << " Print Options:                                      \n";
+    cout << "   1. Print hex dump                                 \n";
+    cout << "   2. Print section headers and the hex dump of each \n";
+    cout << "   3. Print section names                            \n";
+    cout << "   4. Display specific section name                  \n";
     cout << "      .bss, .init, .text, etc                        \n";
-    cout << "   A. Display ascii                                  \n";
+    cout << " Print Options:                                      \n";
+    cout << "   A. Display ASCII                                  \n";
     cout << "   B. Display Binary                                 \n";
     cout << "   D. Display Disassembly                            \n";
     cout << "   H. Display Hex                                    \n";
-    cout << "   M. Mark specific code.                            \n";
-    cout << "   F. Load file.                                     \n";
+    cout << "   M. Mark specific code                             \n";
+    cout << " File Options:                                       \n";
+    cout << "   F. Load file                                      \n";
     cout << "                                            Q-Exit.  \n\n";
     char opt;
     cout << prog.m_fileName << ">";
@@ -287,7 +298,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     case 'F':
     case 'f':
     {
-        cout << "Path to file:";
+        cout << "Path to file: ";
         string path;
         cin >> path;
         if (prog.m_fp)
@@ -318,10 +329,11 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         break;
     case '4':
     {
-        cout << "Section Name>";
+        cout << "Section Name> ";
         string sn;
         cin >> sn;
         cout << "\n";
+
         HexDump_PrintSection(prog, sn);
         skPrintUtils::pause();
         break;
@@ -329,9 +341,10 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     case 'A':
     case 'a':
     {
-        cout << "Display ASCII? (Y|N)>";
+        cout << "Display ASCII ? (Y|N)>";
         char ans;
         cin >> ans;
+
         if (ans == 'y' || ans == 'Y')
             prog.m_flags |= PF_ASCII;
         else if (ans == 'n' || ans == 'N')

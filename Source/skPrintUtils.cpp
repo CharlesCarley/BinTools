@@ -27,15 +27,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Utils/Config/skConfig.h"
+
 #if SK_PLATFORM == SK_PLATFORM_WIN32
 #include "conio.h"
 #include "windows.h"
 #else
 #include "sys/select.h"
 #endif
+
 #include "Utils/skDebugger.h"
 #include "Utils/skTimer.h"
 #include "skPrintUtils.h"
+#include "skBinaryFileCommon.h"
+
+
+
+
 
 #if SK_PLATFORM == SK_PLATFORM_WIN32
 
@@ -59,12 +66,15 @@ unsigned char skPrintUtils::COLOR_TABLE[16][16] = {
     {0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF},
 };
 
+
 unsigned char skPrintUtils::getColor(skConsoleColorSpace fore, skConsoleColorSpace back)
 {
     return COLOR_TABLE[back][fore];
 }
-#else
 
+
+
+#else
 unsigned char skPrintUtils::COLOR_TABLE[16][16][3] = {
     {
         {0, 30, 40},
@@ -220,58 +230,27 @@ unsigned char* skPrintUtils::getColor(skConsoleColorSpace fore, skConsoleColorSp
 
 #endif
 
-void skPrintUtils::writeColor(int cs, int back)
+
+
+void skPrintUtils::writeColor(int fg, int bg)
 {
+    // filter out invalid colors and do nothing if one is supplied 
+    if (fg < 0 || fg > CS_COLOR_MAX || bg < 0 || bg > CS_COLOR_MAX)
+        return;
+
+
+
 #if SK_PLATFORM != SK_PLATFORM_WIN32
-    switch (cs)
-    {
-    case CS_BLACK:
-    case CS_DARKBLUE:
-    case CS_DARKGREEN:
-    case CS_DARKCYAN:
-    case CS_DARKRED:
-    case CS_DARKMAGENTA:
-    case CS_DARKYELLOW:
-    case CS_LIGHT_GREY:
-    case CS_GREY:
-    case CS_BLUE:
-    case CS_GREEN:
-    case CS_CYAN:
-    case CS_RED:
-    case CS_MAGENTA:
-    case CS_YELLOW:
-    case CS_WHITE:
-        unsigned char* col = getColor((skConsoleColorSpace)cs, (skConsoleColorSpace)back);
-        skPrintf("\e[%i;%i;%im", 0, col[1], col[1]);
-        break;
-    }
+    unsigned char* col = getColor((skConsoleColorSpace)fg, (skConsoleColorSpace)bg);
+    skPrintf("\e[%i;%i;%im", 0, col[1], col[1]);
 #else
     if (m_stdout == 0)
         m_stdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
-
-    switch (cs)
-    {
-    case CS_BLACK:
-    case CS_DARKBLUE:
-    case CS_DARKGREEN:
-    case CS_DARKCYAN:
-    case CS_DARKRED:
-    case CS_DARKMAGENTA:
-    case CS_DARKYELLOW:
-    case CS_LIGHT_GREY:
-    case CS_GREY:
-    case CS_BLUE:
-    case CS_GREEN:
-    case CS_CYAN:
-    case CS_RED:
-    case CS_MAGENTA:
-    case CS_YELLOW:
-    case CS_WHITE:
-        SetConsoleTextAttribute(m_stdout, getColor((skConsoleColorSpace)cs, (skConsoleColorSpace)back));
-        break;
-    }
+    ::SetConsoleTextAttribute(m_stdout, getColor((skConsoleColorSpace)fg, (skConsoleColorSpace)bg));
 #endif
 }
+
+
 
 void skPrintUtils::dumpColors()
 {
@@ -333,44 +312,11 @@ void skPrintUtils::pause(void)
 }
 
 
-
-int skPrintUtils::charHexToInt(char ch)
-{
-    if (ch >= '0' && ch <= '9')
-        return ((int)ch) - '0';
-    else if (ch >= 'A' && ch <= 'Z')
-        return 10 + ((int)ch) - 'A';
-    else if (ch >= 'a' && ch <= 'z')
-        return 10 + ((int)ch) - 'a';
-    return 0;
-}
-
-void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int mark);
+void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int mark, bool nl);
 void skPrintUtils_doMarkColor(int c, int mark);
 void skPrintUtils_writeAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
 void skPrintUtils_writeBinary(char* cp, SKsize offs, SKsize max, int flags, int mark);
 void skPrintUtils_writeHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
-
-
-
-int skPrintUtils_markCode(char* code)
-{
-    if (!code)
-        return 0;
-
-    int mark = 0;
-
-    SKsize len = strlen(code);
-    if (len >= 2)
-    {
-        int c0 = code[0];
-        int c1 = code[1];
-
-        int dv = skPrintUtils::charHexToInt(c0), rv = skPrintUtils::charHexToInt(c1);
-        mark = 16 * dv + rv;
-    }
-    return mark;
-}
 
 
 void skPrintUtils_writeHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
@@ -411,6 +357,7 @@ void skPrintUtils_writeBinary(char* cp, SKsize offs, SKsize max, int flags, int 
         if (offs + j < max)
         {
             int c = (int)(unsigned char)cp[offs + j], k;
+
             if (flags & PF_COLORIZE)
                 skPrintUtils_doMarkColor(c, mark);
 
@@ -489,7 +436,7 @@ void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int m
             skPrintUtils::writeColor(CS_LIGHT_GREY);
 
         if (flags & PF_ADDRESS)
-            skPrintf("%08u ", ((unsigned int)i));
+            skPrintUtils::writeAddress((size_t)i);
         if (flags & PF_HEX)
             skPrintUtils_writeHex(cp, i, stop, flags, mark);
         if (flags & PF_BINARY)
@@ -502,7 +449,22 @@ void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int m
 }
 
 
+void skPrintUtils::writeAddress(SKuint64 addr)
+{
+    if (RPL_LEN_IS_8)
+        skPrintf("%016llx ", addr);
+    else
+        skPrintf("%08x ", (SKuint32)addr);
+}
+
+
 void skPrintUtils::dumpHex(void* ptr, size_t len, int flags, int mark, bool nl)
 {
+    /// TODO: Update this to handle more options.
+    /// It should be able to convert printout to 
+    /// short, int, and unsigned int as well as 
+    /// have the option to specify a max column width.
     skPrintUtils_Hexdump(ptr, 0, len, flags, mark, nl);
 }
+
+

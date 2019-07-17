@@ -77,7 +77,6 @@ void skSection::initialize(void *ptr, size_t size)
 
     cs_mode mode = m_owner->getType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
 
-
     cs_err err = cs_open(arch, mode, (csh *)&m_handle);
     if (err != CS_ERR_OK)
     {
@@ -109,12 +108,13 @@ void skSection::dissemble(int flags)
             if (flags & PF_COLORIZE)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
-            skPrintf("0x%08x: ", (unsigned int)(i.address));
+            skPrintUtils::writeAddress(i.address);
             skPrintUtils::dumpHex(i.bytes, i.size, PF_HEXDIS, -1, false);
 
             skPrintUtils::writeColor(CS_WHITE);
             skPrintf("%s\t%s\n", i.mnemonic, i.op_str);
         }
+ 
         cs_free(insn, count);
     }
 }

@@ -36,4 +36,5 @@ skDefaultFile ::~skDefaultFile()
 
 void skDefaultFile::loadImpl(void)
 {
+    m_fileFormat = FF_ANY;
 }

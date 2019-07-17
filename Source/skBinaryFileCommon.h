@@ -28,6 +28,16 @@
 
 #include "Utils/Config/skConfig.h"
 
+
+
+
+enum skRuntimePointerLen
+{
+    RPL_LEN_IS_8 = sizeof(void*) == 8,
+    RPL_LEN_IS_4 = sizeof(void*) == 4,
+};
+
+
 enum skInstructionSet
 {
     IS_NONE = 0,
@@ -48,7 +58,7 @@ enum skInstructionSet
 enum skFileFormat
 {
     FF_UNKNOWN,
-    FF_ANY,  /// instance skDefaultBiary
+    FF_ANY,  /// instance skDefaultFile
     FF_ELF,  /// instance skElfFile 
     FF_PE,   /// instance skPortableExecutable
 };
