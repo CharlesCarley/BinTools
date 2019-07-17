@@ -26,13 +26,14 @@ project(BinTools)
 
 set(CMAKE_MODULE_PATH 
     ${BinTools_SOURCE_DIR}/CMake
+    ${BinTools_SOURCE_DIR}/Extern/Utils/CMake
 )
-include(Configure)
-subdirs(CMake)
-
 set(FOLDER_NAME "External")
 set(USE_FOLDERS TRUE)
 subdirs(Extern/Utils)
+
+include(Configure)
+subdirs(CMake)
 subdirs(Extern/capstone)
 
 
