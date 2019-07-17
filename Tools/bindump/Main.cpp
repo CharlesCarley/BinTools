@@ -76,6 +76,7 @@ int main(int argc, char** argv)
     if (prog.m_state == MS_MAIN)
     {
         // enter into interactive mode
+        skPrintUtils::clear();
         while (prog.m_state == MS_MAIN)
             HexDump_Interactive(prog);
     }
