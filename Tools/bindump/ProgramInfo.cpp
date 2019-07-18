@@ -54,6 +54,7 @@ void HexDump_PrintAll(HexDump_ProgramInfo& prog)
     if (prog.m_fp)
     {
         skPrintUtils::dumpHex((void*)prog.m_fp->ptr(),
+                              0,
                               prog.m_fp->length(),
                               prog.m_flags,
                               prog.m_code);
@@ -134,7 +135,9 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
     if (prog.m_flags & PF_DISASEMBLE)
         section->dissemble(prog.m_flags);
     else
-        skPrintUtils::dumpHex(section->ptr(), section->size(), prog.m_flags, prog.m_code);
+        skPrintUtils::dumpHex(section->ptr(), 
+            section->location(), 
+            section->size(), prog.m_flags, prog.m_code);
 }
 
 

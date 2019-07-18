@@ -63,8 +63,7 @@ public:
     static skBinaryFile *createInstance(const char *file);
 
 
-    /// Returns the underlying base class 
-    /// that was created with createInstance
+    /// Returns the format of the loaded file.
     inline skFileFormat getFormat(void)
     {
         return m_fileFormat;
@@ -83,8 +82,7 @@ public:
         return m_instructionSetType;
     }
 
-    /// Returns an array of strings containing the
-    /// the contents of .shstrtab
+    /// Returns a string array of the section names.
     inline StringArray &getSectionHeaderNames(void)
     {
         return m_sectionHeaderStringTable;
@@ -128,9 +126,8 @@ protected:
 
 
 
-    /// called from createInstance
-    /// loadImpl is responsible for converting 
-    /// the underlying data into this interface.
+    /// Called from createInstance.
+    /// loadImpl is responsible for converting the underlying data into this interface.
     virtual void loadImpl(void) = 0;
 };
 

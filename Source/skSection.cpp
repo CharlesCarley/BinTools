@@ -109,7 +109,7 @@ void skSection::dissemble(int flags)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
             skPrintUtils::writeAddress(i.address);
-            skPrintUtils::dumpHex(i.bytes, i.size, PF_HEXDIS, -1, false);
+            skPrintUtils::dumpHex(i.bytes, 0, i.size, PF_HEXDIS, -1, false);
 
             skPrintUtils::writeColor(CS_WHITE);
             skPrintf("%s\t%s\n", i.mnemonic, i.op_str);

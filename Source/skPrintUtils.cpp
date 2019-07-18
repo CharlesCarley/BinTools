@@ -427,16 +427,17 @@ void skPrintUtils_doMarkColor(int c, int mark)
 }
 
 
-void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int mark, bool nl)
+void skPrintUtils_Hexdump(void* ptr, SKsize offset, SKsize stop, int flags, int mark, bool nl)
 {
     char* cp = (char*)ptr;
-    for (SKsize i = start; i < stop; i += 16)
+    for (SKsize i = 0; i < stop; i += 16)
     {
         if (flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_LIGHT_GREY);
 
         if (flags & PF_ADDRESS)
-            skPrintUtils::writeAddress((size_t)i);
+            skPrintUtils::writeAddress((size_t)(i + offset));
+
         if (flags & PF_HEX)
             skPrintUtils_writeHex(cp, i, stop, flags, mark);
         if (flags & PF_BINARY)
@@ -458,13 +459,13 @@ void skPrintUtils::writeAddress(SKuint64 addr)
 }
 
 
-void skPrintUtils::dumpHex(void* ptr, size_t len, int flags, int mark, bool nl)
+void skPrintUtils::dumpHex(void* ptr, size_t offset, size_t len, int flags, int mark, bool nl)
 {
     /// TODO: Update this to handle more options.
     /// It should be able to convert printout to 
     /// short, int, and unsigned int as well as 
     /// have the option to specify a max column width.
-    skPrintUtils_Hexdump(ptr, 0, len, flags, mark, nl);
+    skPrintUtils_Hexdump(ptr, offset, len, flags, mark, nl);
 }
 
 

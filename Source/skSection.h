@@ -49,32 +49,37 @@ public:
     virtual ~skSection();
 
 
-    /// returns a pointer to the file that owns this section.
+    /// Returns a pointer to the file that owns this section.
     inline skBinaryFile *getOwner(void)
     {
         return m_owner;
     }
 
 
-    /// returns the section name (.init, .text, etc...)
+    /// Returns the section name. (.init, .text, etc...)
     inline skString &getName(void)
     {
         return m_name;
     }
 
 
-    /// returns direct access to the allocated memory for this section.
+    /// Returns direct access to the allocated memory for this section.
     inline PointerType ptr(void)
     {
         return m_data;
     }
 
-    /// returns amount of allocated memory in bytes
+    /// Returns the amount of allocated memory in bytes.
     inline size_t size(void)
     {
         return m_size;
     }
 
+    /// Returns the starting location of this section in the file.
+    inline size_t location(void)
+    {
+        return m_startAddress;
+    }
 
 
     // print the disassembly to stdout
