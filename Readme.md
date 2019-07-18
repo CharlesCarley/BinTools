@@ -37,18 +37,21 @@ bindump [options] -f [path to file]
 
 ##### Interactive mode
 ```
-  Print options:
-    1. Print hex dump.
-    2. Print section headers and the hex dump of each.
-    3. Print section names.
-    4. Display specific section name.
-        .bss, .init, .text, etc.
-  Print flags:
-    A. Display ascii.
-    B. Display Binary.
-    D. Display Disassembly.
-    H. Display Hex.
-  File options:
-    F. Load file.
-                                Q-Exit.
+ Please Select From The Following Menu:
+
+ Print Options:
+   1. Print hex dump
+   2. Print section headers and the hex dump of each
+   3. Print section names
+   4. Display specific section name
+      .bss, .init, .text, etc
+ Print Options:
+   A. Display ASCII
+   B. Display Binary
+   D. Display Disassembly
+   H. Display Hex
+   M. Mark specific code
+ File Options:
+   F. Load file
+                                            Q-Exit.
 ```

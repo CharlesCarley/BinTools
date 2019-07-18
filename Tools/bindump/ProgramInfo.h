@@ -26,6 +26,8 @@
 #ifndef _ProgramInfo_h_
 #define _ProgramInfo_h_
 
+class skBinaryFile;
+
 
 enum HexDump_MenuState
 {
