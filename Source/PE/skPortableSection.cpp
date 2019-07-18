@@ -54,7 +54,7 @@ void skPortableSection::printHeader(void)
     skPrintf("  Virtual Size:          %u\n", m_header.m_virtualSize);
     skPrintf("  Virtual Address:       0x%08x\n", m_header.m_virtualAddress);
     skPrintf("  Size of Raw Data:      %u\n", m_header.m_sizeOfRawData);
-    skPrintf("  Pointer To Raw Data:   %u\n", m_header.m_pointerToRawData);
+    skPrintf("  Pointer To Raw Data:   0x%08x\n", m_header.m_pointerToRawData);
     skPrintf("  Relocation table:      %u\n", m_header.m_pointerToRelocations);
     skPrintf("  Relocation count:      %u\n", m_header.m_numberOfRelocations);
     skPrintf("  Line numbers:          %u\n", m_header.m_pointerToLineNumbers);

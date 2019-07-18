@@ -28,6 +28,10 @@ set(TargetName_SRC
     test.c
 )
 
+set(TargetNameSH_SRC
+    sharedlib.c
+)
+
 
 include_directories(. 
     ${CMAKE_SOURCE_DIR}/Extern
@@ -35,8 +39,11 @@ include_directories(.
 )
 
 add_executable(${TargetName} ${TargetName_SRC})
+add_library(${TargetName}_shared SHARED ${TargetNameSH_SRC})
+
 
 if (BinTools_USE_FOLDERS)
     set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
+    set_target_properties(${TargetName}_shared PROPERTIES FOLDER "${TargetName_GRP}")
 endif()
 

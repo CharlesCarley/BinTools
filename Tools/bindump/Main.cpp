@@ -176,14 +176,16 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
 
 void HexDump_Usage(void)
 {
-    skPrintf("Usage: bindump [options] -f [path to file]\n");
-    skPrintf("  Options:\n");
-    skPrintf("    -a  -- display ASCII listings.\n");
-    skPrintf("    -b  -- convert output to binary.\n");
-    skPrintf("    -d  -- display disassembly.\n");
-    skPrintf("    -h  -- display this help message.\n");
-    skPrintf("    -i  -- interactive mode.\n");
-    skPrintf("    -m [0-255] mark specific code.\n");
+    std::cout << "bindump [options] -f [path to file]\n";
+    std::cout << "                                   \n";
+    std::cout << "  Options:                         \n";
+    std::cout << "                                   \n";
+    std::cout << "  -m    Mark specific code [0-255].\n";
+    std::cout << "  -b    Convert output to binary.  \n";
+    std::cout << "  -a    Display ASCII listings.    \n";
+    std::cout << "  -d    Display disassembly.       \n";
+    std::cout << "  -h    Display this help message. \n";
+    std::cout << "  -i    Interactive mode.          \n";
 }
 
 
@@ -228,9 +230,11 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
     if (prog.m_flags & PF_COLORIZE)
         skPrintUtils::writeColor(CS_DARKYELLOW);
 
-    skPrintf("\t\t\tSectionInfo: %s\n", name.c_str());
+    skPrintf("Section Header: %s\n", name.c_str());
     skPrintUtils::writeSeperator();
 
+    if (prog.m_flags & PF_COLORIZE)
+        skPrintUtils::writeColor(CS_LIGHT_GREY);
     section->printHeader();
     skPrintUtils::writeSeperator();
 
@@ -271,24 +275,24 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, const std::string& name)
 
 void HexDump_Interactive(HexDump_ProgramInfo& prog)
 {
-    cout << "                                                     \n";
-    cout << " Please Select From The Following Menu:              \n";
-    cout << "                                                     \n";
-    cout << " Print Options:                                      \n";
-    cout << "   1. Print hex dump                                 \n";
-    cout << "   2. Print section headers and the hex dump of each \n";
-    cout << "   3. Print section names                            \n";
-    cout << "   4. Display specific section name                  \n";
-    cout << "      .bss, .init, .text, etc                        \n";
-    cout << " Print Options:                                      \n";
-    cout << "   A. Display ASCII                                  \n";
-    cout << "   B. Display Binary                                 \n";
-    cout << "   D. Display Disassembly                            \n";
-    cout << "   H. Display Hex                                    \n";
-    cout << "   M. Mark specific code                             \n";
-    cout << " File Options:                                       \n";
-    cout << "   F. Load file                                      \n";
-    cout << "                                            Q-Exit.  \n\n";
+    std::cout << "                                                    \n";
+    std::cout << " Please Select From The Following Menu:             \n";
+    std::cout << "                                                    \n";
+    std::cout << " Print Options:                                     \n";
+    std::cout << "   1. Print hex dump                                \n";
+    std::cout << "   2. Print section headers and the hex dump of each\n";
+    std::cout << "   3. Print section names                           \n";
+    std::cout << "   4. Display specific section name                 \n";
+    std::cout << "      .bss, .init, .text, etc                       \n";
+    std::cout << " Print Options:                                     \n";
+    std::cout << "   A. Display ASCII                                 \n";
+    std::cout << "   B. Display Binary                                \n";
+    std::cout << "   D. Display Disassembly                           \n";
+    std::cout << "   H. Display Hex                                   \n";
+    std::cout << "   M. Mark specific code                            \n";
+    std::cout << " File Options:                                      \n";
+    std::cout << "   F. Load file                                     \n";
+    std::cout << "                                            Q-Exit. \n";
     char opt;
     cout << prog.m_fileName << ">";
     cin >> opt;

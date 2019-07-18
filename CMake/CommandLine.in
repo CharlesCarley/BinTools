@@ -1,0 +1,10 @@
+bindump [options] -f [path to file]
+  
+  Options:
+
+  -m    Mark specific code [0-255].
+  -b    Convert output to binary.
+  -a    Display ASCII listings.
+  -d    Display disassembly.
+  -h    Display this help message.
+  -i    Interactive mode.
