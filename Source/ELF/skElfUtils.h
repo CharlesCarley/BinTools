@@ -37,7 +37,7 @@ class skElfUtils
 {
 public:
     template <typename T>
-    static void getPlatformId(skElfHeaderInfo<T>& inf, char dest[], int len)
+    static void getPlatformId(const skElfHeaderInfo<T>& inf, char dest[], int len)
     {
         dest[0] = 0;
         if (inf.m_id[EMN_CLASS] == 1)
@@ -47,7 +47,7 @@ public:
     }
 
     template <typename T>
-    static void getByteOrder(skElfHeaderInfo<T>& inf, char dest[], int len)
+    static void getByteOrder(const skElfHeaderInfo<T>& inf, char dest[], int len)
     {
         dest[0] = 0;
         if (inf.m_id[EMN_ENDIAN] == 1)
@@ -57,7 +57,7 @@ public:
     }
 
     template <typename T>
-    static void getVersion(skElfHeaderInfo<T>& inf, char dest[], int len)
+    static void getVersion(const skElfHeaderInfo<T>& inf, char dest[], int len)
     {
         dest[0] = 0;
         if (inf.m_id[EMN_VERSION] == 1)
@@ -65,7 +65,7 @@ public:
     }
 
     template <typename T>
-    static void getABI(skElfHeaderInfo<T>& inf, char dest[], int len)
+    static void getABI(const skElfHeaderInfo<T>& inf, char dest[], int len)
     {
         dest[0] = 0;
         switch (inf.m_id[EMN_ABI])
@@ -128,7 +128,7 @@ public:
     }
 
     template <typename T>
-    static void getType(skElfHeaderInfo<T>& inf, char dest[], int len)
+    static void getType(const skElfHeaderInfo<T>& inf, char dest[], int len)
     {
         switch (inf.m_type)
         {
@@ -157,7 +157,7 @@ public:
     }
 
     template <typename T>
-    static void getArch(skElfHeaderInfo<T>& inf, char dest[], int len)
+    static void getArch(const skElfHeaderInfo<T>& inf, char dest[], int len)
     {
         switch (inf.m_machine)
         {
@@ -201,7 +201,7 @@ public:
     }
 
     template <typename T>
-    static void printElfProgramHeader(skElfProgramHeader<T>& inf)
+    static void printElfProgramHeader(const skElfProgramHeader<T>& inf)
     {
         writeSeperator();
         skPrintf("\t\t\tProgram Header\n");
@@ -229,7 +229,7 @@ public:
     }
 
     template <typename T>
-    static void printElfHeader(skElfHeaderInfo<T>& inf)
+    static void printElfHeader(const skElfHeaderInfo<T>& inf)
     {
         writeSeperator();
         skPrintf("\t\t\tFile Header\n");
@@ -262,7 +262,7 @@ public:
     }
 
     template <typename T>
-    static void getSectionType(skElfSectionHeader<T>& inf, char dest[], int len)
+    static void getSectionType(const skElfSectionHeader<T>& inf, char dest[], int len)
     {
         switch (inf.m_type)
         {
@@ -321,7 +321,7 @@ public:
     }
 
     template <typename T>
-    static void printSectionHeader(skElfSectionHeader<T>& sh)
+    static void printSectionHeader(const skElfSectionHeader<T>& sh)
     {
         char tmpBuf[32];
         skPrintf("  Name:     %u\n", sh.m_name);

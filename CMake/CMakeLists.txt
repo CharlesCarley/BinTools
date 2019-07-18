@@ -27,15 +27,18 @@
 # Utility project to organize build scripts better
 if (MSVC)
     file(GLOB CM_FILES *.cmake)
+    file(GLOB IN_FILES *.in)
     file(GLOB MD_FILES ../*.md)
 
     set(CMAKE_FILES
         ${CM_FILES}
+        ${IN_FILES}
         ${MD_FILES}
         ../.clang-format
     )
 	source_group("CMake"        FILES ${CM_FILES})
 	source_group("Markdown"     FILES ${MD_FILES})
+	source_group("Include"      FILES ${IN_FILES})
 
     set_source_files_properties(
         ${CMAKE_FILES} 

@@ -46,13 +46,10 @@ public:
     virtual ~skElfSection();
 
 
-    inline skElfSectionHeader64& getHeader(void)
+    inline const skElfSectionHeader64& getHeader(void) 
     {
         return m_header;
     }
-
-    virtual void printHeader(void);
-
 };
 
 #endif  //_skElfSection_h_

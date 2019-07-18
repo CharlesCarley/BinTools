@@ -46,16 +46,11 @@ public:
 
     virtual ~skPortableSection();
 
-
-
-    inline COFFSectionHeader &getHeader(void)
+    inline const COFFSectionHeader &getHeader(void)
     {
         return m_header;
     }
 
-
-    // print the section header to stdout
-    virtual void printHeader(void);
 };
 
 #endif  //_skPortableSection_h

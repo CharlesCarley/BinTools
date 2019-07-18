@@ -35,6 +35,8 @@ skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_imageHeader(0),
     m_imageBase(dos_offset)
 {
+    m_fileFormat = FF_PE;
+
     skMemset(&m_header, 0, sizeof(COFFHeader));
 }
 

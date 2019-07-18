@@ -39,6 +39,7 @@ set(TargetName_SRC
     PE/skPortableFile.h
     PE/skPortableTypes.h
     PE/skPortableSection.h
+    PE/skPortableUtils.h
     
     skBinaryFile.cpp
     skDefaultFile.cpp
@@ -52,6 +53,7 @@ set(TargetName_SRC
     PE/skPortableFile.cpp
     PE/skPortableTypes.cpp
     PE/skPortableSection.cpp
+    PE/skPortableUtils.cpp
 )
 
 

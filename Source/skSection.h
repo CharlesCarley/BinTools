@@ -44,7 +44,6 @@ private:
     size_t        m_handle;  // capstone handle
     size_t        m_startAddress;
 
-
 public:
     skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset);
     virtual ~skSection();
@@ -58,7 +57,7 @@ public:
 
 
     /// returns the section name (.init, .text, etc...)
-    inline skString &getname(void)
+    inline skString &getName(void)
     {
         return m_name;
     }
@@ -81,9 +80,6 @@ public:
     // print the disassembly to stdout
     void dissemble(int flags = 0);
 
-
-    // print the section header to stdout
-    virtual void printHeader(void) {}
 
 private:
     void initialize(void *ptr, size_t size);

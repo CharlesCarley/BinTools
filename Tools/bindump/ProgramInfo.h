@@ -23,27 +23,30 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "PE/skPortableSection.h"
-#include "skPrintUtils.h"
-#include "Utils/skDebugger.h"
+#ifndef _ProgramInfo_h_
+#define _ProgramInfo_h_
 
 
-
-skPortableSection::skPortableSection(skBinaryFile*      owner,
-                                     const skString&    name,
-                                     void*              data,
-                                     size_t             size,
-                                     size_t             offset,
-                                     COFFSectionHeader& hdr) :
-    skSection(owner, name, data, size, offset)
+enum HexDump_MenuState
 {
-    skMemcpy(&m_header, &hdr, sizeof(COFFSectionHeader));
+    MS_MAIN = 0,
+    MS_EXIT,
+};
 
-    //  Fix the header offset so that it points to the correct location
-    m_header.m_pointerToRawData = offset;
-}
 
-skPortableSection::~skPortableSection()
+struct HexDump_ProgramInfo
 {
-}
+    int           m_state;
+    skBinaryFile* m_fp;
+    int           m_flags;
+    int           m_code;
+    string        m_fileName;
+};
 
+
+extern int  HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv);
+extern void HexDump_Usage(void);
+extern void HexDump_Interactive(HexDump_ProgramInfo& prog);
+extern void HexDump_PrintAll(HexDump_ProgramInfo& prog);
+
+#endif//_ProgramInfo_h_

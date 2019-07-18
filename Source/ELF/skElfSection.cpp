@@ -43,7 +43,3 @@ skElfSection::~skElfSection()
 {
 }
 
-void skElfSection::printHeader(void)
-{
-    skElfUtils::printSectionHeader(m_header);
-}

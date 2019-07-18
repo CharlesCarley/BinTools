@@ -23,27 +23,17 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "PE/skPortableSection.h"
-#include "skPrintUtils.h"
-#include "Utils/skDebugger.h"
+#ifndef _skPortableUtils_h_
+#define _skPortableUtils_h_
+
+#include "PE/skPortableTypes.h"
 
 
-
-skPortableSection::skPortableSection(skBinaryFile*      owner,
-                                     const skString&    name,
-                                     void*              data,
-                                     size_t             size,
-                                     size_t             offset,
-                                     COFFSectionHeader& hdr) :
-    skSection(owner, name, data, size, offset)
+class skPortableUtils
 {
-    skMemcpy(&m_header, &hdr, sizeof(COFFSectionHeader));
+public:
+    static void printSectionHeader(const COFFSectionHeader& header);
+};
 
-    //  Fix the header offset so that it points to the correct location
-    m_header.m_pointerToRawData = offset;
-}
 
-skPortableSection::~skPortableSection()
-{
-}
-
+#endif  //_skPortableUtils_h_
