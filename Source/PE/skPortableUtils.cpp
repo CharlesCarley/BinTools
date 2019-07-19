@@ -25,22 +25,20 @@
 */
 #include "PE/skPortableUtils.h"
 #include "Utils/skDebugger.h"
-
-//#include <time.h>
+#include <time.h>
 
 
 void skPortableUtils::printCommonHeader(const COFFHeader& header)
 {
 
-    //char  tmpBuf[32];
-    //int err = (int)ctime_s(tmpBuf, 32, (time_t*)&header.m_timeDateStamp);
+    char* result = ctime((time_t*)&header.m_timeDateStamp);
 
     skPrintf("  Machine:              %u\n", header.m_machine);
     skPrintf("  Section Count:        %u\n", header.m_sectionCount);
 
-    //if (err == 0 || tmpBuf[0] != '\0')
-    //    skPrintf("  Timestamp:            %s", tmpBuf);
-    //else
+    if (result != 0)
+        skPrintf("  Timestamp:            %s", result);
+    else
         skPrintf("  Timestamp:            %u\n", header.m_timeDateStamp);
 
     skPrintf("  Symbol Table Offset:  %u\n", header.m_symbolTableOffset);
