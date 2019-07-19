@@ -238,8 +238,6 @@ void skPrintUtils::writeColor(int fg, int bg)
     if (fg < 0 || fg > CS_COLOR_MAX || bg < 0 || bg > CS_COLOR_MAX)
         return;
 
-
-
 #if SK_PLATFORM != SK_PLATFORM_WIN32
     unsigned char* col = getColor((skConsoleColorSpace)fg, (skConsoleColorSpace)bg);
     skPrintf("\e[%i;%i;%im", 0, col[1], col[1]);

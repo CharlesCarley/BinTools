@@ -40,7 +40,7 @@ skElfFile::skElfFile()
     m_fileFormat = FF_ELF;
 
     m_symtab = 0;
-    memset(&m_inf, 0, sizeof(skElfHeaderInfo64));
+    memset(&m_header, 0, sizeof(skElfHeaderInfo64));
 }
 
 skElfFile::~skElfFile()
@@ -56,10 +56,10 @@ void skElfFile::loadImpl(void)
         return;
     }
 
-    skMemcpy(&m_inf, ((char*)m_data), sizeof(skElfHeaderInfo64));
-    if (m_inf.m_id[EMN_CLASS] == 1)
+    skMemcpy(&m_header, ((char*)m_data), sizeof(skElfHeaderInfo64));
+    if (m_header.m_id[EMN_CLASS] == 1)
         m_fileFormatType = FFT_32BIT;
-    else if (m_inf.m_id[EMN_CLASS] == 2)
+    else if (m_header.m_id[EMN_CLASS] == 2)
         m_fileFormatType = FFT_64BIT;
     else
     {
@@ -68,45 +68,45 @@ void skElfFile::loadImpl(void)
     }
 
     // handle the machine architecture
-    switch (m_inf.m_machine)
+    switch (m_header.m_machine)
     {
     case EIA_SPARC:
-        m_instructionSetType = IS_SPARC;
+        m_arch = IS_SPARC;
         break;
     case EIA_X86:
-        m_instructionSetType = IS_X86;
+        m_arch = IS_X86;
         break;
     case EIA_MPS:
-        m_instructionSetType = IS_MPS;
+        m_arch = IS_MPS;
         break;
     case EIA_POWERPC:
-        m_instructionSetType = IS_POWERPC;
+        m_arch = IS_POWERPC;
         break;
     case EIA_S390:
-        m_instructionSetType = IS_S390;
+        m_arch = IS_S390;
         break;
     case EIA_SUPERH:
-        m_instructionSetType = IS_SUPERH;
+        m_arch = IS_SUPERH;
         break;
     case EIA_IA64:
-        m_instructionSetType = IS_IA64;
+        m_arch = IS_IA64;
         break;
     case EIA_X8664:
-        m_instructionSetType = IS_X8664;
+        m_arch = IS_X8664;
         break;
     case EIA_AARCH64:
-        m_instructionSetType = IS_AARCH64;
+        m_arch = IS_AARCH64;
         break;
     case EIA_RISCV:
-        m_instructionSetType = IS_RISCV;
+        m_arch = IS_RISCV;
         break;
     case EIA_NONE:
     default:
-        m_instructionSetType = IS_NONE;
+        m_arch = IS_NONE;
         break;
     }
 
-    if (m_instructionSetType == IS_NONE)
+    if (m_arch == IS_NONE)
     {
         skPrintf("Unknown machine architecture found in the file header");
         return;

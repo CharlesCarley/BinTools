@@ -38,7 +38,11 @@ enum skRuntimePointerLen
 };
 
 
-enum skInstructionSet
+
+/// Generic architecture type. 
+/// Derived classes should convert the 
+/// the specific value to one of these values.
+enum skMachineArchitecture
 {
     IS_NONE = 0,
     IS_SPARC,

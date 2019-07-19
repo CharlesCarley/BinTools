@@ -26,19 +26,42 @@
 #include "PE/skPortableUtils.h"
 #include "Utils/skDebugger.h"
 
+#include <time.h>
+
+
+void skPortableUtils::printCommonHeader(const COFFHeader& header)
+{
+
+    char  tmpBuf[32];
+    errno_t err = ctime_s(tmpBuf, 32, (time_t*)&header.m_timeDateStamp);
+
+    skPrintf("  Machine:              %u\n", header.m_machine);
+    skPrintf("  Section Count:        %u\n", header.m_sectionCount);
+
+    if (err == 0 || tmpBuf[0] != '\0')
+        skPrintf("  Timestamp:            %s", tmpBuf);
+    else
+        skPrintf("  Timestamp:            %u\n", header.m_timeDateStamp);
+
+    skPrintf("  Symbol Table Offset:  %u\n", header.m_symbolTableOffset);
+    skPrintf("  Number Of Symbols:    %u\n", header.m_symbolCount);
+    skPrintf("  Optional Header Size: %u\n", header.m_optionalHeaderSize);
+    skPrintf("  Characteristics:      0x%x\n", header.m_characteristics);
+}
+
 
 
 void skPortableUtils::printSectionHeader(const COFFSectionHeader& header)
 {
     skPrintf("  Name:                  %s\n", header.m_name);
     skPrintf("  Virtual Size:          %u\n", header.m_virtualSize);
-    skPrintf("  Virtual Address:       0x%08x\n", header.m_virtualAddress);
+    skPrintf("  Virtual Address:       0x%x\n", header.m_virtualAddress);
     skPrintf("  Size of Raw Data:      %u\n", header.m_sizeOfRawData);
-    skPrintf("  Pointer To Raw Data:   0x%08x\n", header.m_pointerToRawData);
+    skPrintf("  Pointer To Raw Data:   0x%x\n", header.m_pointerToRawData);
     skPrintf("  Relocation table:      %u\n", header.m_pointerToRelocations);
     skPrintf("  Relocation count:      %u\n", header.m_numberOfRelocations);
     skPrintf("  Line numbers:          %u\n", header.m_pointerToLineNumbers);
     skPrintf("  Line number count:     %u\n", header.m_numberOfLineNumbers);
-    skPrintf("  Characteristics:       0x%08x\n", header.m_characteristics);
+    skPrintf("  Characteristics:       0x%x\n", header.m_characteristics);
     skPrintf("  Size of Header:        %u\n", sizeof(COFFSectionHeader));
 }

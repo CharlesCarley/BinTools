@@ -231,35 +231,31 @@ public:
     template <typename T>
     static void printElfHeader(const skElfHeaderInfo<T>& inf)
     {
-        writeSeperator();
-        skPrintf("\t\t\tFile Header\n");
-        writeSeperator();
-
         char tmpBuf[32];
         getPlatformId(inf, tmpBuf, 32);
-        skPrintf("Class:                  %s\n", tmpBuf);
+        skPrintf("  Class:                  %s\n", tmpBuf);
         getByteOrder(inf, tmpBuf, 32);
-        skPrintf("Data:                   %s\n", tmpBuf);
+        skPrintf("  Data:                   %s\n", tmpBuf);
         getVersion(inf, tmpBuf, 32);
-        skPrintf("Version:                %s\n", tmpBuf);
+        skPrintf("  Version:                %s\n", tmpBuf);
         getABI(inf, tmpBuf, 32);
-        skPrintf("OS/ABI:                 %s\n", tmpBuf);
+        skPrintf("  OS/ABI:                 %s\n", tmpBuf);
         getType(inf, tmpBuf, 32);
-        skPrintf("Type:                   %s\n", tmpBuf);
+        skPrintf("  Type:                   %s\n", tmpBuf);
         getArch(inf, tmpBuf, 32);
-        skPrintf("Architecture:           %s\n", tmpBuf);
-        skPrintf("Entry:                  0x%08X\n", inf.m_entry);
-        skPrintf("Header Off:             0x%08X\n", (int)inf.m_programOffset);
-        skPrintf("Section Off:            0x%08X\n", (int)inf.m_sectionOffset);
-        skPrintf("Flags:                  %u\n", (int)inf.m_flags);
-        skPrintf("Program Header Size:    %u\n", (int)inf.m_headerSizeInBytes);
-        skPrintf("Program Header Count:   %u\n", (int)inf.m_headerEntryCount);
-        skPrintf("Section Entry:          %u\n", (int)inf.m_sectionTableEntrySize);
-        skPrintf("Section Count:          %u\n", (int)inf.m_sectionTableEntryCount);
-        skPrintf("Header Table Index:     %u\n", (int)inf.m_sectionTableIndex);
-        skPrintf("sizeof:                 %i\n", (int)sizeof(inf));
-        writeSeperator();
+        skPrintf("  Architecture:           %s\n", tmpBuf);
+        skPrintf("  Entry:                  0x%llx\n", inf.m_entry);
+        skPrintf("  Program Offset:         0x%llx\n", inf.m_programOffset);
+        skPrintf("  Section Offset:         0x%llx\n", inf.m_sectionOffset);
+        skPrintf("  Flags:                  %u\n", (int)inf.m_flags);
+        skPrintf("  Program Header Size:    %u\n", (int)inf.m_headerSizeInBytes);
+        skPrintf("  Program Header Count:   %u\n", (int)inf.m_headerEntryCount);
+        skPrintf("  Section Entry:          %u\n", (int)inf.m_sectionTableEntrySize);
+        skPrintf("  Section Count:          %u\n", (int)inf.m_sectionTableEntryCount);
+        skPrintf("  Header Table Index:     %u\n", (int)inf.m_sectionTableIndex);
+        skPrintf("  sizeof:                 %u\n\n", sizeof(inf));
     }
+
 
     template <typename T>
     static void getSectionType(const skElfSectionHeader<T>& inf, char dest[], int len)
@@ -324,18 +320,18 @@ public:
     static void printSectionHeader(const skElfSectionHeader<T>& sh)
     {
         char tmpBuf[32];
-        skPrintf("  Name:     %u\n", sh.m_name);
+        skPrintf("  Name:              %u\n", sh.m_name);
         getSectionType(sh, tmpBuf, 32);
-        skPrintf("  Type:     %s\n", tmpBuf);
-        skPrintf("  Flags:    %u\n", (int)sh.m_flags);
-        skPrintf("  Addr:     %u\n", (int)sh.m_addr);
-        skPrintf("  Offs:     0x%08x\n", (int)sh.m_offset);
-        skPrintf("  Size:     %u\n", (int)sh.m_size);
-        skPrintf("  Link:     %u\n", (int)sh.m_link);
-        skPrintf("  Info:     %u\n", (int)sh.m_info);
-        skPrintf("  AddrAln:  %u\n", (int)sh.m_addrAlign);
-        skPrintf("  EntSize:  %u\n", (int)sh.m_entSize);
-        skPrintf("  sizeof:   %u\n", (int)sizeof(sh));
+        skPrintf("  Type:              %s\n", tmpBuf);
+        skPrintf("  Flags:             %u\n", (int)sh.m_flags);
+        skPrintf("  Virtual Address:   %u\n", (int)sh.m_addr);
+        skPrintf("  Offset:            0x%llx\n", sh.m_offset);
+        skPrintf("  Size:              %u\n", (int)sh.m_size);
+        skPrintf("  Link:              %u\n", (int)sh.m_link);
+        skPrintf("  Extra Info:        %u\n", (int)sh.m_info);
+        skPrintf("  Alignment:         %u\n", (int)sh.m_addrAlign);
+        skPrintf("  Entry Table Size:  %u\n", (int)sh.m_entSize);
+        skPrintf("  sizeof:            %u\n", sizeof(sh));
     }
 };
 

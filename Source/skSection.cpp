@@ -32,7 +32,7 @@
 
 
 
-cs_arch skSection_getCapStoneArch(skInstructionSet set);
+cs_arch skSection_getCapStoneArch(skMachineArchitecture set);
 
 
 
@@ -73,7 +73,7 @@ void skSection::initialize(void *ptr, size_t size)
     m_size       = size;
 
 
-    cs_arch arch = skSection_getCapStoneArch(m_owner->getInstructionSet());
+    cs_arch arch = skSection_getCapStoneArch(m_owner->getArchitecture());
 
     cs_mode mode = m_owner->getType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
 
@@ -119,7 +119,7 @@ void skSection::dissemble(int flags)
     }
 }
 
-cs_arch skSection_getCapStoneArch(skInstructionSet set)
+cs_arch skSection_getCapStoneArch(skMachineArchitecture set)
 {
     switch (set)
     {

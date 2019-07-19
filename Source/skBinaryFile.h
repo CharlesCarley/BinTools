@@ -38,14 +38,13 @@ public:
     typedef skHashTable<char *, skSection *> SectionMap;
 
 protected:
-    char *           m_data;
-    SKsize           m_len;
-    skFileFormat     m_fileFormat;
-    skFileFormatType m_fileFormatType;
-    skInstructionSet m_instructionSetType;
-    StringArray      m_sectionHeaderStringTable;
-    SectionMap       m_sectionLookup;
-
+    char *                m_data;
+    SKsize                m_len;
+    skFileFormat          m_fileFormat;
+    skFileFormatType      m_fileFormatType;
+    skMachineArchitecture m_arch;
+    StringArray           m_sectionHeaderStringTable;
+    SectionMap            m_sectionLookup;
 
     /// Protected constructor. Load files via the static interface
     /// skBinaryFile::createInstance(file).
@@ -75,12 +74,13 @@ public:
         return m_fileFormatType;
     }
 
-    /// Returns an abstract value representing
-    /// the underlying files instruction set.
-    inline skInstructionSet getInstructionSet(void)
+    /// Returns an abstract enumeration representing 
+    /// the underlying files architecture.
+    inline skMachineArchitecture getArchitecture(void)
     {
-        return m_instructionSetType;
+        return m_arch;
     }
+
 
     /// Returns a string array of the section names.
     inline StringArray &getSectionHeaderNames(void)

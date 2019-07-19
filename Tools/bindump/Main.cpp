@@ -67,6 +67,7 @@ int main(int argc, char** argv)
     }
 
     delete prog.m_fp;
+    skPrintUtils::writeColor(CS_WHITE);
     return 0;
 }
 

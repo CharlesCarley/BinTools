@@ -64,7 +64,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
         rval = new skElfFile();
     else if (strncmp("MZ", magic, 2) == 0)
     {
-        // Seek to the 4 byte variable containing the 
+        // Seek to the 4 byte variable containing the
         // offset to the PE signature
         fs.seek(0x3C, SEEK_SET);
 
@@ -76,20 +76,30 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
             fs.seek(pe_offset, SEEK_SET);
             fs.read(magic, 4);
 
-            // seek back to the start of the PE signature
+            // Seek back to the start of the PE signature
             fs.seek(pe_offset, SEEK_SET);
 
             if (strncmp("PE\0\0", magic, 4) == 0)
                 rval = new skPortableFile(pe_offset);
             else
             {
-                // defaults to the generic skDefaultFile. 
+                // defaults to the generic skDefaultFile.
                 skPrintf("skBinaryFile::createInstance: - PE signature was not found.\n");
             }
         }
         else
+        {
+            // Or perhaps a DOS program was passed in.
+            // This is looking for PE only right now.
             skPrintf("Invalid PE offset\n");
+
+
+            // Seek back to the start of the file and use 
+            // skDefaultFile, so at least something will be print to screen. 
+            fs.seek(0, SEEK_SET);
+        }
     }
+
 
     if (!rval)
         rval = new skDefaultFile();
@@ -105,7 +115,7 @@ skBinaryFile::skBinaryFile() :
     m_len(0),
     m_fileFormat(FF_UNKNOWN),
     m_fileFormatType(FFT_UNKNOWN),
-    m_instructionSetType(IS_NONE)
+    m_arch(IS_NONE)
 
 {
 }
@@ -113,7 +123,6 @@ skBinaryFile::skBinaryFile() :
 skBinaryFile::~skBinaryFile()
 {
     delete[] m_data;
-    skPrintUtils::writeColor(CS_WHITE);
 }
 
 
@@ -126,7 +135,7 @@ void skBinaryFile::load(skStream &fstream)
         return;
     }
 
-   
+
     m_len  = fstream.size();
     m_data = new char[m_len + 1];
     m_len  = fstream.read(m_data, m_len);

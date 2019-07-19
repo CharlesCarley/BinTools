@@ -47,6 +47,7 @@ enum COFFMachineType
     CMT_IA64  = 0x0200,
 };
 
+
 struct COFFHeader
 {
     SKuint16 m_machine;

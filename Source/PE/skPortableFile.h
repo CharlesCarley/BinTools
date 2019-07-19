@@ -51,6 +51,13 @@ public:
     virtual ~skPortableFile();
 
 
+    /// Returns the header that is common amongst both object files and image files.
+    inline const COFFHeader& getCommonHeader(void)
+    {
+        return m_header;
+    }
+
+
 private:
 
     inline size_t getSectionOffset(COFFSectionHeader& header)

@@ -39,7 +39,7 @@ public:
     typedef skHashTable<elfName, skElfSectionHeader64> SectionMap;
 
 private:
-    skElfHeaderInfo64 m_inf;
+    skElfHeaderInfo64 m_header;
     Sections          m_sections;
     SectionMap        m_sectionTable;
     elf64             m_symtab;
@@ -52,45 +52,49 @@ public:
     virtual ~skElfFile();
 
 
-    inline skElfHeaderInfo64& info(void)
+    // Return access to the ELF file header 
+    inline skElfHeaderInfo64& getHeader(void)
     {
-        return m_inf;
+        return m_header;
     }
+
 
     inline bool is64Bit(void)
     {
-        return m_inf.m_id[EMN_CLASS] == 0x02;
+        return m_header.m_id[EMN_CLASS] == 0x02;
     }
 
     inline ElfInstructionArch getInstructionArchitecture(void)
     {
-        return (ElfInstructionArch)m_inf.m_machine;
+        return (ElfInstructionArch)m_header.m_machine;
     }
 
     inline ElfType getElfType(void)
     {
-        return (ElfType)m_inf.m_type;
+        return (ElfType)m_header.m_type;
     }
 
     inline elf64 getOffset(void)
     {
-        return m_inf.m_entry;
+        return m_header.m_entry;
     }
 
     /// Returns the starting offset to the section header
     inline elf64 getSectionHeaderStart(void)
     {
-        return m_inf.m_sectionOffset;
+        return m_header.m_sectionOffset;
     }
 
     /// Returns the starting offset to the section header
     inline elf64 getSectionHeaderEnd(void)
     {
-        return m_inf.m_sectionOffset + m_inf.m_sectionTableEntryCount * m_inf.m_sectionTableEntrySize;
+        return m_header.m_sectionOffset + m_header.m_sectionTableEntryCount * m_header.m_sectionTableEntrySize;
     }
 
     
 protected:
+
+
     inline elf64 getNameOffset(const skElfSectionHeader64& header)
     {
         // return the offset in the symbol table for

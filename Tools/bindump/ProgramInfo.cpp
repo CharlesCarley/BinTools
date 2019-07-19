@@ -30,22 +30,17 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ELF/skElf.h"
+#include "ELF/skElfSection.h"
+#include "ELF/skElfUtils.h"
+#include "PE/skPortableFile.h"
+#include "PE/skPortableSection.h"
+#include "PE/skPortableUtils.h"
+#include "ProgramInfo.h"
 #include "Utils/skDebugger.h"
 #include "skBinaryFile.h"
 #include "skPrintUtils.h"
 #include "skSection.h"
-#include "ELF/skElf.h"
-#include "ELF/skElfSection.h"
-#include "ELF/skElfUtils.h"
-
-#include "PE/skPortableFile.h"
-#include "PE/skPortableSection.h"
-#include "PE/skPortableUtils.h"
-
-#include "skSection.h"
-
-
-#include "ProgramInfo.h"
 
 
 
@@ -80,13 +75,12 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 }
 
 
-void HexDump_PrintSectionHeader(skBinaryFile *fp, skSection* section)
+void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
 {
     if (!section || !fp)
         return;
 
     // access the derived class
-
     skFileFormat fileFormat = fp->getFormat();
 
 
@@ -97,11 +91,10 @@ void HexDump_PrintSectionHeader(skBinaryFile *fp, skSection* section)
         const skElfSectionHeader64& header = sectionHeader->getHeader();
 
         skElfUtils::printSectionHeader(header);
-
     }
     else if (fileFormat == FF_PE)
     {
-        skPortableSection* pe = static_cast<skPortableSection*>(section);
+        skPortableSection*       pe     = static_cast<skPortableSection*>(section);
         const COFFSectionHeader& header = pe->getHeader();
 
         skPortableUtils::printSectionHeader(header);
@@ -117,27 +110,28 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
 
     const skString& name = section->getName();
 
-    skPrintUtils::writeSeperator();
     if (prog.m_flags & PF_COLORIZE)
         skPrintUtils::writeColor(CS_DARKYELLOW);
 
-    skPrintf("Section Header: %s\n", name.c_str());
-    skPrintUtils::writeSeperator();
+    skPrintf("\nSection Header: %s\n\n", name.c_str());
+
     if (prog.m_flags & PF_COLORIZE)
         skPrintUtils::writeColor(CS_LIGHT_GREY);
 
     HexDump_PrintSectionHeader(prog.m_fp, section);
 
-    skPrintUtils::writeSeperator();
+    skPrintf("\n");
 
     if (prog.m_flags & PF_COLORIZE)
         skPrintUtils::writeColor(CS_WHITE);
     if (prog.m_flags & PF_DISASEMBLE)
         section->dissemble(prog.m_flags);
     else
-        skPrintUtils::dumpHex(section->ptr(), 
-            section->location(), 
-            section->size(), prog.m_flags, prog.m_code);
+        skPrintUtils::dumpHex(section->ptr(),
+                              section->location(),
+                              section->size(),
+                              prog.m_flags,
+                              prog.m_code);
 }
 
 
@@ -146,6 +140,40 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
+        // access the derived class
+        skFileFormat fileFormat = bin->getFormat();
+
+        if (fileFormat == FF_ELF)
+        {
+            skElfFile* elf = static_cast<skElfFile*>(bin);
+
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_DARKYELLOW);
+
+            skPrintf("File Header:\n\n");
+
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_LIGHT_GREY);
+
+            const skElfHeaderInfo64& header = elf->getHeader();
+            skElfUtils::printElfHeader(header);
+        }
+        else if (fileFormat == FF_PE)
+        {
+            skPortableFile* pe = static_cast<skPortableFile*>(bin);
+
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_DARKYELLOW);
+
+            skPrintf("File Header:\n\n");
+
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_LIGHT_GREY);
+
+            const COFFHeader& header = pe->getCommonHeader();
+            skPortableUtils::printCommonHeader(header);
+        }
+
         skBinaryFile::SectionMap::Iterator it = bin->getSectionIterator();
         while (it.hasMoreElements())
             HexDump_PrintSection(prog, it.getNext().second);

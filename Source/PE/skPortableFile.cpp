@@ -57,6 +57,8 @@ void skPortableFile::loadImpl(void)
     SKuint16 optMagic;
 
     // The PE signature is not part of the defined structure (+4)
+
+
     char *ptr = m_data + 4;
     skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
@@ -65,13 +67,13 @@ void skPortableFile::loadImpl(void)
     case CMT_AMD64:
     case CMT_IA64:
     case CMT_I386:
-        m_instructionSetType = IS_X86;
+        m_arch = IS_X86;
         break;
     default:
         break;
     }
 
-    if (m_instructionSetType == IS_NONE)
+    if (m_arch == IS_NONE)
     {
         skPrintf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
         return;
