@@ -49,3 +49,9 @@ if (BinTools_USE_FOLDERS)
 endif()
 
 
+if (NOT WIN32)
+    add_custom_command(TARGET ${TargetName} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${TargetName} "${CMAKE_BINARY_DIR}/${TargetName}"
+    )
+endif()
+
