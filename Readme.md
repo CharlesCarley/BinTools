@@ -1,5 +1,5 @@
 # BinTools
-This project is an experimental repository for examining executable file formats. 
+This project is an experimental repository for examining executable files and formats from the perspective of code. 
 
 - [Executable and Linker Format Specification](http://man7.org/linux/man-pages/man5/elf.5.html)
 - [Portable Executable Specification](https://docs.microsoft.com/en-us/windows/desktop/Debug/pe-format)
@@ -7,16 +7,15 @@ This project is an experimental repository for examining executable file formats
 
 ### Goals
 - To create an abstract interface to load both ELF, and PE. ([skBinaryFile](https://github.com/CharlesCarley/BinTools/blob/master/Source/skBinaryFile.h))
-- Use capstone to disassemble the code extracted from the binary.
+- Use [capstone](http://www.capstone-engine.org/) to disassemble the code extracted from the binary.
+- Convert/extract more relevant information.
+- Make it completely cross platform and dependency free.
+- Keep the BinaryFile library simple and separate from any tools/tests written with it.
 
 
 
-#### TODO
-- [ ] Handle 32 and 64 bit elf types.
-- [ ] Convert more relevant infomation.
 
-
-#### Usage
+#### bindump Usage
 
 
 ##### Command line usage
