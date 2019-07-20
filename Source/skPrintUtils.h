@@ -62,7 +62,7 @@ enum skPrintFlags
     PF_DISASEMBLE = (1 << 5), // ignores hex in place of disassembly
     PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
     PF_BIN        = PF_COLORIZE | PF_BINARY,
-    PF_HEXDIS     = PF_COLORIZE | PF_HEX,
+    PF_HEXDIS     = PF_HEX, 
 };
 
 
@@ -74,7 +74,6 @@ private:
     static unsigned char COLOR_TABLE[16][16];
     static unsigned char getColor(skConsoleColorSpace fore, skConsoleColorSpace back = CS_BLACK);
 #else
-    static unsigned char  COLOR_TABLE[16][16][3];
     static unsigned char* getColor(skConsoleColorSpace fore, skConsoleColorSpace back = CS_BLACK);
 #endif
 

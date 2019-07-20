@@ -75,157 +75,66 @@ unsigned char skPrintUtils::getColor(skConsoleColorSpace fore, skConsoleColorSpa
 
 
 #else
-unsigned char skPrintUtils::COLOR_TABLE[16][16][3] = {
-    {
-        {0, 30, 40},
-        {0, 31, 40},
-        {0, 32, 40},
-        {0, 33, 40},
-        {0, 34, 40},
-        {0, 35, 40},
-        {0, 36, 40},
-        {0, 37, 40},
-        {1, 30, 40},
-        {1, 31, 40},
-        {1, 32, 40},
-        {1, 33, 40},
-        {1, 34, 40},
-        {1, 35, 40},
-        {1, 36, 40},
-        {1, 37, 40},
-    },
-    {
-        {0, 30, 41},
-        {0, 31, 41},
-        {0, 32, 41},
-        {0, 33, 41},
-        {0, 34, 41},
-        {0, 35, 41},
-        {0, 36, 41},
-        {0, 37, 41},
-        {1, 30, 41},
-        {1, 31, 41},
-        {1, 32, 41},
-        {1, 33, 41},
-        {1, 34, 41},
-        {1, 35, 41},
-        {1, 36, 41},
-        {1, 37, 41},
-    },
-    {
-        {0, 30, 42},
-        {0, 31, 42},
-        {0, 32, 42},
-        {0, 33, 42},
-        {0, 34, 42},
-        {0, 35, 42},
-        {0, 36, 42},
-        {0, 37, 42},
-        {1, 30, 42},
-        {1, 31, 42},
-        {1, 32, 42},
-        {1, 33, 42},
-        {1, 34, 42},
-        {1, 35, 42},
-        {1, 36, 42},
-        {1, 37, 42},
-    },
-    {
-        {0, 30, 43},
-        {0, 31, 43},
-        {0, 32, 43},
-        {0, 33, 43},
-        {0, 34, 43},
-        {0, 35, 43},
-        {0, 36, 43},
-        {0, 37, 43},
-        {1, 30, 43},
-        {1, 31, 43},
-        {1, 32, 43},
-        {1, 33, 43},
-        {1, 34, 43},
-        {1, 35, 43},
-        {1, 36, 43},
-        {1, 37, 43},
-    },
-    {
-        {0, 30, 44},
-        {0, 31, 44},
-        {0, 32, 44},
-        {0, 33, 44},
-        {0, 34, 44},
-        {0, 35, 44},
-        {0, 36, 44},
-        {0, 37, 44},
-        {1, 30, 44},
-        {1, 31, 44},
-        {1, 32, 44},
-        {1, 33, 44},
-        {1, 34, 44},
-        {1, 35, 44},
-        {1, 36, 44},
-        {1, 37, 44},
-    },
-    {
-        {0, 30, 45},
-        {0, 31, 45},
-        {0, 32, 45},
-        {0, 33, 45},
-        {0, 34, 45},
-        {0, 35, 45},
-        {0, 36, 45},
-        {0, 37, 45},
-        {1, 30, 45},
-        {1, 31, 45},
-        {1, 32, 45},
-        {1, 33, 45},
-        {1, 34, 45},
-        {1, 35, 45},
-        {1, 36, 45},
-        {1, 37, 45},
-    },
-    {
-        {0, 30, 46},
-        {0, 31, 46},
-        {0, 32, 46},
-        {0, 33, 46},
-        {0, 34, 46},
-        {0, 35, 46},
-        {0, 36, 46},
-        {0, 37, 46},
-        {1, 30, 46},
-        {1, 31, 46},
-        {1, 32, 46},
-        {1, 33, 46},
-        {1, 34, 46},
-        {1, 35, 46},
-        {1, 36, 46},
-        {1, 37, 46},
-    },
-    {
-        {0, 30, 47},
-        {0, 31, 47},
-        {0, 32, 47},
-        {0, 33, 47},
-        {0, 34, 47},
-        {0, 35, 47},
-        {0, 36, 47},
-        {0, 37, 47},
-        {1, 30, 47},
-        {1, 31, 47},
-        {1, 32, 47},
-        {1, 33, 47},
-        {1, 34, 47},
-        {1, 35, 47},
-        {1, 36, 47},
-        {1, 37, 47},
-    },
 
-};
-
-unsigned char* skPrintUtils::getColor(skConsoleColorSpace fore, skConsoleColorSpace back)
+unsigned char* skPrintUtils::getColor(skConsoleColorSpace fore, skConsoleColorSpace)
 {
-    return COLOR_TABLE[back][fore];
+
+    static unsigned char color[2];
+    switch (fore)
+    {
+    case CS_DARKGREEN:
+        color[0] = 32;
+        break;
+    case CS_GREEN:
+        color[0] = 92;
+        break;
+    case CS_CYAN:
+        color[0] = 96;
+        break;
+    case CS_DARKCYAN:
+        color[0] = 36;
+        break;
+    case CS_YELLOW:
+        color[0] = 93;
+        break;
+    case CS_DARKYELLOW:
+        color[0] = 33;
+        break;
+    case CS_RED:
+        color[0] = 91;
+        break;
+    case CS_DARKRED:
+        color[0] = 31;
+        break;
+    case CS_DARKBLUE:
+        color[0] = 34;
+        break;
+    case CS_BLUE:
+        color[0] = 94;
+        break;
+    case CS_DARKMAGENTA:
+        color[0] = 35;
+        break;
+    case CS_MAGENTA:
+        color[0] = 95;
+        break;
+    case CS_BLACK:
+        color[0] = 30;
+        break;
+    case CS_LIGHT_GREY:
+        color[0] = 37;
+        break;
+    case CS_GREY:
+        color[0] = 90;
+        break;
+    case CS_WHITE:
+        color[0] = 37;
+        break;
+    }
+
+    // leaving out the background color for now...
+    color[1] = color[0];
+    return color; 
 }
 
 #endif
@@ -240,7 +149,7 @@ void skPrintUtils::writeColor(int fg, int bg)
 
 #if SK_PLATFORM != SK_PLATFORM_WIN32
     unsigned char* col = getColor((skConsoleColorSpace)fg, (skConsoleColorSpace)bg);
-    skPrintf("\e[%i;%i;%im", 0, col[1], col[1]);
+    skPrintf("\e[%im", col[0]);
 #else
     if (m_stdout == 0)
         m_stdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
