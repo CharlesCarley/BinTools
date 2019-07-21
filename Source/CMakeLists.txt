@@ -46,12 +46,10 @@ set(TargetName_SRC
     skPrintUtils.cpp
     skSection.cpp
 
-    ELF/skElfUtils.cpp
     ELF/skElf.cpp
     ELF/skElfSection.cpp
 
     PE/skPortableFile.cpp
-    PE/skPortableTypes.cpp
     PE/skPortableSection.cpp
     PE/skPortableUtils.cpp
 )
