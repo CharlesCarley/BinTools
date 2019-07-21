@@ -83,7 +83,7 @@ public:
 
 
     /// Returns a string array of the section names.
-    inline StringArray &getSectionHeaderNames(void)
+    inline const StringArray &getSectionHeaderNames(void)
     {
         return m_sectionHeaderStringTable;
     }

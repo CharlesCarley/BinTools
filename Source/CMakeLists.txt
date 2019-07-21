@@ -58,7 +58,7 @@ set(TargetName_SRC
 
 
 include_directories(. 
-    ${CMAKE_SOURCE_DIR}/Extern
+    ${BinTools_SOURCE_DIR}/Extern
     ${CAPSTONE_INCLUDE}
 )
 

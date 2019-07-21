@@ -57,8 +57,6 @@ void skPortableFile::loadImpl(void)
     SKuint16 optMagic;
 
     // The PE signature is not part of the defined structure (+4)
-
-
     char *ptr = m_data + 4;
     skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
@@ -122,7 +120,6 @@ void skPortableFile::loadImpl(void)
 
     // Set the file format type now that it's known to be one or the other.
     m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
-
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
     m_sectionHeaders.reserve(m_header.m_sectionCount);

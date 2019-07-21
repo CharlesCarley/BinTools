@@ -57,7 +57,7 @@ public:
 
 
     /// Returns the section name. (.init, .text, etc...)
-    inline skString &getName(void)
+    inline const skString &getName(void)
     {
         return m_name;
     }

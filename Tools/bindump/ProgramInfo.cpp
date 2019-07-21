@@ -61,12 +61,12 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skBinaryFile::StringArray::Iterator it = prog.m_fp->getSectionHeaderNames().iterator();
+        skBinaryFile::StringArray::ConstIterator it = prog.m_fp->getSectionHeaderNames().iterator();
 
         int i = 1;
         while (it.hasMoreElements())
         {
-            skString& str = it.getNext();
+            const skString& str = it.getNext();
             skPrintf("%-2i\t%s\n", i, str.c_str());
             ++i;
         }
@@ -216,6 +216,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     std::cout << "   F. Load file                                     \n";
     std::cout << "                                            Q-Exit. \n";
     char opt;
+
     cout << prog.m_fileName << ">";
     cin >> opt;
 

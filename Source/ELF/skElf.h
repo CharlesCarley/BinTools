@@ -51,13 +51,11 @@ private:
 public:
     virtual ~skElfFile();
 
-
     // Return access to the ELF file header 
     inline skElfHeaderInfo64& getHeader(void)
     {
         return m_header;
     }
-
 
     inline bool is64Bit(void)
     {
