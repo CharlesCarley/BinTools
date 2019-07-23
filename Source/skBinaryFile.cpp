@@ -100,10 +100,11 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
         }
     }
 
-
+    // This should eventually go away
+    // If the file cannot be loaded or there is a read error 
+    // this function should always return NULL.
     if (!rval)
-        rval = new skDefaultFile();
-
+        rval = new skDefaultFile(); 
     rval->load(fs);
     return rval;
 }
