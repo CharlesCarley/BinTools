@@ -48,9 +48,9 @@ void HexDump_PrintAll(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skPrintUtils::dumpHex((void*)prog.m_fp->ptr(),
+        skPrintUtils::dumpHex((void*)prog.m_fp->getPointer(),
                               0,
-                              prog.m_fp->length(),
+                              prog.m_fp->getLength(),
                               prog.m_flags,
                               prog.m_code);
     }
@@ -127,9 +127,9 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
     if (prog.m_flags & PF_DISASEMBLE)
         section->dissemble(prog.m_flags);
     else
-        skPrintUtils::dumpHex(section->ptr(),
-                              section->location(),
-                              section->size(),
+        skPrintUtils::dumpHex(section->getPointer(),
+                              section->getStartAddress(),
+                              section->getSize(),
                               prog.m_flags,
                               prog.m_code);
 }
@@ -232,7 +232,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         if (prog.m_fp)
             delete prog.m_fp;
 
-        prog.m_fp = skBinaryFile::createInstance(path.c_str());
+        prog.m_fp = skBinaryFile::load(path.c_str());
         if (prog.m_fp)
             prog.m_fileName = path;
 

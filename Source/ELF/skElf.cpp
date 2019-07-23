@@ -141,7 +141,7 @@ void skElfFile::loadImpl(void)
     else
     {
         // This is an error, it should have sections
-        skPrintf("Exception: No sections extracted from the file!");
+        skPrintf("Error - No sections extracted from the file!\n");
         return;
     }
 
@@ -174,13 +174,13 @@ void skElfFile::loadImpl(void)
                 }
                 else
                 {
-                    skPrintf("Exception: Section size exceeds the amount of memory allocated.\n");
+                    skPrintf("Error - Section size exceeds the amount of memory allocated.\n");
                 }
             }
             else
             {
                 // this is an error, it shouldn't have duplicate symbols
-                skPrintf("Exception: duplicate symbol name!");
+                skPrintf("Error - duplicate symbol name!");
             }
         }
     }

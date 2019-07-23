@@ -150,13 +150,13 @@ void skPortableFile::loadImpl(void)
             }
             else
             {
-                skPrintf("Exception: Section size exceeds the amount of memory allocated.\n");
+                skPrintf("Error - Section size exceeds the amount of memory allocated.\n");
             }
         }
         else
         {
             // this is an error, it shouldn't have duplicate symbols
-            skPrintf("Exception: duplicate symbol name!");
+            skPrintf("Error - duplicate symbol name!\n");
         }
     }
 }

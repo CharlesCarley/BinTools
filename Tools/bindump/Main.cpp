@@ -119,7 +119,7 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
                 {
                     prog.m_fileName = argv[i];
 
-                    prog.m_fp = skBinaryFile::createInstance(argv[i]);
+                    prog.m_fp = skBinaryFile::load(argv[i]);
                 }
                 else
                 {

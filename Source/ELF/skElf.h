@@ -72,10 +72,11 @@ public:
         return (ElfType)m_header.m_type;
     }
 
-    inline elf64 getOffset(void)
+    inline SKuint64 getEntryPoint(void)
     {
         return m_header.m_entry;
     }
+
 
     /// Returns the starting offset to the section header
     inline elf64 getSectionHeaderStart(void)

@@ -46,8 +46,8 @@ protected:
     StringArray           m_sectionHeaderStringTable;
     SectionMap            m_sectionLookup;
 
-    /// Protected constructor. Load files via the static interface
-    /// skBinaryFile::createInstance(file).
+    // Protected constructor. Load files via the static interface
+    // skBinaryFile::load(file).
     skBinaryFile();
 
     void load(skStream &fstream);
@@ -56,47 +56,47 @@ public:
     virtual ~skBinaryFile();
 
 
-    /// Create instances based on the supplied file's magic.
-    /// Returns skDefaultFile if the file format is not supported, or NULL if the
-    /// file can not be loaded.
-    static skBinaryFile *createInstance(const char *file);
+    // Create instances based on the supplied file's magic.
+    // Returns skDefaultFile if the file format is not supported, or NULL if the
+    // file can not be loaded.
+    static skBinaryFile *load(const char *file);
 
 
-    /// Returns the format of the loaded file.
+    // Returns the format of the loaded file.
     inline skFileFormat getFormat(void)
     {
         return m_fileFormat;
     }
 
-    /// Returns the files platform type  
+    // Returns the files platform type  
     inline skFileFormatType getType(void)
     {
         return m_fileFormatType;
     }
 
-    /// Returns an abstract enumeration representing 
-    /// the underlying files architecture.
+    // Returns an abstract enumeration representing 
+    // the underlying files architecture.
     inline skMachineArchitecture getArchitecture(void)
     {
         return m_arch;
     }
 
 
-    /// Returns a string array of the section names.
+    // Returns a string array of the section names.
     inline const StringArray &getSectionHeaderNames(void)
     {
         return m_sectionHeaderStringTable;
     }
 
 
-    /// Returns an iterator for all sections
+    // Returns an iterator for all sections
     inline SectionMap::Iterator getSectionIterator(void)
     {
         return m_sectionLookup.iterator();
     }
 
-    /// Search for a named section.
-    /// returns NULL if the requested section name is not found.
+    // Search for a named section.
+    // returns NULL if the requested section name is not found.
     skSection *getSection(const char *sinf)
     {
         if (sinf)
@@ -109,25 +109,27 @@ public:
     }
 
 
-    /// Returns the size in bytes for the loaded file.
-    inline SKsize length(void)
+    // Returns the size in bytes for the loaded file.
+    inline SKsize getLength(void)
     {
         return m_len;
     }
 
-    /// Returns a pointer to the underlying allocated memory.
-    inline const void *ptr(void)
+    // Returns a pointer to the underlying allocated memory.
+    inline const void *getPointer(void)
     {
         return m_data;
     }
 
 
+    virtual SKuint64 getEntryPoint(void) = 0;
+
 protected:
 
 
 
-    /// Called from createInstance.
-    /// loadImpl is responsible for converting the underlying data into this interface.
+    // Called from load.
+    // loadImpl is responsible for converting the underlying data into this interface.
     virtual void loadImpl(void) = 0;
 };
 

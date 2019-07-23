@@ -34,7 +34,7 @@
 #include "skPrintUtils.h"
 
 
-skBinaryFile *skBinaryFile::createInstance(const char *file)
+skBinaryFile *skBinaryFile::load(const char *file)
 {
     if (!file || !(*file))
         return 0;
@@ -77,6 +77,8 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
             fs.read(magic, 4);
 
             // Seek back to the start of the PE signature
+            // TODO: This should really include everything, 
+            // not just The PE part
             fs.seek(pe_offset, SEEK_SET);
 
             if (strncmp("PE\0\0", magic, 4) == 0)
@@ -84,7 +86,7 @@ skBinaryFile *skBinaryFile::createInstance(const char *file)
             else
             {
                 // defaults to the generic skDefaultFile.
-                skPrintf("skBinaryFile::createInstance: - PE signature was not found.\n");
+                skPrintf("skBinaryFile::load: - PE signature was not found.\n");
             }
         }
         else

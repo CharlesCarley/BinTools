@@ -57,6 +57,13 @@ public:
         return m_header;
     }
 
+    
+    SKuint64 getEntryPoint(void)
+    {
+        if (m_imageHeader != 0)
+            return m_imageHeader->m_entryPoint - m_imageBase;
+        return (SKuint64)-1;
+    }
 
 private:
 

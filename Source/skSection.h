@@ -36,7 +36,7 @@ public:
     SK_DECLARE_TYPE(unsigned char);
 
 
-private:
+protected:
     PointerType   m_data;
     size_t        m_size;
     skString      m_name;
@@ -49,40 +49,42 @@ public:
     virtual ~skSection();
 
 
-    /// Returns a pointer to the file that owns this section.
+    // Returns a pointer to the file that owns this section.
     inline skBinaryFile *getOwner(void)
     {
         return m_owner;
     }
 
 
-    /// Returns the section name. (.init, .text, etc...)
+    // Returns the section name. (.init, .text, etc...)
     inline const skString &getName(void)
     {
         return m_name;
     }
 
 
-    /// Returns direct access to the allocated memory for this section.
-    inline PointerType ptr(void)
+    // Returns direct access to the allocated memory for this section.
+    inline PointerType getPointer(void)
     {
         return m_data;
     }
 
-    /// Returns the amount of allocated memory in bytes.
-    inline size_t size(void)
+    // Returns the amount of allocated memory in bytes.
+    inline size_t getSize(void)
     {
         return m_size;
     }
 
-    /// Returns the starting location of this section in the file.
-    inline size_t location(void)
+    // Returns the starting location of this section in the file.
+    inline size_t getStartAddress(void)
     {
         return m_startAddress;
     }
 
 
     // print the disassembly to stdout
+    // This should eventually move to a client library beside
+    // this library
     void dissemble(int flags = 0);
 
 

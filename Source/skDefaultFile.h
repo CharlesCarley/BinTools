@@ -38,6 +38,13 @@ private:
 public:
     virtual ~skDefaultFile();
 
+
+    SKuint64 getEntryPoint(void)
+    {
+        return (SKuint64)-1;
+    }
+
+
 protected:
     virtual void loadImpl(void);
 };
