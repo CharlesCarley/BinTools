@@ -222,7 +222,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
 
     switch (opt)
     {
-        break;
     case 'F':
     case 'f':
     {
