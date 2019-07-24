@@ -61,5 +61,5 @@ void skPortableUtils::printSectionHeader(const COFFSectionHeader& header)
     skPrintf("  Line numbers:          %u\n", header.m_pointerToLineNumbers);
     skPrintf("  Line number count:     %u\n", header.m_numberOfLineNumbers);
     skPrintf("  Characteristics:       0x%x\n", header.m_characteristics);
-    skPrintf("  Size of Header:        %u\n", sizeof(COFFSectionHeader));
+    skPrintf("  Size of Header:        %u\n", (SKuint32)sizeof(COFFSectionHeader));
 }
