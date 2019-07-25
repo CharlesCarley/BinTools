@@ -33,6 +33,7 @@
 #include "skDefaultFile.h"
 #include "skSection.h"
 #include "skPrintUtils.h"
+#include "skSymbol.h"
 
 
 skBinaryFile *skBinaryFile::load(const char *file)

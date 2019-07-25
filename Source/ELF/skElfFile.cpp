@@ -28,12 +28,12 @@
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
-#include "ELF/skElfSection.h"
-#include "ELF/skElfSymbol.h"
 #include "ELF/skElfUtils.h"
 #include "Utils/skString.h"
 #include "skPrintUtils.h"
 #include "skSection.h"
+#include "ELF/skElfSection.h"
+#include "ELF/skElfSymbol.h"
 
 
 skElfFile::skElfFile()
@@ -222,7 +222,7 @@ void skElfFile::loadSymbolTable(void)
         }
 
 
-        m_symTable.reserve(hdr.m_entSize);
+        m_symTable.reserve((SKsize)hdr.m_entSize);
 
 
         i = 0;

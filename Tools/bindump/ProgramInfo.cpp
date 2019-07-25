@@ -30,7 +30,7 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ELF/skElf.h"
+#include "ELF/skElfFile.h"
 #include "ELF/skElfSection.h"
 #include "ELF/skElfUtils.h"
 #include "PE/skPortableFile.h"
@@ -41,6 +41,7 @@ using namespace std;
 #include "skBinaryFile.h"
 #include "skPrintUtils.h"
 #include "skSection.h"
+#include "skSymbol.h"
 
 
 
