@@ -287,17 +287,17 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
         i = 0;
         while (i < hdr.m_entSize)
         {
-            const skElfSymbolHeader& sym = (*symPtr);
+            const skElfSymbolHeader& syml = (*symPtr);
 
             // Make sure that the index is at least in range.
-            if (sym.m_strTableIdx <= arr.size())
+            if (syml.m_strTableIdx <= arr.size())
             {
-                const skString& str = arr[sym.m_strTableIdx];
+                const skString& strl = arr[syml.m_strTableIdx];
 
                 // Ensure that the parsed name at least has some info.
-                if (!str.empty())
+                if (!strl.empty())
                 {
-                    SKsize idx = m_symTable.find(str);
+                    SKsize idx = m_symTable.find(strl);
                     if (idx == SK_NPOS)
                     {
                         skElfSymbol64 sdp;
@@ -307,8 +307,8 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                         else
                             skElfUtils::copyHeader(sdp, (*(skElfSymbol64*)symPtr));
 
-                        skSymbol* elfSym = new skElfSymbol(this, str, sdp);
-                        m_symTable.insert(str, elfSym);
+                        skSymbol* elfSym = new skElfSymbol(this, strl, sdp);
+                        m_symTable.insert(strl, elfSym);
                     }
                 }
             }
