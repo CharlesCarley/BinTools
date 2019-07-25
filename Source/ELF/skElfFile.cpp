@@ -59,15 +59,10 @@ void skElfFile::loadImpl(void)
         return;
     }
 
-    // Copy the header info and find the file's platform type.
-    elf8 m_id[16];
-    skMemcpy(&m_id, ((char*)m_data), 16);
-
-
-
-    if (m_id[EMN_CLASS] == 1)
+    // Find the file's platform type.
+    if (*(m_data + EMN_CLASS) == 1)
         m_fileFormatType = FFT_32BIT;
-    else if (m_id[EMN_CLASS] == 2)
+    else if (*(m_data + EMN_CLASS) == 2)
         m_fileFormatType = FFT_64BIT;
     else
     {
@@ -233,6 +228,9 @@ void skElfFile::loadSections(void)
 template <typename skElfSymbolHeader>
 void skElfFile::loadSymbolTable(void)
 {
+    // Nonexistent in a stripped binary
+
+
     skElfSection* strtab = reinterpret_cast<skElfSection*>(getSection(".strtab"));
     skElfSection* symtab = reinterpret_cast<skElfSection*>(getSection(".symtab"));
 
@@ -260,8 +258,7 @@ void skElfFile::loadSymbolTable(void)
             char*  cp = (char*)strPtr + i;
             SKsize sl = skStringUtils::length(cp);
 
-            if (sl > 0)  // !!could misalign indices
-                arr.push_back(skString(cp, sl));
+            arr.push_back(skString(cp, sl));
 
             i += sl;
             ++i;  // skip past the null terminator
@@ -297,7 +294,6 @@ void skElfFile::loadSymbolTable(void)
                     }
                 }
             }
-
             ++symPtr;
             i++;
         }
