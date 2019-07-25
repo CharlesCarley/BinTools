@@ -1,9 +1,14 @@
 #include <stdio.h>
 
+void do_a_call()
+{
+    puts("Hello world");
+}
+
 
 int main(int argc, char **argv)
 {
-    puts("Hello world");
+    do_a_call();
     return 0;
 }
 

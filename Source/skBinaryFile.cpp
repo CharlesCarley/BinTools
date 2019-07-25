@@ -31,6 +31,7 @@
 #include "Utils/skDebugger.h"
 #include "Utils/skFileStream.h"
 #include "skDefaultFile.h"
+#include "skSection.h"
 #include "skPrintUtils.h"
 
 
@@ -126,6 +127,10 @@ skBinaryFile::skBinaryFile() :
 skBinaryFile::~skBinaryFile()
 {
     delete[] m_data;
+
+    SectionMap::Iterator it = m_sectionLookup.iterator();
+    while (it.hasMoreElements())
+        delete it.getNext().second;
 }
 
 

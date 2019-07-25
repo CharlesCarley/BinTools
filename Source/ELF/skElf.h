@@ -35,13 +35,11 @@
 class skElfFile : public skBinaryFile
 {
 public:
-    typedef skArray<skElfSectionHeader64>              Sections;
-    typedef skHashTable<elfName, skElfSectionHeader64> SectionMap;
+    typedef skArray<skElfSectionHeader64> Sections;
 
 private:
     skElfHeaderInfo64 m_header;
     Sections          m_sections;
-    SectionMap        m_sectionTable;
     elf64             m_symtab;
 
 
@@ -91,15 +89,19 @@ public:
     }
 
     
-protected:
+private:
 
 
     inline elf64 getNameOffset(const skElfSectionHeader64& header)
     {
-        // return the offset in the symbol table for
-        // the supplied header
+        // return the offset in the symbol string 
+        // table for the supplied header
         return m_symtab + header.m_name;
     }
+
+
+    void loadSymbolTable(void);
+    void loadDynSymbolTable(void);
 
     virtual void loadImpl(void);
 };

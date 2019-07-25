@@ -22,11 +22,15 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
+
+    See: http://man7.org/linux/man-pages/man5/elf.5.html
+    
+    Definitions are also referenced from /usr/include/elf.h.
+
 */
 #ifndef _skElfTypes_h_
 #define _skElfTypes_h_
 
-// Definitions are referenced from /usr/include/elf.h.
 
 typedef unsigned char      elf8;
 typedef unsigned short     elf16;
@@ -113,15 +117,27 @@ enum ElfSectionHeaderFlags
 {
     ESHF_NONE          = 0x00,
     ESHF_WRITE         = 0x1,  // can write at runtime
-    EPHT_ALLOC         = 0x2,  // virtual memory
-    EPHT_EXEC_INST     = 0x4,  // is executable
-    EPHT_LIVE_PATCH    = 0x00100000,
-    EPHT_RO_AFTER_INIT = 0x00200000,
-    EPHT_MASK_PROC     = 0xF0000000,
+    ESHT_ALLOC         = 0x2,  // virtual memory
+    ESHT_EXEC_INST     = 0x4,  // is executable
+    ESHT_LIVE_PATCH    = 0x00100000,
+    ESHT_RO_AFTER_INIT = 0x00200000,
+    ESHT_MASK_PROC     = 0xF0000000,
 };
 
 
-// Short hand to generalize definitions
+enum ElfSymbolType
+{
+    ESYM_NONE = 0,
+    ESYM_OBJECT,
+    ESYM_FUNC,
+    ESYM_SECTION,
+    ESYM_FILE,
+    ESYM_COMMON,
+    ESYM_TLS,
+};
+
+
+// Short hand to shorten definitions
 template <typename elfT>
 struct skElfHeaderInfo
 {
@@ -166,6 +182,29 @@ struct skElfSectionHeader
     elf32 m_info;
     elfT  m_addrAlign;
     elfT  m_entSize;
+};
+
+
+
+struct skElfSymbol32
+{
+    elf32 m_name;
+    elf32 m_value;
+    elf32 m_size;
+    elf8  m_info;
+    elf8  m_other;
+    elf16 m_strTableIdx;
+};
+
+
+struct skElfSymbol64
+{
+    elf32 m_name;
+    elf8  m_info;
+    elf8  m_other;
+    elf16 m_strTableIdx;
+    elf64 m_value;
+    elf64 m_size;
 };
 
 typedef skElfHeaderInfo<elf64>    skElfHeaderInfo64;

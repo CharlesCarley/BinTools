@@ -42,7 +42,8 @@ skSection::skSection(skBinaryFile *owner, const skString &name, void *data, size
     m_size(0),
     m_owner(owner),
     m_handle(-1),
-    m_startAddress(offset)
+    m_startAddress(offset),
+    m_isExecutable(false)
 {
     initialize(data, size);
 }
@@ -95,6 +96,13 @@ void skSection::dissemble(int flags)
         return;
     }
 
+    // filter out non executable sections.
+    if (!m_isExecutable)
+    {
+        skPrintUtils::dumpHex(m_data, m_startAddress, m_size);
+        return;
+
+    }
 
     cs_insn *insn;
 
@@ -114,7 +122,7 @@ void skSection::dissemble(int flags)
             skPrintUtils::writeColor(CS_WHITE);
             skPrintf("%s\t%s\n", i.mnemonic, i.op_str);
         }
- 
+
         cs_free(insn, count);
     }
 }

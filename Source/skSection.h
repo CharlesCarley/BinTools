@@ -43,10 +43,27 @@ protected:
     skBinaryFile *m_owner;
     size_t        m_handle;  // capstone handle
     size_t        m_startAddress;
+    bool          m_isExecutable;
+
+
 
 public:
     skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset);
     virtual ~skSection();
+
+
+
+    // Marks this section as executable
+    inline void _setExectuable(bool exe)
+    {
+        m_isExecutable = exe;
+    }
+
+    // Returns true if this section contains executable code.
+    inline bool isExectuable(void)
+    {
+        return m_isExecutable;
+    }
 
 
     // Returns a pointer to the file that owns this section.

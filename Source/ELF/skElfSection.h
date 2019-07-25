@@ -41,11 +41,12 @@ public:
                  void*                 data,
                  size_t                size,
                  size_t                offset,
-                 skElfSectionHeader64& hdr);
+                 const skElfSectionHeader64& hdr);
 
     virtual ~skElfSection();
 
 
+    // Returns the ELF section header structure for this section.
     inline const skElfSectionHeader64& getHeader(void) 
     {
         return m_header;

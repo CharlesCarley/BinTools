@@ -33,7 +33,7 @@ skElfSection::skElfSection(skBinaryFile*         owner,
                            void*                 data,
                            size_t                size,
                            size_t                offset,
-                           skElfSectionHeader64& hdr):
+                           const skElfSectionHeader64& hdr):
     skSection(owner, name, data, size, offset)
 {
     skMemcpy(&m_header, &hdr, sizeof(skElfSectionHeader64));
