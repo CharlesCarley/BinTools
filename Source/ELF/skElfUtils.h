@@ -253,7 +253,7 @@ public:
         skPrintf("  Section Entry:          %u\n", (int)inf.m_sectionTableEntrySize);
         skPrintf("  Section Count:          %u\n", (int)inf.m_sectionTableEntryCount);
         skPrintf("  Header Table Index:     %u\n", (int)inf.m_sectionTableIndex);
-        skPrintf("  sizeof:                 %u\n\n", sizeof(inf));
+        skPrintf("  sizeof:                 %u\n\n", (SKuint32)sizeof(inf));
     }
 
 
@@ -331,7 +331,7 @@ public:
         skPrintf("  Extra Info:        %u\n", (int)sh.m_info);
         skPrintf("  Alignment:         %u\n", (int)sh.m_addrAlign);
         skPrintf("  Entry Table Size:  %u\n", (int)sh.m_entSize);
-        skPrintf("  sizeof:            %u\n", sizeof(sh));
+        skPrintf("  sizeof:            %u\n", (SKuint32)sizeof(sh));
     }
 
     

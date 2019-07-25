@@ -85,7 +85,7 @@ void skPortableFile::loadImpl(void)
         if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
         {
             skPrintf("COFFOptionalHeader32 not properly aligned %u-%u\n",
-                     sizeof(COFFOptionalHeader32),
+                     (SKuint32)sizeof(COFFOptionalHeader32),
                      m_header.m_optionalHeaderSize);
 
             return;
@@ -102,7 +102,7 @@ void skPortableFile::loadImpl(void)
         if (sizeof(COFFOptionalHeader64) != m_header.m_optionalHeaderSize)
         {
             skPrintf("COFFOptionalHeader64 not properly aligned %u-%u\n",
-                     sizeof(COFFOptionalHeader64),
+                     (SKuint32)sizeof(COFFOptionalHeader64),
                      m_header.m_optionalHeaderSize);
             return;
         }
