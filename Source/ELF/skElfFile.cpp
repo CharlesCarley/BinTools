@@ -72,8 +72,7 @@ void skElfFile::loadImpl(void)
 
     if (m_fileFormatType == FFT_32BIT)
     {
-        // read as 32 bit then store as a 64bit type
-
+        // Read as 32 bit then store as a 64bit type
         skElfHeaderInfo32 header;
         skMemcpy(&header, (char*)m_data, sizeof(skElfHeaderInfo32));
         skElfUtils::copyHeader(m_header, header);
@@ -84,7 +83,7 @@ void skElfFile::loadImpl(void)
     }
 
 
-    // handle the machine architecture
+    // Handle the machine architecture
     switch (m_header.m_machine)
     {
     case EIA_SPARC:
@@ -149,6 +148,9 @@ void skElfFile::loadSections(void)
 {
     elf64 offs, offe;
 
+    if (!m_data || m_len == 0 || m_len == (size_t)-1)
+        return;
+
     // The section headers are packed in m_data[start:end]
     offs = getSectionHeaderStart();
     offe = getSectionHeaderEnd();
@@ -159,9 +161,6 @@ void skElfFile::loadSections(void)
         return;
     }
 
-
-    if (!m_data || m_len == 0 || m_len == (size_t)-1)
-        return;
 
     elf64 i;
 
@@ -225,44 +224,58 @@ void skElfFile::loadSections(void)
 }
 
 
+void skElfFile::parseStringTable(StringArray& arr, SKint8* data, SKsize len)
+{
+    // Parse a string table packed as 
+    // \0str1\0str2\0str3\0
+
+    if (!data || len == 0)
+        return;
+
+    // len is the total size in bytes of 'data'
+
+    SKsize i = 0, sl=0;
+    while (i < len)
+    {
+        if (*(data+i) == '\0')
+            ++i;
+
+        char* termStr = (char*)data + i;
+        if (termStr && *termStr != '\0')
+        {
+            sl = skStringUtils::length(termStr);
+            arr.push_back(skString(termStr, sl));
+
+            // offset to the next '\0'
+            i += sl;
+        }
+    }
+}
+
+
+
 template <typename skElfSymbolHeader>
 void skElfFile::loadSymbolTable(void)
 {
     // Nonexistent in a stripped binary
-
 
     skElfSection* strtab = reinterpret_cast<skElfSection*>(getSection(".strtab"));
     skElfSection* symtab = reinterpret_cast<skElfSection*>(getSection(".symtab"));
 
     if (symtab && strtab)
     {
+        SKuint64           i = 0;
+        StringArray        arr;
+        skElfSymbolHeader* symPtr;
+        SKint8*            strPtr;
+
         const skElfSectionHeader64& hdr = symtab->getHeader();
 
+        symPtr = (skElfSymbolHeader*)symtab->getPointer();
+        strPtr = (SKint8*)strtab->getPointer();
 
-        skElfSymbolHeader* symPtr = (skElfSymbolHeader*)symtab->getPointer();
-        SKint8*            strPtr = (SKint8*)strtab->getPointer();
-
-        SKuint64 i = 0;
-
-        // Skip past the initial NULL byte
-        if (*(strPtr) == '\0')
-            ++strPtr;
-
-
-        // Build the string table array
-        StringArray arr;
         arr.reserve((SKsize)hdr.m_entSize);
-
-        for (i = 0; i < strtab->getSize();)
-        {
-            char*  cp = (char*)strPtr + i;
-            SKsize sl = skStringUtils::length(cp);
-
-            arr.push_back(skString(cp, sl));
-
-            i += sl;
-            ++i;  // skip past the null terminator
-        }
+        parseStringTable(arr, strPtr, strtab->getSize());
 
 
         m_symTable.reserve((SKsize)hdr.m_entSize);
