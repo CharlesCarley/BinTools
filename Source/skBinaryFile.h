@@ -89,6 +89,14 @@ public:
         return m_sectionLookup.iterator();
     }
 
+
+    // Returns an iterator for converted symbols
+    inline SymbolTable::Iterator getSymbolTableIterator(void)
+    {
+        return m_symTable.iterator();
+    }
+
+
     // Search for a named section.
     // returns NULL if the requested section name is not found.
     skSection *getSection(const char *sinf)

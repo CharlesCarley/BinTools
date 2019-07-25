@@ -62,12 +62,12 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skBinaryFile::StringArray::ConstIterator it = prog.m_fp->getSectionHeaderNames().iterator();
+        skBinaryFile::SectionMap::ConstIterator it = prog.m_fp->getSectionIterator();
 
         int i = 1;
         while (it.hasMoreElements())
         {
-            const skString& str = it.getNext();
+            const skString& str = it.getNext().first;
             skPrintf("%-2i\t%s\n", i, str.c_str());
             ++i;
         }
@@ -195,6 +195,21 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, const std::string& name)
 }
 
 
+void HexDump_PrintSymtab(HexDump_ProgramInfo& prog)
+{
+    skBinaryFile* bin = prog.m_fp;
+    if (bin)
+    {
+        skBinaryFile::SymbolTable::Iterator it = bin->getSymbolTableIterator();
+        while (it.hasMoreElements())
+        {
+            skSymbol *sym = it.getNext().second;
+            skPrintf("%s\n", sym->getName().c_str());
+        }
+    }
+}
+
+
 
 void HexDump_Interactive(HexDump_ProgramInfo& prog)
 {
@@ -207,6 +222,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     std::cout << "   3. Print section names                           \n";
     std::cout << "   4. Display specific section name                 \n";
     std::cout << "      .bss, .init, .text, etc                       \n";
+    std::cout << "   5. Print symbol names                            \n";
     std::cout << " Print Options:                                     \n";
     std::cout << "   A. Display ASCII                                 \n";
     std::cout << "   B. Display Binary                                \n";
@@ -257,12 +273,18 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         break;
     case '4':
     {
-        cout << "Section Name> ";
+        cout << "Section Name>";
         string sn;
         cin >> sn;
         cout << "\n";
 
         HexDump_PrintSection(prog, sn);
+        skPrintUtils::pause();
+        break;
+    }
+    case '5':
+    {
+        HexDump_PrintSymtab(prog);
         skPrintUtils::pause();
         break;
     }
