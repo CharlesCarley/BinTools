@@ -2,6 +2,7 @@
 This project is an experimental repository for examining executable files and formats from the perspective of code. 
 
 - [Executable and Linker Format Specification](http://man7.org/linux/man-pages/man5/elf.5.html)
+- [Linker and Libraries Guide](https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-93046.html#scrolltoc)
 - [Portable Executable Specification](https://docs.microsoft.com/en-us/windows/desktop/Debug/pe-format)
 
 
