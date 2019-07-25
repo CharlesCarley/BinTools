@@ -59,9 +59,6 @@ skBinaryFile *skBinaryFile::load(const char *file)
     // rewind
     fs.seek(0, SEEK_SET);
 
-    // TODO: separate into 32/64bit files
-    //       this only loads 64 bit at the moment.
-
     if (strncmp("\177ELF", magic, 4) == 0)
         rval = new skElfFile();
     else if (strncmp("MZ", magic, 2) == 0)

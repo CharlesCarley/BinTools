@@ -99,7 +99,7 @@ void skSection::dissemble(int flags)
     // filter out non executable sections.
     if (!m_isExecutable)
     {
-        skPrintUtils::dumpHex(m_data, m_startAddress, m_size);
+        skPrintUtils::dumpHex(m_data, m_startAddress, m_size, PF_DEFAULT, -1);
         return;
 
     }

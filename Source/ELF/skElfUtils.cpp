@@ -46,7 +46,7 @@ void skElfUtils::copyHeader(skElfHeaderInfo64& header, const skElfHeaderInfo32& 
     header.m_entry                  = header32Bit.m_entry;
 
     skMemcpy(header.m_id, header32Bit.m_id, 16);
- }
+}
 
 void skElfUtils::copyHeader(skElfSectionHeader64& header, const skElfSectionHeader32& header32Bit)
 {
@@ -67,4 +67,21 @@ void skElfUtils::copyHeader(skElfSectionHeader64& header, const skElfSectionHead
 {
     // can memcpy over
     skMemcpy(&header, &header64Bit, sizeof(skElfSectionHeader64));
+}
+
+
+
+void skElfUtils::copyHeader(skElfSymbol64& header, const skElfSymbol64& header64Bit)
+{
+    skMemcpy(&header, &header64Bit, sizeof(skElfSymbol64));
+}
+
+void skElfUtils::copyHeader(skElfSymbol64& header, const skElfSymbol32& header32Bit)
+{
+    header.m_info        = header32Bit.m_info;
+    header.m_name        = header32Bit.m_name;
+    header.m_other       = header32Bit.m_other;
+    header.m_size        = header32Bit.m_size;
+    header.m_strTableIdx = header32Bit.m_strTableIdx;
+    header.m_value       = header32Bit.m_value;
 }

@@ -138,7 +138,6 @@ void skPortableFile::loadImpl(void)
         if (m_sectionLookup.find(name) == SK_NPOS)
         {
             m_sectionTable.insert(name, sh);
-            m_sectionHeaderStringTable.push_back(name);
 
             size_t sectionOffset = getSectionOffset(sh);
 

@@ -99,8 +99,13 @@ private:
         return m_symtab + header.m_name;
     }
 
+    template <typename skElfSymbol>
+    void loadSections(void);
 
+    template<typename skElfSymbol>
     void loadSymbolTable(void);
+
+
     void loadDynSymbolTable(void);
 
     virtual void loadImpl(void);

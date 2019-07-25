@@ -29,7 +29,7 @@
 skElfSymbol::skElfSymbol(skBinaryFile* owner, const skString& name, const skElfSymbol64& sym):
     skSymbol(owner, name)
 {
-    skMemcpy(&m_symbol, &sym, sizeof(skElfSymbol));
+    skMemcpy(&m_symbol, &sym, sizeof(skElfSymbol64));
 }
 
 skElfSymbol::~skElfSymbol()

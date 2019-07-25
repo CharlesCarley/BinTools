@@ -44,7 +44,6 @@ protected:
     skFileFormat          m_fileFormat;
     skFileFormatType      m_fileFormatType;
     skMachineArchitecture m_arch;
-    StringArray           m_sectionHeaderStringTable;
     SectionMap            m_sectionLookup;
     SymbolTable           m_symTable;
 
@@ -83,14 +82,6 @@ public:
     {
         return m_arch;
     }
-
-
-    // Returns a string array of the section names.
-    inline const StringArray &getSectionHeaderNames(void)
-    {
-        return m_sectionHeaderStringTable;
-    }
-
 
     // Returns an iterator for all sections
     inline SectionMap::Iterator getSectionIterator(void)
