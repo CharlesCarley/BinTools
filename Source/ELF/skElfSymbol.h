@@ -45,6 +45,11 @@ public:
     {
         return m_symbol;
     }
+
+    inline SKuint64 getAddress(void)
+    {
+        return m_symbol.m_value;
+    }
 };
 
 #endif  //_skElfSymbol_h_

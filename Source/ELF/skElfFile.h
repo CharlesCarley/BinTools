@@ -105,11 +105,8 @@ private:
     template <typename skElfSymbol>
     void loadSections(void);
 
-    template<typename skElfSymbol>
-    void loadSymbolTable(void);
-
-
-    void loadDynSymbolTable(void);
+    template <typename skElfSymbolHeader>
+    void loadSymbolTable(const char* str, const char* sym);
 
     virtual void loadImpl(void);
 };

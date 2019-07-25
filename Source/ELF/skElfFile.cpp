@@ -131,15 +131,15 @@ void skElfFile::loadImpl(void)
     if (m_fileFormatType == FFT_32BIT)
     {
         loadSections<skElfSectionHeader32>();
-        loadSymbolTable<skElfSymbol32>();
+        loadSymbolTable<skElfSymbol32>(".strtab", ".symtab");
+        loadSymbolTable<skElfSymbol32>(".dynstr", ".dynsym");
     }
     else
     {
         loadSections<skElfSectionHeader64>();
-        loadSymbolTable<skElfSymbol64>();
+        loadSymbolTable<skElfSymbol64>(".strtab", ".symtab");
+        loadSymbolTable<skElfSymbol64>(".dynstr", ".dynsym");
     }
-
-    loadDynSymbolTable();
 }
 
 
@@ -255,27 +255,32 @@ void skElfFile::parseStringTable(StringArray& arr, SKint8* data, SKsize len)
 
 
 template <typename skElfSymbolHeader>
-void skElfFile::loadSymbolTable(void)
+void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
-    // Nonexistent in a stripped binary
+    // Some symbols are nonexistent in a stripped binary
+    if (!strLookup || !symLookup)
+    {
+        // required
+        return;
+    }
 
-    skElfSection* strtab = reinterpret_cast<skElfSection*>(getSection(".strtab"));
-    skElfSection* symtab = reinterpret_cast<skElfSection*>(getSection(".symtab"));
+    skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
+    skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
 
-    if (symtab && strtab)
+    if (sym && str)
     {
         SKuint64           i = 0;
         StringArray        arr;
         skElfSymbolHeader* symPtr;
         SKint8*            strPtr;
 
-        const skElfSectionHeader64& hdr = symtab->getHeader();
+        const skElfSectionHeader64& hdr = sym->getHeader();
 
-        symPtr = (skElfSymbolHeader*)symtab->getPointer();
-        strPtr = (SKint8*)strtab->getPointer();
+        symPtr = (skElfSymbolHeader*)sym->getPointer();
+        strPtr = (SKint8*)str->getPointer();
 
         arr.reserve((SKsize)hdr.m_entSize);
-        parseStringTable(arr, strPtr, strtab->getSize());
+        parseStringTable(arr, strPtr, str->getSize());
 
 
         m_symTable.reserve((SKsize)hdr.m_entSize);
@@ -311,9 +316,4 @@ void skElfFile::loadSymbolTable(void)
             i++;
         }
     }
-}
-
-
-void skElfFile::loadDynSymbolTable(void)
-{
 }

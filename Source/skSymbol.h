@@ -55,6 +55,8 @@ public:
         return m_name;
     }
 
+
+    virtual SKuint64 getAddress(void) = 0;
 };
 
 #endif  //_skSymbol_h_
