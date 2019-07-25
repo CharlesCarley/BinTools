@@ -82,6 +82,6 @@ void skElfUtils::copyHeader(skElfSymbol64& header, const skElfSymbol32& header32
     header.m_name        = header32Bit.m_name;
     header.m_other       = header32Bit.m_other;
     header.m_size        = header32Bit.m_size;
-    header.m_strTableIdx = header32Bit.m_strTableIdx;
+    header.m_sectionIdx  = header32Bit.m_sectionIdx;
     header.m_value       = header32Bit.m_value;
 }

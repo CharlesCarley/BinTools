@@ -241,7 +241,6 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
     if (sym && str)
     {
         SKuint64           i = 0;
-        StringArray        arr;
         skElfSymbolHeader* symPtr;
         SKint8*            strPtr;
 
@@ -259,13 +258,13 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
         {
             const skElfSymbolHeader& syml = (*symPtr);
 
+            // Make sure that the index is at least in range.
             if (syml.m_name > str->getSize())
             {
                 // error
                 break;
             }
 
-            // Make sure that the index is at least in range.
             char* cp = (char*)(strPtr + syml.m_name);
             if (*cp == '\0')
                 ++cp;
@@ -289,8 +288,6 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                     m_symTable.insert(strl, elfSym);
                 }
             }
-            
-            
             ++symPtr;
             i++;
         }

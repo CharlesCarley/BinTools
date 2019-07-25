@@ -193,7 +193,7 @@ struct skElfSymbol32
     elf32 m_size;
     elf8  m_info;
     elf8  m_other;
-    elf16 m_strTableIdx;
+    elf16 m_sectionIdx;
 };
 
 
@@ -202,7 +202,7 @@ struct skElfSymbol64
     elf32 m_name;
     elf8  m_info;
     elf8  m_other;
-    elf16 m_strTableIdx;
+    elf16 m_sectionIdx;
     elf64 m_value;
     elf64 m_size;
 };
