@@ -50,25 +50,122 @@ skElfFile::~skElfFile()
 {
 }
 
+
+template <typename skElfSectionHeader>
+void skElfFile_BuildSectionGeneric(skBinaryFile::SectionMap& dest, skElfFile* parent, SKuint8* data, size_t len, elf64& symtab, elf64 offs, elf64 offe, int fmt)
+{
+    if (!data || len == 0 || len == (size_t)-1)
+        return;
+
+    elf64 i;
+
+    // Find the offset
+    skElfSectionHeader* sectionBasePtr = (skElfSectionHeader*)(data + (offe - sizeof(skElfSectionHeader)));
+
+
+    symtab = sectionBasePtr->m_offset;
+
+    sectionBasePtr = (skElfSectionHeader*)(data + offs);
+
+
+    // Preallocate to prevent unnecessary allocations.
+    // Allocations expand with m_size*2 when m_size == m_capacity
+    // TODO: remove this, just use: m_sectionLookup.iterator().getNext().first
+
+    //m_sectionHeaderStringTable.reserve((SKsize)((offe - offs) / sizeof(skElfSectionHeader)));
+
+
+    // Store each section one by one.
+    for (i = offs; i < offe && sectionBasePtr; i += sizeof(skElfSectionHeader), ++sectionBasePtr)
+    {
+        const skElfSectionHeader&   sp = (*sectionBasePtr);
+
+
+        SKsize sn = (SKsize)symtab + sp.m_name;
+        if (sn < len)
+        {
+            elfName name = (elfName)(data + sn);
+
+            // Skip the null entry
+            if (name != 0 && (*name) == '\0')
+                continue;
+
+            if (dest.find(name) == SK_NPOS)
+            {
+                //m_sectionHeaderStringTable.push_back(name);
+
+                if (sp.m_offset + sp.m_size < len)
+                {
+
+                    skElfSectionHeader64 spd;
+                    if (fmt == FFT_32BIT)
+                        skElfUtils::copyHeader(spd, *((skElfSectionHeader32*)sectionBasePtr));
+                    else
+                        skElfUtils::copyHeader(spd, *((skElfSectionHeader64*)sectionBasePtr));
+                    
+
+                    skSection* section = new skElfSection(
+                        parent, name, data + sp.m_offset, (SKsize)sp.m_size, (size_t)sp.m_offset, 
+                        spd);
+
+                    if (sp.m_flags & ESHT_EXEC_INST)
+                        section->_setExectuable(true);
+
+                    dest.insert(name, section);
+                }
+                else
+                {
+                    skPrintf("Error - Section size exceeds the amount of allocated memory.\n");
+                }
+            }
+            else
+            {
+                // this is an error, it shouldn't have duplicate sections
+                skPrintf("Error - duplicate section name!");
+            }
+        }
+    }
+}
+
+
 void skElfFile::loadImpl(void)
 {
-    elf64 offs, offe, i;
+    elf64 offs, offe;
     if (m_data == 0)
     {
         skPrintf("No data was loaded prior to calling load\n");
         return;
     }
 
-    skMemcpy(&m_header, ((char*)m_data), sizeof(skElfHeaderInfo64));
-    if (m_header.m_id[EMN_CLASS] == 1)
+    // Copy the header info and find the file's platform type. 
+    elf8 m_id[16];
+    skMemcpy(&m_id, ((char*)m_data), 16);
+
+
+
+    if (m_id[EMN_CLASS] == 1)
         m_fileFormatType = FFT_32BIT;
-    else if (m_header.m_id[EMN_CLASS] == 2)
+    else if (m_id[EMN_CLASS] == 2)
         m_fileFormatType = FFT_64BIT;
     else
     {
         skPrintf("Unknown class descriptor found in the file header.\n");
         return;
     }
+
+
+    if (m_fileFormatType == FFT_32BIT)
+    {
+        // read as 32 bit then store as a 64bit type
+
+        skElfHeaderInfo32 header;
+        skMemcpy(&header, (char*)m_data, sizeof(skElfHeaderInfo32));
+
+        skElfUtils::copyHeader(m_header, header);
+
+
+    }
+
 
     // handle the machine architecture
     switch (m_header.m_machine)
@@ -125,63 +222,32 @@ void skElfFile::loadImpl(void)
         return;
     }
 
-    // Find the offset
-    skElfSectionHeader64* sectionBasePtr = (skElfSectionHeader64*)(m_data + (offe - sizeof(skElfSectionHeader64)));
-    
-
-    m_symtab = sectionBasePtr->m_offset;
-
-    sectionBasePtr = (skElfSectionHeader64*)(m_data + offs);
 
 
-    // Preallocate to prevent unnecessary allocations.
-    // Allocations expand with m_size*2 when m_size == m_capacity
-    // TODO: remove this, just use: m_sectionLookup.iterator().getNext().first
-
-    m_sectionHeaderStringTable.reserve((SKsize)((offe - offs) / sizeof(skElfSectionHeader64)));
-
-
-    // Store each section one by one.
-    for (i = offs; i < offe && sectionBasePtr; i += sizeof(skElfSectionHeader64), ++sectionBasePtr)
+    if (m_fileFormatType == FFT_32BIT)
     {
-        const skElfSectionHeader64& sp = (*sectionBasePtr);
-        SKsize sn = (SKsize)getNameOffset(sp);
-
-        if (sn < m_len)
-        {
-            elfName name = (elfName)(m_data + sn);
-
-            // Skip the null entry
-            if (name != 0 && (*name) == '\0')
-                continue;
-
-            if (m_sectionLookup.find(name) == SK_NPOS)
-            {
-                m_sectionHeaderStringTable.push_back(name);
-
-                if (sp.m_offset + sp.m_size < m_len)
-                {
-                    skSection* section = new skElfSection(
-                        this, name, m_data + sp.m_offset, (SKsize)sp.m_size, (size_t)sp.m_offset, sp);
-
-                    if (sp.m_flags & ESHT_EXEC_INST)
-                        section->_setExectuable(true);
-
-                    m_sectionLookup.insert(name, section);
-                }
-                else
-                {
-                    skPrintf("Error - Section size exceeds the amount of allocated memory.\n");
-                }
-            }
-            else
-            {
-                // this is an error, it shouldn't have duplicate sections
-                skPrintf("Error - duplicate section name!");
-            }
-        }
+        skElfFile_BuildSectionGeneric<skElfSectionHeader32>(
+            m_sectionLookup,
+            this,
+            (SKuint8*)m_data,
+            m_len,
+            m_symtab,
+            offs,
+            offe,
+            m_fileFormatType);
     }
-
+    else
+    {
+        skElfFile_BuildSectionGeneric<skElfSectionHeader64>(
+            m_sectionLookup,
+            this,
+            (SKuint8*)m_data,
+            m_len,
+            m_symtab,
+            offs,
+            offe,
+            m_fileFormatType);
+    }
 
     loadSymbolTable();
     loadDynSymbolTable();
@@ -190,6 +256,10 @@ void skElfFile::loadImpl(void)
 
 void skElfFile::loadSymbolTable(void)
 {
+    if (m_fileFormatType == FFT_32BIT)
+        return;
+
+
     skElfSection* strtab = reinterpret_cast<skElfSection*>(getSection(".strtab"));
     skElfSection* symtab = reinterpret_cast<skElfSection*>(getSection(".symtab"));
 
@@ -230,12 +300,12 @@ void skElfFile::loadSymbolTable(void)
         {
             const skElfSymbol64& sym = (*symPtr++);
 
-            // Make sure that the index is at least in range
+            // Make sure that the index is at least in range.
             if (sym.m_strTableIdx <= arr.size())
             {
                 const skString& str = arr[sym.m_strTableIdx];
 
-                // ensure that it at least has info
+                // Ensure that the parsed name at least has some info.
                 if (!str.empty()) 
                 {
                     SKsize idx = m_symTable.find(str);
@@ -246,7 +316,6 @@ void skElfFile::loadSymbolTable(void)
                     }
                 }
             }
-
             i++;
         }
     }

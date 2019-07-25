@@ -333,6 +333,13 @@ public:
         skPrintf("  Entry Table Size:  %u\n", (int)sh.m_entSize);
         skPrintf("  sizeof:            %u\n", sizeof(sh));
     }
+
+    
+
+    static void copyHeader(skElfSectionHeader64& header, const skElfSectionHeader64& header64Bit);
+    static void copyHeader(skElfSectionHeader64& header, const skElfSectionHeader32& header32Bit);
+    static void copyHeader(skElfHeaderInfo64& header, const skElfHeaderInfo32& header32Bit);
+
 };
 
 

@@ -49,6 +49,7 @@ set(TargetName_SRC
     ELF/skElfFile.cpp
     ELF/skElfSection.cpp
     ELF/skElfSymbol.cpp
+    ELF/skElfUtils.cpp
 
 
     PE/skPortableFile.h
