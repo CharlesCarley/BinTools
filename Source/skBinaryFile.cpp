@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits>
-#include "ELF/skElf.h"
+#include "ELF/skElfFile.h"
 #include "PE/skPortableFile.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skFileStream.h"
@@ -131,6 +131,10 @@ skBinaryFile::~skBinaryFile()
     SectionMap::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
         delete it.getNext().second;
+
+    SymbolTable::Iterator sym_it = m_symTable.iterator();
+    while (sym_it.hasMoreElements())
+        delete sym_it.getNext().second;
 }
 
 

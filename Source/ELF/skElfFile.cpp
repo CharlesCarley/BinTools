@@ -23,12 +23,13 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "ELF/skElf.h"
+#include "ELF/skElfFile.h"
 #include <capstone/capstone.h>
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
 #include "ELF/skElfSection.h"
+#include "ELF/skElfSymbol.h"
 #include "ELF/skElfUtils.h"
 #include "Utils/skString.h"
 #include "skPrintUtils.h"
@@ -143,10 +144,7 @@ void skElfFile::loadImpl(void)
     // Store each section one by one.
     for (i = offs; i < offe && sectionBasePtr; i += sizeof(skElfSectionHeader64), ++sectionBasePtr)
     {
-
-
         const skElfSectionHeader64& sp = (*sectionBasePtr);
-
         SKsize sn = (SKsize)getNameOffset(sp);
 
         if (sn < m_len)
@@ -186,6 +184,7 @@ void skElfFile::loadImpl(void)
 
 
     loadSymbolTable();
+    loadDynSymbolTable();
 }
 
 
@@ -223,21 +222,31 @@ void skElfFile::loadSymbolTable(void)
         }
 
 
+        m_symTable.reserve(hdr.m_entSize);
+
+
         i = 0;
         while (i < hdr.m_entSize)
         {
             const skElfSymbol64& sym = (*symPtr++);
 
-            skPrintf("0x%llx ", sym.m_value);
-
-
+            // Make sure that the index is at least in range
             if (sym.m_strTableIdx <= arr.size())
             {
-                skString str = arr.at(sym.m_strTableIdx);
-                skPrintf("%s\n", str.c_str());
+                const skString& str = arr[sym.m_strTableIdx];
+
+                // ensure that it at least has info
+                if (!str.empty()) 
+                {
+                    SKsize idx = m_symTable.find(str);
+                    if (idx == SK_NPOS)
+                    {
+                        skSymbol* elfSym = new skElfSymbol(this, str, sym);
+                        m_symTable.insert(str, elfSym);
+                    }
+                }
             }
 
-            SKint8* cp = (strPtr + sym.m_strTableIdx);
             i++;
         }
     }

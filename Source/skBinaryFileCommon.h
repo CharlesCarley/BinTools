@@ -77,6 +77,7 @@ enum skFileFormatType
 
 class skStream;
 class skSection;
+class skSymbol;
 class skBinaryFile;
 
 

@@ -34,8 +34,9 @@
 class skBinaryFile
 {
 public:
-    typedef skArray<skString>                StringArray;
-    typedef skHashTable<char *, skSection *> SectionMap;
+    typedef skArray<skString>                   StringArray;
+    typedef skHashTable<skString, skSection *>  SectionMap;
+    typedef skHashTable<skString, skSymbol *>   SymbolTable;
 
 protected:
     char *                m_data;
@@ -45,6 +46,8 @@ protected:
     skMachineArchitecture m_arch;
     StringArray           m_sectionHeaderStringTable;
     SectionMap            m_sectionLookup;
+    SymbolTable           m_symTable;
+
 
     // Protected constructor. Load files via the static interface
     // skBinaryFile::load(file).
