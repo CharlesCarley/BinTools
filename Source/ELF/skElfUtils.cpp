@@ -62,14 +62,10 @@ void skElfUtils::copyHeader(skElfSectionHeader64& header, const skElfSectionHead
     header.m_type      = header32Bit.m_type;
 }
 
-
 void skElfUtils::copyHeader(skElfSectionHeader64& header, const skElfSectionHeader64& header64Bit)
 {
-    // can memcpy over
     skMemcpy(&header, &header64Bit, sizeof(skElfSectionHeader64));
 }
-
-
 
 void skElfUtils::copyHeader(skElfSymbol64& header, const skElfSymbol64& header64Bit)
 {

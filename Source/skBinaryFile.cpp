@@ -126,7 +126,7 @@ skBinaryFile::~skBinaryFile()
 {
     delete[] m_data;
 
-    SectionMap::Iterator it = m_sectionLookup.iterator();
+    SectionTable::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
         delete it.getNext().second;
 
@@ -149,7 +149,6 @@ void skBinaryFile::load(skStream &fstream)
     m_len  = fstream.size();
     m_data = new char[m_len + 1];
     m_len  = fstream.read(m_data, m_len);
-
     m_data[m_len] = 0;
 
     loadImpl();

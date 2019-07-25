@@ -23,14 +23,16 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
+
+#define _CRT_SECURE_NO_WARNINGS
 #include "PE/skPortableUtils.h"
-#include "Utils/skDebugger.h"
 #include <time.h>
+#include "Utils/skDebugger.h"
 
 
-void skPortableUtils::printCommonHeader(const COFFHeader& header)
+
+void skPortableUtils::printHeader(const COFFHeader& header)
 {
-
     char* result = ctime((time_t*)&header.m_timeDateStamp);
 
     skPrintf("  Machine:              %u\n", header.m_machine);
@@ -47,9 +49,7 @@ void skPortableUtils::printCommonHeader(const COFFHeader& header)
     skPrintf("  Characteristics:      0x%x\n", header.m_characteristics);
 }
 
-
-
-void skPortableUtils::printSectionHeader(const COFFSectionHeader& header)
+void skPortableUtils::printHeader(const COFFSectionHeader& header)
 {
     skPrintf("  Name:                  %s\n", header.m_name);
     skPrintf("  Virtual Size:          %u\n", header.m_virtualSize);

@@ -32,9 +32,8 @@
 class skPortableUtils
 {
 public:
-
-    static void printCommonHeader(const COFFHeader& header);
-    static void printSectionHeader(const COFFSectionHeader& header);
+    static void printHeader(const COFFHeader& header);
+    static void printHeader(const COFFSectionHeader& header);
 
 };
 

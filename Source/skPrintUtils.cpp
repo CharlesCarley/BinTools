@@ -187,7 +187,7 @@ void skPrintUtils::clear(void)
 #if SK_PLATFORM == SK_PLATFORM_WIN32
     system("cls");
 #else
-    skPrintf("\033c");
+    system("clear");
 #endif  // WIN32
 }
 

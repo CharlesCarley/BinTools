@@ -148,7 +148,7 @@ void skElfFile::loadImpl(void)
 template <typename skElfSectionHeader>
 void skElfFile::loadSections(void)
 {
-    elf64 offs, offe;
+    elf64 offs, offe, i;
 
     if (!m_data || m_len == 0 || m_len == (size_t)-1)
         return;
@@ -163,14 +163,9 @@ void skElfFile::loadSections(void)
         return;
     }
 
-
-    elf64 i;
-
     // Find the offset
     skElfSectionHeader* sectionBasePtr = (skElfSectionHeader*)(m_data + (offe - sizeof(skElfSectionHeader)));
-
-
-    m_symtab = sectionBasePtr->m_offset;
+    m_symtab                           = sectionBasePtr->m_offset;
 
     sectionBasePtr = (skElfSectionHeader*)(m_data + offs);
 
@@ -219,21 +214,19 @@ void skElfFile::loadSections(void)
             else
             {
                 // this is an error, it shouldn't have duplicate sections
-                skPrintf("Error - duplicate section name!");
+                skPrintf("Error - duplicate section name!\n");
             }
         }
     }
 }
 
+
 template <typename skElfSymbolHeader>
 void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
-    // Some symbols are nonexistent in a stripped binary
+    // Some symbols are nonexistent in a stripped binary (.strtab, .symtab)
     if (!strLookup || !symLookup)
-    {
-        // required
         return;
-    }
 
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
@@ -249,7 +242,6 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
         symPtr = (skElfSymbolHeader*)sym->getPointer();
         strPtr = (SKint8*)str->getPointer();
 
-
         // Total number of elements
         SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
 
@@ -259,9 +251,9 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             const skElfSymbolHeader& syml = (*symPtr);
 
             // Make sure that the index is at least in range.
-            if (syml.m_name > str->getSize())
+            if (syml.m_name >= str->getSize())
             {
-                // error
+                skPrintf("Error - The size of the symbol name exceeds the size of the string table.\n");
                 break;
             }
 
@@ -278,7 +270,6 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                 if (idx == SK_NPOS)
                 {
                     skElfSymbol64 sdp;
-
                     if (m_fileFormatType == FFT_32BIT)
                         skElfUtils::copyHeader(sdp, (*(skElfSymbol32*)symPtr));
                     else

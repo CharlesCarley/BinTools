@@ -39,6 +39,7 @@ skPortableSection::skPortableSection(skBinaryFile*      owner,
 {
     skMemcpy(&m_header, &hdr, sizeof(COFFSectionHeader));
 
+
     //  Fix the header offset so that it points to the correct location
     m_header.m_pointerToRawData = offset;
 }

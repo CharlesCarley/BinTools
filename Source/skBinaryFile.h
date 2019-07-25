@@ -35,7 +35,7 @@ class skBinaryFile
 {
 public:
     typedef skArray<skString>                   StringArray;
-    typedef skHashTable<skString, skSection *>  SectionMap;
+    typedef skHashTable<skString, skSection *>  SectionTable;
     typedef skHashTable<skString, skSymbol *>   SymbolTable;
 
 protected:
@@ -44,7 +44,7 @@ protected:
     skFileFormat          m_fileFormat;
     skFileFormatType      m_fileFormatType;
     skMachineArchitecture m_arch;
-    SectionMap            m_sectionLookup;
+    SectionTable            m_sectionLookup;
     SymbolTable           m_symTable;
 
 
@@ -84,14 +84,14 @@ public:
     }
 
     // Returns an iterator for all sections
-    inline SectionMap::Iterator getSectionIterator(void)
+    inline SectionTable::Iterator getSectionIterator(void)
     {
         return m_sectionLookup.iterator();
     }
 
 
     // Returns an iterator for converted symbols
-    inline SymbolTable::Iterator getSymbolTableIterator(void)
+    inline SymbolTable::Iterator getSymbolIterator(void)
     {
         return m_symTable.iterator();
     }

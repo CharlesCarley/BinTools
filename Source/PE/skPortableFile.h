@@ -26,15 +26,15 @@
 #ifndef _skPortableFile_h_
 #define _skPortableFile_h_
 
-#include "skBinaryFile.h"
 #include "PE/skPortableTypes.h"
+#include "skBinaryFile.h"
 
 
 class skPortableFile : public skBinaryFile
 {
 public:
-    typedef skArray<COFFSectionHeader>              Sections;
-    typedef skHashTable<char*, COFFSectionHeader>   SectionMap;
+    typedef skArray<COFFSectionHeader>            Sections;
+    typedef skHashTable<char*, COFFSectionHeader> SectionTable;
 
 private:
     COFFHeader                m_header;
@@ -42,22 +42,22 @@ private:
     SKuint16                  m_imageBase;
     SKuint64                  m_sectionStart;
     Sections                  m_sectionHeaders;
-    SectionMap                m_sectionTable;
+    SectionTable                m_sectionTable;
 
 
     friend class skBinaryFile;
     skPortableFile(SKint16 dos_offset);
+
 public:
     virtual ~skPortableFile();
 
 
-    /// Returns the header that is common amongst both object files and image files.
+    // Returns the header that is common amongst both object files and image files.
     inline const COFFHeader& getCommonHeader(void)
     {
         return m_header;
     }
 
-    
     SKuint64 getEntryPoint(void)
     {
         if (m_imageHeader != 0)
@@ -66,7 +66,6 @@ public:
     }
 
 private:
-
     inline size_t getSectionOffset(COFFSectionHeader& header)
     {
         // m_imageBase is the offset past the DOS stub program.

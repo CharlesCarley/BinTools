@@ -62,7 +62,7 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skBinaryFile::SectionMap::ConstIterator it = prog.m_fp->getSectionIterator();
+        skBinaryFile::SectionTable::ConstIterator it = prog.m_fp->getSectionIterator();
 
         int i = 1;
         while (it.hasMoreElements())
@@ -98,7 +98,7 @@ void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
         skPortableSection*       pe     = static_cast<skPortableSection*>(section);
         const COFFSectionHeader& header = pe->getHeader();
 
-        skPortableUtils::printSectionHeader(header);
+        skPortableUtils::printHeader(header);
     }
 }
 
@@ -172,10 +172,11 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
             const COFFHeader& header = pe->getCommonHeader();
-            skPortableUtils::printCommonHeader(header);
+            
+            skPortableUtils::printHeader(header);
         }
 
-        skBinaryFile::SectionMap::Iterator it = bin->getSectionIterator();
+        skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
         while (it.hasMoreElements())
             HexDump_PrintSection(prog, it.getNext().second);
     }
@@ -200,7 +201,7 @@ void HexDump_PrintSymtab(HexDump_ProgramInfo& prog)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
-        skBinaryFile::SymbolTable::Iterator it = bin->getSymbolTableIterator();
+        skBinaryFile::SymbolTable::Iterator it = bin->getSymbolIterator();
         while (it.hasMoreElements())
         {
             skSymbol *sym = it.getNext().second;
