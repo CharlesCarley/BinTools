@@ -30,24 +30,31 @@ set(TargetName_SRC
     skDefaultFile.h
     skPrintUtils.h
     skSection.h
-
-    ELF/skElf.h
-    ELF/skElfTypes.h
-    ELF/skElfUtils.h
-    ELF/skElfSection.h
-
-    PE/skPortableFile.h
-    PE/skPortableTypes.h
-    PE/skPortableSection.h
-    PE/skPortableUtils.h
+    skSymbol.h
     
     skBinaryFile.cpp
     skDefaultFile.cpp
     skPrintUtils.cpp
     skSection.cpp
+    skSymbol.cpp
 
-    ELF/skElf.cpp
+
+
+    ELF/skElfFile.h
+    ELF/skElfTypes.h
+    ELF/skElfUtils.h
+    ELF/skElfSection.h
+    ELF/skElfSymbol.h
+
+    ELF/skElfFile.cpp
     ELF/skElfSection.cpp
+    ELF/skElfSymbol.cpp
+
+
+    PE/skPortableFile.h
+    PE/skPortableTypes.h
+    PE/skPortableSection.h
+    PE/skPortableUtils.h
 
     PE/skPortableFile.cpp
     PE/skPortableSection.cpp
