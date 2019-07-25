@@ -99,9 +99,6 @@ private:
         return m_symtab + header.m_name;
     }
 
-    void parseStringTable(StringArray &arr, SKint8* data, SKsize len);
-
-
     template <typename skElfSymbol>
     void loadSections(void);
 

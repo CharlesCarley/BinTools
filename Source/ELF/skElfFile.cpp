@@ -128,17 +128,19 @@ void skElfFile::loadImpl(void)
         return;
     }
 
+    m_symTable.reserve(256);
+
     if (m_fileFormatType == FFT_32BIT)
     {
         loadSections<skElfSectionHeader32>();
-        loadSymbolTable<skElfSymbol32>(".strtab", ".symtab");
         loadSymbolTable<skElfSymbol32>(".dynstr", ".dynsym");
+        loadSymbolTable<skElfSymbol32>(".strtab", ".symtab");
     }
     else
     {
         loadSections<skElfSectionHeader64>();
-        loadSymbolTable<skElfSymbol64>(".strtab", ".symtab");
         loadSymbolTable<skElfSymbol64>(".dynstr", ".dynsym");
+        loadSymbolTable<skElfSymbol64>(".strtab", ".symtab");
     }
 }
 
@@ -223,37 +225,6 @@ void skElfFile::loadSections(void)
     }
 }
 
-
-void skElfFile::parseStringTable(StringArray& arr, SKint8* data, SKsize len)
-{
-    // Parse a string table packed as 
-    // \0str1\0str2\0str3\0
-
-    if (!data || len == 0)
-        return;
-
-    // len is the total size in bytes of 'data'
-
-    SKsize i = 0, sl=0;
-    while (i < len)
-    {
-        if (*(data+i) == '\0')
-            ++i;
-
-        char* termStr = (char*)data + i;
-        if (termStr && *termStr != '\0')
-        {
-            sl = skStringUtils::length(termStr);
-            arr.push_back(skString(termStr, sl));
-
-            // offset to the next '\0'
-            i += sl;
-        }
-    }
-}
-
-
-
 template <typename skElfSymbolHeader>
 void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
@@ -279,39 +250,47 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
         symPtr = (skElfSymbolHeader*)sym->getPointer();
         strPtr = (SKint8*)str->getPointer();
 
-        arr.reserve((SKsize)hdr.m_entSize);
-        parseStringTable(arr, strPtr, str->getSize());
 
+        // Total number of elements
+        SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
 
-        m_symTable.reserve((SKsize)hdr.m_entSize);
         i = 0;
-        while (i < hdr.m_entSize)
+        while (i < entryLen)
         {
             const skElfSymbolHeader& syml = (*symPtr);
 
-            // Make sure that the index is at least in range.
-            if (syml.m_strTableIdx <= arr.size())
+            if (syml.m_name > str->getSize())
             {
-                const skString& strl = arr[syml.m_strTableIdx];
+                // error
+                break;
+            }
 
-                // Ensure that the parsed name at least has some info.
-                if (!strl.empty())
+            // Make sure that the index is at least in range.
+            char* cp = (char*)(strPtr + syml.m_name);
+            if (*cp == '\0')
+                ++cp;
+
+            const skString& strl = cp;
+
+            // Ensure that the parsed name at least has some info.
+            if (!strl.empty())
+            {
+                SKsize idx = m_symTable.find(strl);
+                if (idx == SK_NPOS)
                 {
-                    SKsize idx = m_symTable.find(strl);
-                    if (idx == SK_NPOS)
-                    {
-                        skElfSymbol64 sdp;
+                    skElfSymbol64 sdp;
 
-                        if (m_fileFormatType == FFT_32BIT)
-                            skElfUtils::copyHeader(sdp, (*(skElfSymbol32*)symPtr));
-                        else
-                            skElfUtils::copyHeader(sdp, (*(skElfSymbol64*)symPtr));
+                    if (m_fileFormatType == FFT_32BIT)
+                        skElfUtils::copyHeader(sdp, (*(skElfSymbol32*)symPtr));
+                    else
+                        skElfUtils::copyHeader(sdp, (*(skElfSymbol64*)symPtr));
 
-                        skSymbol* elfSym = new skElfSymbol(this, strl, sdp);
-                        m_symTable.insert(strl, elfSym);
-                    }
+                    skSymbol* elfSym = new skElfSymbol(this, strl, sdp);
+                    m_symTable.insert(strl, elfSym);
                 }
             }
+            
+            
             ++symPtr;
             i++;
         }

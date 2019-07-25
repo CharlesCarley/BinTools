@@ -204,7 +204,7 @@ void HexDump_PrintSymtab(HexDump_ProgramInfo& prog)
         while (it.hasMoreElements())
         {
             skSymbol *sym = it.getNext().second;
-            skPrintf("%s\n", sym->getName().c_str());
+            skPrintf("%016llx %s\n", sym->getAddress(), sym->getName().c_str());
         }
     }
 }
