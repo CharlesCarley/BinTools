@@ -84,8 +84,15 @@ void skPortableFile::loadImpl(void)
 
     SKuint16 optMagic;
 
+
+
+    char *ptr = m_data;
+
+    // Skip past the DOS stub program.
     // The PE signature is not part of the defined structure (+4)
-    char *ptr = m_data + 4;
+    ptr += m_imageBase + 4;
+
+
     skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
     switch (m_header.m_machine)
@@ -122,7 +129,7 @@ void skPortableFile::loadImpl(void)
         m_imageHeader = new COFFOptionalHeader32;
         skMemcpy(m_imageHeader, (COFFOptionalHeader32 *)ptr, sizeof(COFFOptionalHeader32));
 
-        m_sectionStart = 4 + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
+        m_sectionStart = 4 + m_imageBase + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
     }
     else if (optMagic == COFF_MAG_PE64)
     {
@@ -138,7 +145,7 @@ void skPortableFile::loadImpl(void)
         m_imageHeader = new COFFOptionalHeader64;
         skMemcpy(m_imageHeader, ptr, sizeof(COFFOptionalHeader64));
 
-        m_sectionStart = 4 + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
+        m_sectionStart = 4 + m_imageBase + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
     }
     else
     {

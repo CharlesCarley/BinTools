@@ -75,10 +75,8 @@ skBinaryFile *skBinaryFile::load(const char *file)
             fs.seek(pe_offset, SEEK_SET);
             fs.read(magic, 4);
 
-            // Seek back to the start of the PE signature
-            // TODO: This should really include everything, 
-            // not just The PE part
-            fs.seek(pe_offset, SEEK_SET);
+            // Seek back to the start of the MZ signature
+            fs.seek(0, SEEK_SET);
 
             if (strncmp("PE\0\0", magic, 4) == 0)
                 rval = new skPortableFile(pe_offset);

@@ -66,7 +66,7 @@ void skPortableUtils::printHeader(const COFFSectionHeader& header)
 
 void skPrintDataDir(const char * msg, const COFFDataDirectory &dd)
 {
-    skPrintf("%s0x%x, %u\n", msg, dd.I32[0], dd.I32[1]);
+    skPrintf("%s0x%x,%u\n", msg, dd.I32[0], dd.I32[1]);
 }
 
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
@@ -78,7 +78,7 @@ void skPortableUtils_printHeader(const COFFOptionalHeader<COFFOptionalHeaderVary
     skPrintf("  Operating System Version:   %u.%u\n", header.m_majOpSysVersion, header.m_minOpSysVersion);
     skPrintf("  Image Version:              %u.%u\n", header.m_majImSysVersion, header.m_minImSysVersion);
     skPrintf("  Sub System Version:         %u.%u\n", header.m_majSubSysVersion, header.m_minSubSysVersion);
-    skPrintf("  Image Size:                 %u\n", header.m_sizeOfImage);
+    skPrintf("  Image Size:                 0x%x,%u\n", header.m_sizeOfImage, header.m_sizeOfImage);
     skPrintf("  Size of Headers:            %u\n", header.m_sizeOfHeaders);
     skPrintf("  Checksum:                   %u\n", header.m_checkSum);
     skPrintf("  Subsystem:                  %u\n", header.m_subsystem);

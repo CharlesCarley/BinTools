@@ -85,7 +85,7 @@ private:
         // m_imageBase is the offset past the DOS stub program.
         // m_pointerToRawData points to the section location in the file.
         // m_data only points to the PE data
-        return (size_t)(header.m_pointerToRawData - m_imageBase);
+        return (size_t)(header.m_pointerToRawData);
     }
 
 
