@@ -88,7 +88,7 @@ struct COFFOptionalHeaderCommonPE64 : COFFOptionalHeaderCommon
 
 typedef union COFFDataDirectory {
     SKuint32 I32[2];
-    SKuint32 I64;
+    SKuint64 I64;
 } COFFDataDirectory;
 
 
