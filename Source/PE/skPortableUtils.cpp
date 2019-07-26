@@ -28,6 +28,7 @@
 #include "PE/skPortableUtils.h"
 #include <time.h>
 #include "Utils/skDebugger.h"
+#include "skPrintUtils.h"
 
 
 
@@ -66,7 +67,10 @@ void skPortableUtils::printHeader(const COFFSectionHeader& header)
 
 void skPrintDataDir(const char * msg, const COFFDataDirectory &dd)
 {
-    skPrintf("%s0x%x,%u\n", msg, dd.m_virtualAddress, dd.m_size);
+    if (dd.m_size)
+        skPrintf("%s0x%x,%u\n", msg, dd.m_virtualAddress, dd.m_size);
+    else
+        skPrintf("%s0\n", msg);
 }
 
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
@@ -88,7 +92,12 @@ void skPortableUtils_printHeader(const COFFOptionalHeader<COFFOptionalHeaderVary
     skPrintf("  Stack Heap Reserve:         %llu\n", (SKuint64)header.m_sizeOfHeapReserve);
     skPrintf("  Stack Commit Size:          %llu\n", (SKuint64)header.m_sizeOfHeapCommit);
     skPrintf("  Loader Flags:               0x%x\n", header.m_loaderFlags);
-    skPrintf("  RVA and Size Count:         %u\n", header.m_numberOfRvaAndSizes);
+    skPrintf("  RVA and Size Count:         %u\n\n", header.m_numberOfRvaAndSizes);
+
+
+    skPrintUtils::writeColor(CS_DARKYELLOW);
+    skPrintf("Data Directories\n\n");
+    skPrintUtils::writeColor(CS_LIGHT_GREY);
 
     skPrintDataDir("  Export Table:               ", header.m_exportTable);
     skPrintDataDir("  Import Table:               ", header.m_importTable);
