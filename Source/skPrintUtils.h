@@ -62,7 +62,7 @@ enum skPrintFlags
     PF_DISASEMBLE = (1 << 5), // ignores hex in place of disassembly
     PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
     PF_BIN        = PF_COLORIZE | PF_BINARY,
-    PF_HEXDIS     = PF_HEX, 
+    PF_HEXDIS     = PF_COLORIZE | PF_HEX,
 };
 
 
@@ -79,8 +79,6 @@ private:
 
 public:
     static void writeColor(int fg, int bg = CS_BLACK);
-    static void writeSeperator(bool color = true);
-
     static void writeAddress(SKuint64 addr);
 
     static void dumpColors();

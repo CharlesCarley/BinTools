@@ -66,7 +66,7 @@ void skPortableUtils::printHeader(const COFFSectionHeader& header)
 
 void skPrintDataDir(const char * msg, const COFFDataDirectory &dd)
 {
-    skPrintf("%s0x%x,%u\n", msg, dd.I32[0], dd.I32[1]);
+    skPrintf("%s0x%x,%u\n", msg, dd.m_virtualAddress, dd.m_size);
 }
 
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>

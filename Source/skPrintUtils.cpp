@@ -31,8 +31,6 @@
 #if SK_PLATFORM == SK_PLATFORM_WIN32
 #include "conio.h"
 #include "windows.h"
-#else
-#include "sys/select.h"
 #endif
 
 #include "Utils/skDebugger.h"
@@ -171,51 +169,26 @@ void skPrintUtils::dumpColors()
     }
 }
 
-void skPrintUtils::writeSeperator(bool color)
-{
-    if (color)
-        writeColor(CS_GREY);
-
-    skPrintf("------------------------------------------------------------------\n");
-
-    if (color)
-        writeColor(CS_WHITE);
-}
-
 void skPrintUtils::clear(void)
 {
 #if SK_PLATFORM == SK_PLATFORM_WIN32
     system("cls");
 #else
-    system("clear");
+    skPrintf("\33c");
 #endif  // WIN32
 }
 
 void skPrintUtils::pause(void)
 {
-#if SK_PLATFORM == SK_PLATFORM_WIN32
-    skPrintf("\n");
     writeColor(CS_WHITE);
-    system("pause");
-    clear();
-#else
-    writeColor(CS_WHITE);
-    skPrintf("Press any key to continue . . .\n");
-
-    fd_set m_readInfo;
-    FD_ZERO(&m_readInfo);
-    FD_SET(0, &m_readInfo);
-
-    int result = -1;
-    while (result == -1)
+    skPrintf("\nPress enter to continue . . .");
+    getc(stdin);
+    for (;;)
     {
-        result = select(1, &m_readInfo, 0, 0, 0);
-        if (FD_ISSET(0, &m_readInfo))
+        if (getc(stdin) == '\n')
             break;
     }
-
     clear();
-#endif
 }
 
 
@@ -341,10 +314,8 @@ void skPrintUtils_Hexdump(void* ptr, SKsize offset, SKsize stop, int flags, int 
     {
         if (flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_LIGHT_GREY);
-
         if (flags & PF_ADDRESS)
             skPrintUtils::writeAddress((size_t)(i + offset));
-
         if (flags & PF_HEX)
             skPrintUtils_writeHex(cp, i, stop, flags, mark);
         if (flags & PF_BINARY)
@@ -359,13 +330,10 @@ void skPrintUtils_Hexdump(void* ptr, SKsize offset, SKsize stop, int flags, int 
 
 void skPrintUtils::writeAddress(SKuint64 addr)
 {
-    if (RPL_LEN_IS_8)
-        skPrintf("%016llx ", addr);
-    else
-        skPrintf("%08x ", (SKuint32)addr);
+    skPrintUtils::writeColor(CS_LIGHT_GREY);
+    skPrintf("%16llx  ", addr);
 }
-
-
+ 
 void skPrintUtils::dumpHex(void* ptr, size_t offset, size_t len, int flags, int mark, bool nl)
 {
     /// TODO: Update this to handle more options.

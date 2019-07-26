@@ -180,6 +180,10 @@ void skPortableFile::loadImpl(void)
             {
                 skSection *section = new skPortableSection(
                     this, name, m_data + sectionOffset, (SKsize)sh.m_virtualSize, sectionOffset, sh);
+
+                if (sh.m_characteristics & CSC_HAS_CODE)
+                    section->_setExectuable(true);
+
                 m_sectionLookup.insert(name, section);
             }
             else
@@ -193,4 +197,5 @@ void skPortableFile::loadImpl(void)
             skPrintf("Error - duplicate symbol name!\n");
         }
     }
+
 }

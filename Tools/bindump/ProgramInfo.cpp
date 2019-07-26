@@ -62,13 +62,26 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skBinaryFile::SectionTable::ConstIterator it = prog.m_fp->getSectionIterator();
+        skBinaryFile::SectionTable::Iterator it = prog.m_fp->getSectionIterator();
 
-        int i = 1;
+
+        if (prog.m_flags & PF_COLORIZE)
+            skPrintUtils::writeColor(CS_DARKYELLOW);
+
+        skPrintf("\nSections:\n\n");
+
+        if (prog.m_flags & PF_COLORIZE)
+            skPrintUtils::writeColor(CS_GREY);
+       skPrintf(" Name                 Offset             Index\n");
+        if (prog.m_flags & PF_COLORIZE)
+            skPrintUtils::writeColor(CS_LIGHT_GREY);
+        int i = 0;
         while (it.hasMoreElements())
         {
-            const skString& str = it.getNext().first;
-            skPrintf("%-2i\t%s\n", i, str.c_str());
+            skSection*      sec = it.getNext().second;
+            const skString& str = sec->getName();
+            SKuint64 offs = (SKuint64)sec->getStartAddress();
+            skPrintf(" %-20s 0x%-16llx %-2u\n", str.c_str(), offs, i);
             ++i;
         }
         skPrintf("\n\n");
@@ -99,7 +112,6 @@ void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
         const COFFSectionHeader& header = pe->getHeader();
 
         skPortableUtils::printHeader(header);
-
     }
 }
 
@@ -173,11 +185,11 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
             const COFFHeader& header = pe->getCommonHeader();
-            
+
             skPortableUtils::printHeader(header);
 
 
-            // Print the varying header. //
+            // Print the varying header.
             skFileFormatType fpt = pe->getPlatformType();
             if (fpt == FFT_32BIT)
             {
@@ -218,11 +230,32 @@ void HexDump_PrintSymtab(HexDump_ProgramInfo& prog)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
+
         skBinaryFile::SymbolTable::Iterator it = bin->getSymbolIterator();
-        while (it.hasMoreElements())
+
+        if (prog.m_flags & PF_COLORIZE)
+            skPrintUtils::writeColor(CS_DARKYELLOW);
+
+        skPrintf("\nSymbols:\n\n");
+
+        if (prog.m_flags & PF_COLORIZE)
+            skPrintUtils::writeColor(CS_GREY);
+
+        if (!it.hasMoreElements())
+            skPrintf("No symbols.\n");
+        else
         {
-            skSymbol *sym = it.getNext().second;
-            skPrintf("%016llx %s\n", sym->getAddress(), sym->getName().c_str());
+            while (it.hasMoreElements())
+            {
+                skSymbol* sym = it.getNext().second;
+                if (prog.m_flags & PF_COLORIZE)
+                    skPrintUtils::writeColor(CS_LIGHT_GREY);
+
+                if (RPL_LEN_IS_8)
+                    skPrintf("%016llx   %s\n", sym->getAddress(), sym->getName().c_str());
+                else
+                    skPrintf("%08llx    %s\n", sym->getAddress(), sym->getName().c_str());
+            }
         }
     }
 }

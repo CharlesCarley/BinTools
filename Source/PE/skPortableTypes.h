@@ -48,6 +48,14 @@ enum COFFMachineType
 };
 
 
+
+enum COFFSectionCharacteristics
+{
+    CSC_HAS_CODE    = 0x00000020,
+    CSC_CAN_EXECUTE = 0x20000000
+};
+
+
 struct COFFHeader
 {
     SKuint16 m_machine;
@@ -86,10 +94,11 @@ struct COFFOptionalHeaderCommonPE64 : COFFOptionalHeaderCommon
 
 
 
-typedef union COFFDataDirectory {
-    SKuint32 I32[2];
-    SKuint64 I64;
-} COFFDataDirectory;
+struct COFFDataDirectory 
+{
+    SKuint32 m_virtualAddress;
+    SKuint32 m_size;
+};
 
 
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
@@ -168,6 +177,10 @@ SK_ASSERTCOMP(COFFOptionalHeaderCommonPE32_sizeof, sizeof(COFFOptionalHeaderComm
 SK_ASSERTCOMP(COFFOptionalHeaderCommonPE64_sizeof, sizeof(COFFOptionalHeaderCommonPE64) == 24);
 SK_ASSERTCOMP(COFFSectionHeader_sizeof, sizeof(COFFSectionHeader) == 40);
 SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
+SK_ASSERTCOMP(COFFDataDirectory_sizeof, sizeof(COFFDataDirectory) == 8);
+
+
+
 
 #endif  //_skPortableTypes_h_
 
