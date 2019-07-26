@@ -64,6 +64,10 @@ void skPortableUtils::printHeader(const COFFSectionHeader& header)
     skPrintf("  Size of Header:             %u\n", (SKuint32)sizeof(COFFSectionHeader));
 }
 
+void skPrintDataDir(const char * msg, const COFFDataDirectory &dd)
+{
+    skPrintf("%s0x%x, %u\n", msg, dd.I32[0], dd.I32[1]);
+}
 
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 void skPortableUtils_printHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
@@ -86,22 +90,21 @@ void skPortableUtils_printHeader(const COFFOptionalHeader<COFFOptionalHeaderVary
     skPrintf("  Loader Flags:               0x%x\n", header.m_loaderFlags);
     skPrintf("  RVA and Size Count:         %u\n", header.m_numberOfRvaAndSizes);
 
-    skPrintf("  Export Table:               0x%llx\n", (SKuint64)header.m_exportTable);
-    skPrintf("  Import Table:               0x%llx\n", (SKuint64)header.m_importTable);
-    skPrintf("  Resource Table:             0x%llx\n", (SKuint64)header.m_resourceTable);
-    skPrintf("  Exception Table:            0x%llx\n", (SKuint64)header.m_exceptionTable);
-    skPrintf("  Certificate Table:          0x%llx\n", (SKuint64)header.m_certificateTable);
-    skPrintf("  Base Relocation Table:      0x%llx\n", (SKuint64)header.m_baseRelocationTable);
-    skPrintf("  Debug Table:                0x%llx\n", (SKuint64)header.m_debug);
-    skPrintf("  Architecture (Reserved):    %llu\n", (SKuint64)header.m_architecture);
-    skPrintf("  Global Pointer Register:    %llu\n", (SKuint64)header.m_globPtrReg);
-    skPrintf("  Thread Local Storage:       0x%llx\n", (SKuint64)header.m_threadLocalStorage);
-    skPrintf("  Loader Config Table:        0x%llx\n", (SKuint64)header.m_loadConfigTable);
-    skPrintf("  Bound Import Table:         0x%llx\n", (SKuint64)header.m_boundImport);
-    skPrintf("  Import Address Table:       0x%llx\n", (SKuint64)header.m_importAddressTable);
-    skPrintf("  Delay Import Descriptor:    0x%llx\n", (SKuint64)header.m_delayImportDescriptor);
-    skPrintf("  CRT Runtime Header:         0x%llx\n", (SKuint64)header.m_crtRuntimeHeader);
-    skPrintf("  (Reserved):                 %llu\n", (SKuint64)header.m_reserved);
+    skPrintDataDir("  Export Table:               ", header.m_exportTable);
+    skPrintDataDir("  Import Table:               ", header.m_importTable);
+    skPrintDataDir("  Resource Table:             ", header.m_resourceTable);
+    skPrintDataDir("  Exception Table:            ", header.m_exceptionTable);
+    skPrintDataDir("  Certificate Table:          ", header.m_certificateTable);
+    skPrintDataDir("  Base Relocation Table:      ", header.m_baseRelocationTable);
+    skPrintDataDir("  Debug Table:                ", header.m_debug);
+    skPrintDataDir("  Architecture (Reserved):    ", header.m_architecture);
+    skPrintDataDir("  Global Pointer Register:    ", header.m_globPtrReg);
+    skPrintDataDir("  Thread Local Storage:       ", header.m_threadLocalStorage);
+    skPrintDataDir("  Loader Config Table:        ", header.m_loadConfigTable);
+    skPrintDataDir("  Bound Import Table:         ", header.m_boundImport);
+    skPrintDataDir("  Import Address Table:       ", header.m_importAddressTable);
+    skPrintDataDir("  Delay Import Descriptor:    ", header.m_delayImportDescriptor);
+    skPrintDataDir("  CRT Runtime Header:         ", header.m_crtRuntimeHeader);
 }
 
 

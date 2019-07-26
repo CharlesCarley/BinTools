@@ -86,6 +86,12 @@ struct COFFOptionalHeaderCommonPE64 : COFFOptionalHeaderCommon
 
 
 
+typedef union COFFDataDirectory {
+    SKuint32 I32[2];
+    SKuint32 I64;
+} COFFDataDirectory;
+
+
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
 {
@@ -113,22 +119,22 @@ struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
 
 
     // Header Data Directories
-    SKuint64 m_exportTable;
-    SKuint64 m_importTable;
-    SKuint64 m_resourceTable;
-    SKuint64 m_exceptionTable;
-    SKuint64 m_certificateTable;
-    SKuint64 m_baseRelocationTable;
-    SKuint64 m_debug;
-    SKuint64 m_architecture;
-    SKuint64 m_globPtrReg;
-    SKuint64 m_threadLocalStorage;
-    SKuint64 m_loadConfigTable;
-    SKuint64 m_boundImport;
-    SKuint64 m_importAddressTable;
-    SKuint64 m_delayImportDescriptor;
-    SKuint64 m_crtRuntimeHeader;
-    SKuint64 m_reserved;
+    COFFDataDirectory m_exportTable;
+    COFFDataDirectory m_importTable;
+    COFFDataDirectory m_resourceTable;
+    COFFDataDirectory m_exceptionTable;
+    COFFDataDirectory m_certificateTable;
+    COFFDataDirectory m_baseRelocationTable;
+    COFFDataDirectory m_debug;
+    COFFDataDirectory m_architecture;
+    COFFDataDirectory m_globPtrReg;
+    COFFDataDirectory m_threadLocalStorage;
+    COFFDataDirectory m_loadConfigTable;
+    COFFDataDirectory m_boundImport;
+    COFFDataDirectory m_importAddressTable;
+    COFFDataDirectory m_delayImportDescriptor;
+    COFFDataDirectory m_crtRuntimeHeader;
+    COFFDataDirectory m_reserved;
 };
 
 
