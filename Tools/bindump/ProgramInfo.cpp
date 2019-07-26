@@ -99,6 +99,7 @@ void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
         const COFFSectionHeader& header = pe->getHeader();
 
         skPortableUtils::printHeader(header);
+
     }
 }
 
@@ -174,6 +175,22 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
             const COFFHeader& header = pe->getCommonHeader();
             
             skPortableUtils::printHeader(header);
+
+
+            // Print the varying header. //
+            skFileFormatType fpt = pe->getPlatformType();
+            if (fpt == FFT_32BIT)
+            {
+                COFFOptionalHeader32 dest;
+                pe->getOptionalHeader(dest);
+                skPortableUtils::printHeader(dest);
+            }
+            else if (fpt == FFT_64BIT)
+            {
+                COFFOptionalHeader64 dest;
+                pe->getOptionalHeader(dest);
+                skPortableUtils::printHeader(dest);
+            }
         }
 
         skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();

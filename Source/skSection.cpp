@@ -76,7 +76,7 @@ void skSection::initialize(void *ptr, size_t size)
 
     cs_arch arch = skSection_getCapStoneArch(m_owner->getArchitecture());
 
-    cs_mode mode = m_owner->getType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
+    cs_mode mode = m_owner->getPlatformType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
 
     cs_err err = cs_open(arch, mode, (csh *)&m_handle);
     if (err != CS_ERR_OK)

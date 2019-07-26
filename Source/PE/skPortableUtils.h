@@ -35,6 +35,8 @@ public:
     static void printHeader(const COFFHeader& header);
     static void printHeader(const COFFSectionHeader& header);
 
+    static void printHeader(const COFFOptionalHeader32& header);
+    static void printHeader(const COFFOptionalHeader64& header);
 };
 
 

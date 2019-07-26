@@ -52,7 +52,6 @@ int main(int argc, char** argv)
         return -1;
     }
 
-
     if (prog.m_state == MS_MAIN)
     {
         // enter into interactive mode

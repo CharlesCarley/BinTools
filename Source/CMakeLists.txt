@@ -24,30 +24,32 @@
 set(TargetName          BinaryFile)
 set(TargetName_GRP      "")
 
-set(TargetName_HDR_ELF
+
+set(TargetName_SRC
+    skBinaryFile.h
+    skBinaryFileCommon.h
+    skDefaultFile.h
+    skPrintUtils.h
+    skSection.h
+    skSymbol.h
     ELF/skElfFile.h
     ELF/skElfTypes.h
     ELF/skElfUtils.h
     ELF/skElfSection.h
     ELF/skElfSymbol.h
-)
-
-set(TargetName_SRC_ELF
-    ELF/skElfFile.cpp
-    ELF/skElfSection.cpp
-    ELF/skElfSymbol.cpp
-    ELF/skElfUtils.cpp
-)
-
-set(TargetName_HDR_PE
     PE/skPortableFile.h
     PE/skPortableTypes.h
     PE/skPortableSection.h
     PE/skPortableUtils.h
-)
-
-
-set(TargetName_SRC_PE
+    skBinaryFile.cpp
+    skDefaultFile.cpp
+    skPrintUtils.cpp
+    skSection.cpp
+    skSymbol.cpp
+    ELF/skElfFile.cpp
+    ELF/skElfSection.cpp
+    ELF/skElfSymbol.cpp
+    ELF/skElfUtils.cpp
     PE/skPortableFile.h
     PE/skPortableTypes.h
     PE/skPortableSection.h
@@ -57,38 +59,14 @@ set(TargetName_SRC_PE
     PE/skPortableUtils.cpp
 )
 
-set(TargetName_SRC
-    skBinaryFile.h
-    skBinaryFileCommon.h
-    skDefaultFile.h
-    skPrintUtils.h
-    skSection.h
-    skSymbol.h
-    
-    skBinaryFile.cpp
-    skDefaultFile.cpp
-    skPrintUtils.cpp
-    skSection.cpp
-    skSymbol.cpp
-
-    ${TargetName_SRC_PE}
-    ${TargetName_SRC_ELF}
-    ${TargetName_HDR_PE}
-    ${TargetName_HDR_ELF}
-)
-
-
 include_directories(. 
     ${BinTools_SOURCE_DIR}/Extern
     ${CAPSTONE_INCLUDE}
 )
 
 add_library(${TargetName} ${TargetName_SRC})
-
 target_link_libraries(${TargetName} ${CAPSTONE_LIB})
 
 if (BinTools_USE_FOLDERS)
     set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
 endif()
-
-

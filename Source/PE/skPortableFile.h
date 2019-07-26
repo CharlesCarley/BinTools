@@ -42,7 +42,7 @@ private:
     SKuint16                  m_imageBase;
     SKuint64                  m_sectionStart;
     Sections                  m_sectionHeaders;
-    SectionTable                m_sectionTable;
+    SectionTable              m_sectionTable;
 
 
     friend class skBinaryFile;
@@ -57,6 +57,20 @@ public:
     {
         return m_header;
     }
+
+
+
+    // Returns access to the 32Bit optional header
+    // Note that it is only valid when getPlatformType() == FFT_32BIT
+    void getOptionalHeader(COFFOptionalHeader32& dest);
+
+
+    // Returns access to the 32Bit optional header
+    // Note that it is only valid when getPlatformType() == FFT_64BIT
+    void getOptionalHeader(COFFOptionalHeader64& dest);
+
+
+
 
     SKuint64 getEntryPoint(void)
     {

@@ -34,18 +34,19 @@
 class skBinaryFile
 {
 public:
-    typedef skArray<skString>                   StringArray;
-    typedef skHashTable<skString, skSection *>  SectionTable;
-    typedef skHashTable<skString, skSymbol *>   SymbolTable;
+    typedef skArray<skString>                    StringArray;
+    typedef skHashTable<skString, skSection *>   SectionTable;
+    typedef skHashTable<skString, skSymbol *>    SymbolTable;
 
 protected:
-    char *                m_data;
+    char*                m_data;
     SKsize                m_len;
     skFileFormat          m_fileFormat;
     skFileFormatType      m_fileFormatType;
     skMachineArchitecture m_arch;
-    SectionTable            m_sectionLookup;
-    SymbolTable           m_symTable;
+
+    SectionTable m_sectionLookup;
+    SymbolTable  m_symTable;
 
 
     // Protected constructor. Load files via the static interface
@@ -71,7 +72,7 @@ public:
     }
 
     // Returns the files platform type  
-    inline skFileFormatType getType(void)
+    inline skFileFormatType getPlatformType(void)
     {
         return m_fileFormatType;
     }

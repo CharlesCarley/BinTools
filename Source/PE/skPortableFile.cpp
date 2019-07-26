@@ -26,6 +26,7 @@
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "Utils/skDebugger.h"
+#include "Utils/skMemoryUtils.h"
 #include "skSection.h"
 
 
@@ -44,6 +45,33 @@ skPortableFile ::~skPortableFile()
 {
     delete m_imageHeader;
 }
+
+
+
+void skPortableFile::getOptionalHeader(COFFOptionalHeader32 &dest)
+{
+    // The file format type is the only indicator for determining
+    // how m_imageHeader can be cast to the correct value.
+    if (m_imageHeader && m_fileFormatType == FFT_32BIT)
+    {
+        COFFOptionalHeader32 *h32 = (COFFOptionalHeader32 *)m_imageHeader;
+
+        skMemcpy(&dest, h32, sizeof(COFFOptionalHeader32));
+    }
+}
+
+void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest)
+{
+    // The file format type is the only indicator for determining
+    // how m_imageHeader can be cast to the correct value.
+    if (m_imageHeader && m_fileFormatType == FFT_32BIT)
+    {
+        COFFOptionalHeader64 *h64 = (COFFOptionalHeader64 *)m_imageHeader;
+
+        skMemcpy(&dest, h64, sizeof(COFFOptionalHeader64));
+    }
+}
+
 
 
 void skPortableFile::loadImpl(void)

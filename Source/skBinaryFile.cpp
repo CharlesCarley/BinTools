@@ -133,6 +133,7 @@ skBinaryFile::~skBinaryFile()
     SymbolTable::Iterator sym_it = m_symTable.iterator();
     while (sym_it.hasMoreElements())
         delete sym_it.getNext().second;
+
 }
 
 

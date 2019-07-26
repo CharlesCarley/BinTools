@@ -36,14 +36,13 @@
 #include "skSection.h"
 
 
-skElfFile::skElfFile()
+skElfFile::skElfFile() :
+    m_symtab(0)
 {
-    // make sure this type of instance
-    // is visible in base class
+    // Make sure this type of instance is visible in the base class.
     m_fileFormat = FF_ELF;
 
-    m_symtab = 0;
-    memset(&m_header, 0, sizeof(skElfHeaderInfo64));
+    skMemset(&m_header, 0, sizeof(skElfHeaderInfo64));
 }
 
 skElfFile::~skElfFile()
