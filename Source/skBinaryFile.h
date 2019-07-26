@@ -61,7 +61,8 @@ public:
 
     // Create instances based on the supplied file's magic.
     // Returns skDefaultFile if the file format is not supported, or NULL if the
-    // file can not be loaded.
+    // file can not be loaded. Instances created through this function sill must be 
+    // deleted when no longer needed. 
     static skBinaryFile *load(const char *file);
 
 
