@@ -21,16 +21,23 @@ This project is an experimental repository for examining executable files and fo
 
 ##### Command line usage
 ```
-bindump [options] -f [path to file]
-  
-  Options:
+bindump <options> <path to file>
 
-  -m    Mark specific code [0-255].
-  -b    Convert output to binary.
-  -a    Display ASCII listings.
-  -d    Display disassembly.
-  -h    Display this help message.
-  -i    Interactive mode.
+  Options:
+      -m [0-255]  Mark specific code.
+
+      -a          Display ASCII table.
+      -b          Convert output to binary.
+      -d          Display disassembly in code sections.
+      -h          Display this help message.
+
+      -o [1-4]    Interactive menu option.
+                  - 1. Print a hex dump of the files contents.
+                  - 2. Print section headers and the hex dump of each.
+                  - 3. List all loaded section names
+                  - 4. List all loaded symbols
+
+      -i          Run in interactive mode.
 ```
 
 
@@ -45,7 +52,8 @@ bindump [options] -f [path to file]
    3. Print section names
    4. Display specific section name
       .bss, .init, .text, etc
- Print Options:
+   5. Print symbol names
+Print Options:
    A. Display ASCII
    B. Display Binary
    D. Display Disassembly
