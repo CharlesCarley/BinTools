@@ -72,7 +72,7 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 
         if (prog.m_flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_GREY);
-       skPrintf(" Name                 Offset             Index\n");
+       skPrintf(" Name                 Offset             Index\n\n");
         if (prog.m_flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_LIGHT_GREY);
         int i = 0;
@@ -225,7 +225,7 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, const std::string& name)
 }
 
 
-void HexDump_PrintSymtab(HexDump_ProgramInfo& prog)
+void HexDump_PrintSymbols(HexDump_ProgramInfo& prog)
 {
     skBinaryFile* bin = prog.m_fp;
     if (bin)
@@ -250,11 +250,9 @@ void HexDump_PrintSymtab(HexDump_ProgramInfo& prog)
                 skSymbol* sym = it.getNext().second;
                 if (prog.m_flags & PF_COLORIZE)
                     skPrintUtils::writeColor(CS_LIGHT_GREY);
-
-                if (RPL_LEN_IS_8)
-                    skPrintf("%016llx   %s\n", sym->getAddress(), sym->getName().c_str());
-                else
-                    skPrintf("%08llx    %s\n", sym->getAddress(), sym->getName().c_str());
+    
+                
+                skPrintf("%16llx   %s\n", sym->getAddress(), sym->getName().c_str());
             }
         }
     }
@@ -335,7 +333,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
     }
     case '5':
     {
-        HexDump_PrintSymtab(prog);
+        HexDump_PrintSymbols(prog);
         skPrintUtils::pause();
         break;
     }

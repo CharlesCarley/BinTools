@@ -30,22 +30,21 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ProgramInfo.h"
 #include "Utils/skDebugger.h"
 #include "skBinaryFile.h"
 #include "skPrintUtils.h"
-#include "ProgramInfo.h"
-
 
 
 
 int main(int argc, char** argv)
 {
     HexDump_ProgramInfo prog = {MS_EXIT, 0, PF_DEFAULT, -1};
-    
+
     if (HexDump_ParseCommandLine(prog, argc, argv) == -1)
     {
         HexDump_Usage();
-        
+
         if (prog.m_fp)
             delete prog.m_fp;
 
@@ -62,7 +61,23 @@ int main(int argc, char** argv)
     else
     {
         if (prog.m_fp)
-            HexDump_PrintAll(prog);
+        {
+            switch (prog.m_opt)
+            {
+            case 2:
+                HexDump_PrintSections(prog);
+                break;
+            case 3:
+                HexDump_PrintSectionNames(prog);
+                break;
+            case 4:
+                HexDump_PrintSymbols(prog);
+                break;
+            default:
+                HexDump_PrintAll(prog);
+                break;
+            }
+        }
     }
 
     delete prog.m_fp;
@@ -74,16 +89,23 @@ int main(int argc, char** argv)
 
 void HexDump_Usage(void)
 {
-    std::cout << "bindump [options] -f [path to file]\n";
-    std::cout << "                                   \n";
-    std::cout << "  Options:                         \n";
-    std::cout << "                                   \n";
-    std::cout << "  -m    Mark specific code [0-255].\n";
-    std::cout << "  -b    Convert output to binary.  \n";
-    std::cout << "  -a    Display ASCII listings.    \n";
-    std::cout << "  -d    Display disassembly.       \n";
-    std::cout << "  -h    Display this help message. \n";
-    std::cout << "  -i    Interactive mode.          \n";
+    std::cout << "bindump <options> <path to file>                                      \n";
+    std::cout << "                                                                      \n";
+    std::cout << "  Options:                                                            \n";
+    std::cout << "      -m [0-255]  Mark specific code.                                 \n";
+    std::cout << "                                                                      \n";
+    std::cout << "      -a          Display ASCII table.                                \n";
+    std::cout << "      -b          Convert output to binary.                           \n";
+    std::cout << "      -d          Display disassembly in code sections.               \n";
+    std::cout << "      -h          Display this help message.                          \n";
+    std::cout << "                                                                      \n";
+    std::cout << "      -o [1-4]    Interactive menu option.                            \n";
+    std::cout << "                  - 1. Print a hex dump of the files contents.        \n";
+    std::cout << "                  - 2. Print section headers and the hex dump of each.\n";
+    std::cout << "                  - 3. List all loaded section names                  \n";
+    std::cout << "                  - 4. List all loaded symbols                        \n";
+    std::cout << "                                                                      \n";
+    std::cout << "      -i          Run in interactive mode.                            \n";
 }
 
 
@@ -97,8 +119,9 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
     int    i;
     char*  ch = 0;
     char   sw;
+    bool   err = false;
 
-    for (i = 0; i < argc; i++)
+    for (i = 1; i < argc - 1; i++)
     {
         ch = argv[i];
         if (ch && *ch == '-')
@@ -111,62 +134,58 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
 
             switch (sw)
             {
-            case 0x66:
+            case 'm':
             {
                 ++i;
                 if (i < argc)
-                {
-                    prog.m_fileName = argv[i];
-
-                    prog.m_fp = skBinaryFile::load(argv[i]);
-                }
-                else
-                {
-                    skPrintf("Missing file argument!\n");
-                    return -1;
-                }
+                    prog.m_code = skClamp((int) std::strtol(argv[i], 0, 16), 0, 255);
             }
             break;
-            case 0x6D:
+            case 'o':
             {
                 ++i;
                 if (i < argc)
-                    prog.m_code = (int)std::strtol(argv[i], 0, 16);
+                    prog.m_opt = skClamp((int) std::strtol(argv[i], 0, 10), 1, 4);
             }
             break;
-            case 0x62:
-                prog.m_flags |= PF_BINARY;
-                break;
-            case 0x63:
-                break;
-            case 0x61:
+            case 'a':
                 prog.m_flags |= PF_ASCII;
                 break;
-            case 0x64:
+            case 'b':
+                prog.m_flags |= PF_BINARY;
+                break;
+            case 'd':
                 prog.m_flags |= PF_DISASEMBLE;
                 break;
-            case 0x68:
+            case 'h':
                 HexDump_Usage();
                 return -1;
-            case 0x69:
+            case 'i':
                 prog.m_state = MS_MAIN;
                 break;
-            case 0x78:
-            {
-                if (offs < alen)
-                    sw = ch[offs++];
-
-                if (sw == 0x68)
-                {
-                    prog.m_flags |= PF_HEX;
-                    break;
-                }
-            }
             default:
                 skPrintf("unknown argument '%c'\n", sw);
                 return -1;
             }
         }
+    }
+
+    if (argc >= 2)
+    {
+        prog.m_fileName = argv[argc-1];
+
+        prog.m_fp = skBinaryFile::load(argv[argc - 1]);
+        if (!prog.m_fp)
+            err = true;
+    }
+    else
+        err = true;
+
+    
+    if (err)
+    {
+        skPrintf("Missing file argument!\n");
+        return -1;
     }
     return 0;
 }

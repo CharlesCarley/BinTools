@@ -42,6 +42,7 @@ struct HexDump_ProgramInfo
     skBinaryFile* m_fp;
     int           m_flags;
     int           m_code;
+    int           m_opt;
     string        m_fileName;
 };
 
@@ -49,6 +50,11 @@ struct HexDump_ProgramInfo
 extern int  HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv);
 extern void HexDump_Usage(void);
 extern void HexDump_Interactive(HexDump_ProgramInfo& prog);
+
 extern void HexDump_PrintAll(HexDump_ProgramInfo& prog);
+extern void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog);
+extern void HexDump_PrintSections(HexDump_ProgramInfo& prog);
+extern void HexDump_PrintSymbols(HexDump_ProgramInfo& prog);
+
 
 #endif//_ProgramInfo_h_

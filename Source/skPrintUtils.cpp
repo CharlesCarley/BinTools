@@ -146,12 +146,16 @@ void skPrintUtils::writeColor(int fg, int bg)
         return;
 
 #if SK_PLATFORM != SK_PLATFORM_WIN32
+
     unsigned char* col = getColor((skConsoleColorSpace)fg, (skConsoleColorSpace)bg);
     skPrintf("\e[%im", col[0]);
+
 #else
     if (m_stdout == 0)
         m_stdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
+
     ::SetConsoleTextAttribute(m_stdout, getColor((skConsoleColorSpace)fg, (skConsoleColorSpace)bg));
+
 #endif
 }
 
