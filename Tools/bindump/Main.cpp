@@ -94,16 +94,16 @@ void HexDump_Usage(void)
     std::cout << "  Options:                                                            \n";
     std::cout << "      -m [0-255]  Mark specific code.                                 \n";
     std::cout << "                                                                      \n";
-    std::cout << "      -a          Display ASCII table.                                \n";
-    std::cout << "      -b          Convert output to binary.                           \n";
+    std::cout << "      -a          Display an ASCII table in the hex dump output.      \n";
+    std::cout << "      -b          Display a binary table in the hex dump output.      \n";
     std::cout << "      -d          Display disassembly in code sections.               \n";
     std::cout << "      -h          Display this help message.                          \n";
     std::cout << "                                                                      \n";
     std::cout << "      -o [1-4]    Interactive menu option.                            \n";
     std::cout << "                  - 1. Print a hex dump of the files contents.        \n";
     std::cout << "                  - 2. Print section headers and the hex dump of each.\n";
-    std::cout << "                  - 3. List all loaded section names                  \n";
-    std::cout << "                  - 4. List all loaded symbols                        \n";
+    std::cout << "                  - 3. List all loaded section names.                 \n";
+    std::cout << "                  - 4. List all loaded symbols.                       \n";
     std::cout << "                                                                      \n";
     std::cout << "      -i          Run in interactive mode.                            \n";
 }

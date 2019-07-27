@@ -262,25 +262,28 @@ void HexDump_PrintSymbols(HexDump_ProgramInfo& prog)
 
 void HexDump_Interactive(HexDump_ProgramInfo& prog)
 {
-    std::cout << "                                                    \n";
-    std::cout << " Please Select From The Following Menu:             \n";
-    std::cout << "                                                    \n";
-    std::cout << " Print Options:                                     \n";
-    std::cout << "   1. Print hex dump                                \n";
-    std::cout << "   2. Print section headers and the hex dump of each\n";
-    std::cout << "   3. Print section names                           \n";
-    std::cout << "   4. Display specific section name                 \n";
-    std::cout << "      .bss, .init, .text, etc                       \n";
-    std::cout << "   5. Print symbol names                            \n";
-    std::cout << " Print Options:                                     \n";
-    std::cout << "   A. Display ASCII                                 \n";
-    std::cout << "   B. Display Binary                                \n";
-    std::cout << "   D. Display Disassembly                           \n";
-    std::cout << "   H. Display Hex                                   \n";
-    std::cout << "   M. Mark specific code                            \n";
-    std::cout << " File Options:                                      \n";
-    std::cout << "   F. Load file                                     \n";
-    std::cout << "                                            Q-Exit. \n";
+    std::cout << "                                                      \n";
+    std::cout << "Please Select From The Following Menu:                \n";
+    std::cout << "                                                      \n";
+    std::cout << "  Print Options:                                      \n";
+    std::cout << "    1. Print a hex dump of the files contents.        \n";
+    std::cout << "    2. Print section headers and the hex dump of each.\n";
+    std::cout << "    3. List all loaded section names.                 \n";
+    std::cout << "    4. Display specific section name.                 \n";
+    std::cout << "         .bss, .init, .text, etc                      \n";
+    std::cout << "    5. List all loaded symbols.                       \n";
+    std::cout << "                                                      \n";
+    std::cout << "  Display Options:                                    \n";
+    std::cout << "    A. Display ASCII                                  \n";
+    std::cout << "    B. Display Binary                                 \n";
+    std::cout << "    D. Display Disassembly                            \n";
+    std::cout << "    H. Display Hex                                    \n";
+    std::cout << "    M. Mark specific code                             \n";
+    std::cout << "                                                      \n";
+    std::cout << "  File Options:                                       \n";
+    std::cout << "    F. Path to file                                   \n";
+    std::cout << "                                                      \n";
+    std::cout << "                                        Q-Exit.       \n";
     char opt;
 
     cout << prog.m_fileName << ">";

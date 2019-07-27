@@ -26,16 +26,16 @@ bindump <options> <path to file>
   Options:
       -m [0-255]  Mark specific code.
 
-      -a          Display ASCII table.
-      -b          Convert output to binary.
+      -a          Display an ASCII table in the hex dump output.
+      -b          Display a binary table in the hex dump output.
       -d          Display disassembly in code sections.
       -h          Display this help message.
 
       -o [1-4]    Interactive menu option.
                   - 1. Print a hex dump of the files contents.
                   - 2. Print section headers and the hex dump of each.
-                  - 3. List all loaded section names
-                  - 4. List all loaded symbols
+                  - 3. List all loaded section names.
+                  - 4. List all loaded symbols.
 
       -i          Run in interactive mode.
 ```
@@ -44,22 +44,25 @@ bindump <options> <path to file>
 
 ##### Interactive mode
 ```
- Please Select From The Following Menu:
+Please Select From The Following Menu:
 
- Print Options:
-   1. Print hex dump
-   2. Print section headers and the hex dump of each
-   3. Print section names
-   4. Display specific section name
-      .bss, .init, .text, etc
-   5. Print symbol names
-Print Options:
-   A. Display ASCII
-   B. Display Binary
-   D. Display Disassembly
-   H. Display Hex
-   M. Mark specific code
- File Options:
-   F. Load file
-                                            Q-Exit.
+  Print Options:
+    1. Print a hex dump of the files contents.
+    2. Print section headers and the hex dump of each.
+    3. List all loaded section names.
+    4. Display specific section name.
+         .bss, .init, .text, etc
+    5. List all loaded symbols.
+
+  Display Options:
+    A. Display ASCII
+    B. Display Binary
+    D. Display Disassembly
+    H. Display Hex
+    M. Mark specific code.
+
+  File Options:
+    F. Path to file
+    
+                                        Q-Exit.
 ```
