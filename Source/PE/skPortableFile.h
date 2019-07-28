@@ -33,6 +33,9 @@
 class skPortableFile : public skBinaryFile
 {
 public:
+
+
+    // TODO: Remove all of this and go thorough m_sectionLookup instead.
     typedef skArray<COFFSectionHeader>            Sections;
     typedef skHashTable<char*, COFFSectionHeader> SectionTable;
 

@@ -34,12 +34,11 @@
 class skBinaryFile
 {
 public:
-    typedef skArray<skString>                    StringArray;
-    typedef skHashTable<skString, skSection *>   SectionTable;
-    typedef skHashTable<skString, skSymbol *>    SymbolTable;
+    typedef skHashTable<skString, skSection *> SectionTable;
+    typedef skHashTable<skString, skSymbol *>  SymbolTable;
 
 protected:
-    char*                m_data;
+    char *                m_data;
     SKsize                m_len;
     skFileFormat          m_fileFormat;
     skFileFormatType      m_fileFormatType;
@@ -61,8 +60,8 @@ public:
 
     // Create instances based on the supplied file's magic.
     // Returns skDefaultFile if the file format is not supported, or NULL if the
-    // file can not be loaded. Instances created through this function sill must be 
-    // deleted when no longer needed. 
+    // file can not be loaded. Instances created through this function sill must be
+    // deleted when no longer needed.
     static skBinaryFile *load(const char *file);
 
 
@@ -72,13 +71,13 @@ public:
         return m_fileFormat;
     }
 
-    // Returns the files platform type  
+    // Returns the files platform type
     inline skFileFormatType getPlatformType(void)
     {
         return m_fileFormatType;
     }
 
-    // Returns an abstract enumeration representing 
+    // Returns an abstract enumeration representing
     // the underlying files architecture.
     inline skMachineArchitecture getArchitecture(void)
     {
@@ -129,9 +128,6 @@ public:
     virtual SKuint64 getEntryPoint(void) = 0;
 
 protected:
-
-
-
     // Called from load.
     // loadImpl is responsible for converting the underlying data into this interface.
     virtual void loadImpl(void) = 0;
