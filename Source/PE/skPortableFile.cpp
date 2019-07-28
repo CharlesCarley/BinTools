@@ -205,4 +205,7 @@ void skPortableFile::loadImpl(void)
             skPrintf("Error - duplicate symbol name!\n");
         }
     }
+
+
+    // TODO: extract IAT
 }
