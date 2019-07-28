@@ -34,10 +34,14 @@ skElfSection::skElfSection(skBinaryFile*         owner,
                            size_t                size,
                            size_t                offset,
                            const skElfSectionHeader64& hdr):
-    skSection(owner, name, data, size, offset)
+    skSection(owner, name, data, size, offset),
+    m_header(hdr)
 {
-    skMemcpy(&m_header, &hdr, sizeof(skElfSectionHeader64));
+
+    if (m_header.m_flags & ESHT_EXEC_INST)
+        m_isExecutable = true;
 }
+
 
 skElfSection::~skElfSection()
 {

@@ -37,7 +37,7 @@
 
 
 skElfFile::skElfFile() :
-    m_symtab(0)
+    m_strtab(0)
 {
     // Make sure this type of instance is visible in the base class.
     m_fileFormat = FF_ELF;
@@ -163,17 +163,17 @@ void skElfFile::loadSections(void)
     }
 
     // Find the offset
-    skElfSectionHeader* sectionBasePtr = (skElfSectionHeader*)(m_data + (offe - sizeof(skElfSectionHeader)));
-    m_symtab                           = sectionBasePtr->m_offset;
-
-    sectionBasePtr = (skElfSectionHeader*)(m_data + offs);
+    skElfSectionHeader* secPtr = (skElfSectionHeader*)(m_data + (offe - sizeof(skElfSectionHeader)));
+    
+    m_strtab = secPtr->m_offset;
+    secPtr   = (skElfSectionHeader*)(m_data + offs);
 
     // Store each section one by one.
-    for (i = offs; i < offe && sectionBasePtr; i += sizeof(skElfSectionHeader), ++sectionBasePtr)
+    for (i = offs; i < offe && secPtr; i += sizeof(skElfSectionHeader), ++secPtr)
     {
-        const skElfSectionHeader& sp = (*sectionBasePtr);
+        const skElfSectionHeader& sp = (*secPtr);
 
-        SKsize sn = (SKsize)m_symtab + sp.m_name;
+        SKsize sn = (SKsize)m_strtab + sp.m_name;
         if (sn < m_len)
         {
             elfName name = (elfName)(m_data + sn);
@@ -186,11 +186,11 @@ void skElfFile::loadSections(void)
             {
                 if (sp.m_offset + sp.m_size < m_len)
                 {
-                    skElfSectionHeader64 spd;
+                    skElfSectionHeader64 header;
                     if (m_fileFormatType == FFT_32BIT)
-                        skElfUtils::copyHeader(spd, *((skElfSectionHeader32*)sectionBasePtr));
+                        skElfUtils::copyHeader(header, *((skElfSectionHeader32*)secPtr));
                     else
-                        skElfUtils::copyHeader(spd, *((skElfSectionHeader64*)sectionBasePtr));
+                        skElfUtils::copyHeader(header, *((skElfSectionHeader64*)secPtr));
 
                     skSection* section = new skElfSection(
                         this,
@@ -198,10 +198,7 @@ void skElfFile::loadSections(void)
                         m_data + sp.m_offset,
                         (SKsize)sp.m_size,
                         (size_t)sp.m_offset,
-                        spd);
-
-                    if (sp.m_flags & ESHT_EXEC_INST)
-                        section->_setExectuable(true);
+                        header);
 
                     m_sectionLookup.insert(name, section);
                 }
@@ -223,10 +220,11 @@ void skElfFile::loadSections(void)
 template <typename skElfSymbolHeader>
 void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
-    // Some symbols are nonexistent in a stripped binary (.strtab, .symtab)
     if (!strLookup || !symLookup)
         return;
 
+    // Some symbols are nonexistent in a stripped binary (.strtab, .symtab)
+ 
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
 

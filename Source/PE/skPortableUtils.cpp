@@ -34,12 +34,14 @@
 
 void skPortableUtils::printHeader(const COFFHeader& header)
 {
+    size_t bw;
+    char buf[32];
+
     skPrintf("  Machine:                    %u\n", header.m_machine);
     skPrintf("  Section Count:              %u\n", header.m_sectionCount);
 
-    char buf[32];
-    strftime(buf, 32, "%D %r", localtime((time_t*)&header.m_timeDateStamp));
-    if (buf[0] != 0)
+    bw = strftime(buf, 32, "%D %r", localtime((time_t*)&header.m_timeDateStamp));
+    if (buf[0] != 0 && bw > 0)
         skPrintf("  Timestamp:                  %s\n", buf);
     else
         skPrintf("  Timestamp:                  %u\n", header.m_timeDateStamp);

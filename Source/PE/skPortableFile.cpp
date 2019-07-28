@@ -174,15 +174,23 @@ void skPortableFile::loadImpl(void)
         {
             m_sectionTable.insert(name, sh);
 
-            size_t sectionOffset = getSectionOffset(sh);
-
-            if (sectionOffset + sh.m_virtualSize < m_len)
+            size_t size = sh.m_virtualSize;
+            if (sh.m_virtualSize > sh.m_sizeOfRawData)
             {
-                skSection *section = new skPortableSection(
-                    this, name, m_data + sectionOffset, (SKsize)sh.m_virtualSize, sectionOffset, sh);
+                // The section data is zero padded.
+                size = sh.m_sizeOfRawData;
+            }
 
-                if (sh.m_characteristics & CSC_HAS_CODE)
-                    section->_setExectuable(true);
+            if (sh.m_pointerToRawData + size < m_len)
+            {
+               
+                skSection *section = new skPortableSection(
+                        this,
+                        name,
+                        m_data + sh.m_pointerToRawData,
+                        (SKsize)size,
+                        sh.m_pointerToRawData,
+                        sh);
 
                 m_sectionLookup.insert(name, section);
             }
@@ -197,5 +205,4 @@ void skPortableFile::loadImpl(void)
             skPrintf("Error - duplicate symbol name!\n");
         }
     }
-
 }

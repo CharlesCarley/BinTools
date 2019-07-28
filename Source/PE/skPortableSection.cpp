@@ -35,13 +35,11 @@ skPortableSection::skPortableSection(skBinaryFile*      owner,
                                      size_t             size,
                                      size_t             offset,
                                      COFFSectionHeader& hdr) :
-    skSection(owner, name, data, size, offset)
+    skSection(owner, name, data, size, offset),
+    m_header(hdr)
 {
-    skMemcpy(&m_header, &hdr, sizeof(COFFSectionHeader));
-
-
-    //  Fix the header offset so that it points to the correct location
-    m_header.m_pointerToRawData = offset;
+    if (m_header.m_characteristics & CSC_HAS_CODE)
+        m_isExecutable = true;
 }
 
 skPortableSection::~skPortableSection()

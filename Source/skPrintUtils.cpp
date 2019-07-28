@@ -184,12 +184,16 @@ void skPrintUtils::clear(void)
 
 void skPrintUtils::pause(void)
 {
+    char ch;
     writeColor(CS_WHITE);
     skPrintf("\nPress enter to continue . . .");
+
+
     getc(stdin);
     for (;;)
     {
-        if (getc(stdin) == '\n')
+        ch = getc(stdin);
+        if (ch == '\n' || ch == '\r')
             break;
     }
     clear();

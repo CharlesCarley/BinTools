@@ -40,7 +40,7 @@ public:
 private:
     skElfHeaderInfo64 m_header;
     Sections          m_sections;
-    elf64             m_symtab;
+    elf64             m_strtab;
 
 
     friend class skBinaryFile;
@@ -90,14 +90,6 @@ public:
 
     
 private:
-
-
-    inline elf64 getNameOffset(const skElfSectionHeader64& header)
-    {
-        // return the offset in the symbol string 
-        // table for the supplied header
-        return m_symtab + header.m_name;
-    }
 
     template <typename skElfSymbol>
     void loadSections(void);

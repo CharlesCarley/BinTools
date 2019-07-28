@@ -59,7 +59,6 @@ public:
     }
 
 
-
     // Returns access to the 32Bit optional header
     // Note that it is only valid when getPlatformType() == FFT_32BIT
     void getOptionalHeader(COFFOptionalHeader32& dest);
@@ -80,13 +79,6 @@ public:
     }
 
 private:
-
-    inline size_t getSectionOffset(COFFSectionHeader& header)
-    {
-        // m_pointerToRawData points to the section location in the file.
-        return (size_t)(header.m_pointerToRawData);
-    }
-
 
     virtual void loadImpl(void);
 };

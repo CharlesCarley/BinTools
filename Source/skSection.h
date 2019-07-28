@@ -52,13 +52,6 @@ public:
     virtual ~skSection();
 
 
-
-    // Marks this section as executable
-    inline void _setExectuable(bool exe)
-    {
-        m_isExecutable = exe;
-    }
-
     // Returns true if this section contains executable code.
     inline bool isExectuable(void)
     {
