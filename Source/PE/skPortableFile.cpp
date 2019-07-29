@@ -24,6 +24,7 @@
 -------------------------------------------------------------------------------
 */
 #include "PE/skPortableFile.h"
+#include "PE/skPortableDirectory.h"
 #include "PE/skPortableSection.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skMemoryUtils.h"
@@ -34,7 +35,8 @@
 skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_sectionStart(0),
     m_imageHeader(0),
-    m_imageBase(dos_offset)
+    m_imageBase(0),
+    m_headerOffs(dos_offset)
 {
     m_fileFormat = FF_PE;
 
@@ -90,7 +92,7 @@ void skPortableFile::loadImpl(void)
 
     // Skip past the DOS stub program.
     // The PE signature is not part of the defined structure (+4)
-    ptr += m_imageBase + 4;
+    ptr += m_headerOffs + 4;
 
 
     skMemcpy(&m_header, ptr, sizeof(COFFHeader));
@@ -129,7 +131,10 @@ void skPortableFile::loadImpl(void)
         m_imageHeader = new COFFOptionalHeader32;
         skMemcpy(m_imageHeader, (COFFOptionalHeader32 *)ptr, sizeof(COFFOptionalHeader32));
 
-        m_sectionStart = 4 + m_imageBase + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
+        m_imageBase = ((COFFOptionalHeader32 *)m_imageHeader)->m_imageBase;
+
+
+        m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
     }
     else if (optMagic == COFF_MAG_PE64)
     {
@@ -145,7 +150,8 @@ void skPortableFile::loadImpl(void)
         m_imageHeader = new COFFOptionalHeader64;
         skMemcpy(m_imageHeader, ptr, sizeof(COFFOptionalHeader64));
 
-        m_sectionStart = 4 + m_imageBase + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
+        m_imageBase    = ((COFFOptionalHeader64 *)m_imageHeader)->m_imageBase;
+        m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
     }
     else
     {
@@ -157,13 +163,13 @@ void skPortableFile::loadImpl(void)
     m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
-    
+
     SKuint16 i16;
     for (i16 = 0; i16 < m_header.m_sectionCount; ++i16, ++sectionPtr)
     {
         COFFSectionHeader sh;
         skMemcpy(&sh, sectionPtr, sizeof(COFFSectionHeader));
-    
+
         char *name = (char *)sh.m_name;
         if ((*name) == '\0' || name[7] != '\0')
             continue;
@@ -179,14 +185,13 @@ void skPortableFile::loadImpl(void)
 
             if (sh.m_pointerToRawData + size < m_len)
             {
-               
                 skSection *section = new skPortableSection(
-                        this,
-                        name,
-                        m_data + sh.m_pointerToRawData,
-                        (SKsize)size,
-                        sh.m_pointerToRawData,
-                        sh);
+                    this,
+                    name,
+                    m_data + sh.m_pointerToRawData,
+                    (SKsize)size,
+                    sh.m_pointerToRawData,
+                    sh);
 
                 m_sectionLookup.insert(name, section);
             }
@@ -199,6 +204,243 @@ void skPortableFile::loadImpl(void)
         {
             // this is an error, it shouldn't have duplicate symbols
             skPrintf("Error - duplicate symbol name!\n");
+        }
+    }
+
+
+    if (m_fileFormatType == FFT_32BIT)
+    {
+        sortDataDirectories<COFFOptionalHeader32>();
+    }
+    else if (m_fileFormatType == FFT_64BIT)
+    {
+        sortDataDirectories<COFFOptionalHeader64>();
+    }
+
+
+
+    SectionTable::Iterator it = m_sectionLookup.iterator();
+    while (it.hasMoreElements())
+    {
+        skPortableSection *pes = reinterpret_cast<skPortableSection *>(it.getNext().second);
+
+        // break apart directories
+
+        skPortableSection::Directories::Iterator dit = pes->getDirectoryIterator();
+        while (dit.hasMoreElements())
+        {
+            skPortableDirectory *dir = dit.getNext();
+
+            switch (dir->getType())
+            {
+            case CDE_RESOURCE:
+                loadResourceDirectory(pes, dir);
+                break;
+            case CDE_IMPORT:
+                loadImportDirectory(pes, dir);
+                break;
+            case CDE_IMPORT_ADDRESS_TABLE:
+                break;
+            case CDE_EXPORT:
+            case CDE_EXCEPTION:
+            case CDE_CERTIFICATE:
+            case CDE_BASE_RELOCATION:
+            case CDE_DEBUG:
+            case CDE_ARCHITECTURE:
+            case CDE_GLOBAL_PTR:
+            case CDE_THREAD_LOCAL_STORAGE:
+            case CDE_LOAD_CONFIG:
+            case CDE_BOUND_IMPORT:
+            case CDE_DELAY_IMPORT_DESC:
+            case CDE_CRT_RUNTIME_HEADER:
+            default:
+                break;
+            }
+        }
+    }
+}
+
+
+
+void skPortableFile::loadResourceDirectory(skPortableSection *section, skPortableDirectory *resource)
+{
+}
+
+
+
+void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDirectory *directory)
+{
+    const skString &name = section->getName();
+
+
+    // resolve the relative virtual address.
+    SKuint32 addr = directory->getAddress();
+    if (addr == (SKuint32)-1)
+    {
+        // meaning the directory has no owner.
+        return;
+    }
+
+
+    // Grab the initial pointer with the
+    // offset to the directory table
+    SKuint8 *ptr = section->getPointer() + addr;
+
+
+    // Cast the pointer to the import directory structure so the memory can be
+    // iterated over in fixed  blocks.
+    COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
+
+
+    SKuint32 i    = 0,
+             len  = directory->getSize(),
+             maxl = section->getSize(),
+             ival = sizeof(COFFImportDirectoryTable);
+
+
+
+    while (i < len)  // constrain the maximum range in case idata is not null terminated
+    {
+        const COFFImportDirectoryTable &cidt = (*idata++);
+        if (cidt.m_iatAddress == 0)
+            break;
+
+        char *dllName = 0;
+
+        SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
+        if (addrOfDLL < maxl)
+        {
+            dllName = (char *)ptr + addrOfDLL;
+            skPrintf("%s\n", dllName);
+        }
+
+        SKuint32 addrOfHint = cidt.m_nameHintRVA - directory->getRVA();
+        if (addrOfHint < maxl)
+        {
+            char *cp = ((char *)ptr) + addrOfHint;
+
+            SKuint32 i = *(SKuint32 *)cp;
+
+
+            if (i & 0x80000000)
+            {
+                // lookup by ordinal
+                skPrintf("Lookup by ordinal\n");
+            }
+            else
+            {
+                /// look up by name
+                skPrintf("Lookup by name\n");
+
+                SKuint32 hint = i  - directory->getRVA();
+                SKuint16 *sp = (SKuint16 *)(((char *)ptr) + hint);
+                SKsize    vl;
+
+                i  = *sp++;
+                cp = (char *)sp;
+                while (*cp != '\0')
+                {
+                    vl = skStringUtils::length(cp) +1;
+                    if (vl % 2 != 0)
+                        ++vl;
+
+
+
+                    printf("%16u : %s\n", i, cp);
+
+                    cp += vl;
+
+                    if (skStringUtils::equals(dllName, cp)==0)
+                        break;
+
+                    sp = (SKuint16 *)cp;
+
+                    i  = *sp++;
+                    if (i == 0 || i > maxl)
+                        break;
+
+                    cp = (char *)sp;
+                }
+
+
+            }
+
+
+
+
+
+
+
+            skPrintf("%p\n", cp);
+        }
+
+
+
+
+        i += ival;
+    }
+}
+
+
+template <typename COFFOptionalHeaderVaryingBase>
+void skPortableFile::sortDataDirectories(void)
+{
+    // Find the locations of the data directories
+
+    COFFOptionalHeaderVaryingBase *hdr = reinterpret_cast<COFFOptionalHeaderVaryingBase *>(m_imageHeader);
+
+    COFFDataDirectories &fd = hdr->m_directories;
+
+    struct DataDir
+    {
+        COFFDataDirectory *ptr;
+        SKubyte            use;
+    };
+
+
+    DataDir directories[16] = {
+        {&fd.m_exportTable, 0},
+        {&fd.m_importTable, 0},
+        {&fd.m_resourceTable, 0},
+        {&fd.m_exceptionTable, 0},
+        {&fd.m_certificateTable, 0},
+        {&fd.m_baseRelocationTable, 0},
+        {&fd.m_debug, 0},
+        {&fd.m_globPtrReg, 0},
+        {&fd.m_threadLocalStorage, 0},
+        {&fd.m_loadConfigTable, 0},
+        {&fd.m_boundImport, 0},
+        {&fd.m_importAddressTable, 0},
+        {&fd.m_delayImportDescriptor, 0},
+        {&fd.m_crtRuntimeHeader, 0},
+        {&fd.m_reserved, 0},
+    };
+
+
+    int                    i;
+    SectionTable::Iterator it = m_sectionLookup.iterator();
+    while (it.hasMoreElements())
+    {
+        skPortableSection *pes = reinterpret_cast<skPortableSection *>(it.getNext().second);
+
+        const COFFSectionHeader &csh = pes->getHeader();
+
+        for (i = 0; i < CDE_MAX; ++i)
+        {
+            DataDir &ddb = directories[i];
+            if (ddb.use == 1)
+                continue;
+
+            COFFDataDirectory *dd = ddb.ptr;
+            if (!dd || dd->m_size == 0)
+                continue;
+
+            // Is the virtual address in the section?
+            if (dd->m_virtualAddress >= csh.m_virtualAddress && dd->m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
+            {
+                pes->_addDirectory((COFFDirectoryEnum)i, *dd);
+                ddb.use = 1;
+            }
         }
     }
 }

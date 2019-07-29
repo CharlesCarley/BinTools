@@ -338,7 +338,7 @@ void skPrintUtils_Hexdump(void* ptr, SKsize offset, SKsize stop, int flags, int 
 
 void skPrintUtils::writeAddress(SKuint64 addr)
 {
-    skPrintUtils::writeColor(CS_LIGHT_GREY);
+    skPrintUtils::writeColor(CS_GREY);
     skPrintf("%16llx  ", addr);
 }
  

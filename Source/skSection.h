@@ -95,7 +95,7 @@ public:
     // print the disassembly to stdout
     // This should eventually move to a client library beside
     // this library
-    void dissemble(int flags = 0);
+    void dissemble(int flags = 0, int code = -1);
 
 
 private:

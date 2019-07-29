@@ -35,7 +35,8 @@ class skPortableFile : public skBinaryFile
 private:
     COFFHeader                m_header;
     COFFOptionalHeaderCommon* m_imageHeader;
-    SKuint16                  m_imageBase;
+    SKuint16                  m_headerOffs;
+    SKuint64                  m_imageBase;
     SKuint64                  m_sectionStart;
 
 
@@ -73,6 +74,14 @@ public:
     }
 
 private:
+
+
+    void loadResourceDirectory(skPortableSection* section, skPortableDirectory* directory);
+    void loadImportDirectory(skPortableSection* section, skPortableDirectory* directory);
+
+    template <typename COFFOptionalHeaderVaryingBase>
+    void sortDataDirectories(void);
+
 
     virtual void loadImpl(void);
 };

@@ -25,34 +25,35 @@
 */
 #include "PE/skPortableSection.h"
 #include "PE/skPortableDirectory.h"
-#include "Utils/skDebugger.h"
-#include "skPrintUtils.h"
 
 
-
-skPortableSection::skPortableSection(skBinaryFile*      owner,
-                                     const skString&    name,
-                                     void*              data,
-                                     size_t             size,
-                                     size_t             offset,
-                                     COFFSectionHeader& hdr) :
-    skSection(owner, name, data, size, offset),
-    m_header(hdr)
+skPortableDirectory::skPortableDirectory() :
+    m_owner(0),
+    m_enum(CDE_UNKNOWN),
+    m_dir()
 {
-    if (m_header.m_characteristics & CSC_HAS_CODE)
-        m_isExecutable = true;
 }
 
-skPortableSection::~skPortableSection()
+
+skPortableDirectory::skPortableDirectory(skPortableSection *owner, COFFDirectoryEnum en, const COFFDataDirectory &dd) :
+    m_owner(owner),
+    m_enum(en),
+    m_dir(dd)
 {
-    Directories::Iterator it = m_directories.iterator();
-    while (it.hasMoreElements())
+}
+
+SKuint32 skPortableDirectory::getAddress(void)
+{
+    if (m_owner)
     {
-        delete it.getNext();
+        const COFFSectionHeader &hdr = m_owner->getHeader();
+
+        // USE: 
+        //   hdr.m_pointerToRawData + (m_dir.m_virtualAddress - hdr.m_virtualAddress)
+        //   If its relative to the start of the file data
+        //  otherwise:
+        return skClamp<SKuint32>(m_dir.m_virtualAddress - hdr.m_virtualAddress, 0, hdr.m_sizeOfRawData);
     }
+    return -1;
 }
 
-void skPortableSection::_addDirectory(COFFDirectoryEnum dir, const COFFDataDirectory& dd)
-{
-    m_directories.push_back(new skPortableDirectory(this, dir, dd));
-}

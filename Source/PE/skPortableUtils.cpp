@@ -67,7 +67,7 @@ void skPortableUtils::printHeader(const COFFSectionHeader& header)
     skPrintf("  Size of Header:             %u\n", (SKuint32)sizeof(COFFSectionHeader));
 }
 
-void skPrintDataDir(const char * msg, const COFFDataDirectory &dd)
+void skPrintDataDir(const char* msg, const COFFDataDirectory& dd)
 {
     if (dd.m_size)
         skPrintf("%s0x%x,%u\n", msg, dd.m_virtualAddress, dd.m_size);
@@ -101,21 +101,26 @@ void skPortableUtils_printHeader(const COFFOptionalHeader<COFFOptionalHeaderVary
     skPrintf("Data Directories\n\n");
     skPrintUtils::writeColor(CS_LIGHT_GREY);
 
-    skPrintDataDir("  Export Table:               ", header.m_exportTable);
-    skPrintDataDir("  Import Table:               ", header.m_importTable);
-    skPrintDataDir("  Resource Table:             ", header.m_resourceTable);
-    skPrintDataDir("  Exception Table:            ", header.m_exceptionTable);
-    skPrintDataDir("  Certificate Table:          ", header.m_certificateTable);
-    skPrintDataDir("  Base Relocation Table:      ", header.m_baseRelocationTable);
-    skPrintDataDir("  Debug Table:                ", header.m_debug);
-    skPrintDataDir("  Architecture (Reserved):    ", header.m_architecture);
-    skPrintDataDir("  Global Pointer Register:    ", header.m_globPtrReg);
-    skPrintDataDir("  Thread Local Storage:       ", header.m_threadLocalStorage);
-    skPrintDataDir("  Loader Config Table:        ", header.m_loadConfigTable);
-    skPrintDataDir("  Bound Import Table:         ", header.m_boundImport);
-    skPrintDataDir("  Import Address Table:       ", header.m_importAddressTable);
-    skPrintDataDir("  Delay Import Descriptor:    ", header.m_delayImportDescriptor);
-    skPrintDataDir("  CRT Runtime Header:         ", header.m_crtRuntimeHeader);
+
+    const COFFDataDirectories &dir = header.m_directories;
+
+
+
+    skPrintDataDir("  Export Table:               ", dir.m_exportTable);
+    skPrintDataDir("  Import Table:               ", dir.m_importTable);
+    skPrintDataDir("  Resource Table:             ", dir.m_resourceTable);
+    skPrintDataDir("  Exception Table:            ", dir.m_exceptionTable);
+    skPrintDataDir("  Certificate Table:          ", dir.m_certificateTable);
+    skPrintDataDir("  Base Relocation Table:      ", dir.m_baseRelocationTable);
+    skPrintDataDir("  Debug Table:                ", dir.m_debug);
+    skPrintDataDir("  Architecture (Reserved):    ", dir.m_architecture);
+    skPrintDataDir("  Global Pointer Register:    ", dir.m_globPtrReg);
+    skPrintDataDir("  Thread Local Storage:       ", dir.m_threadLocalStorage);
+    skPrintDataDir("  Loader Config Table:        ", dir.m_loadConfigTable);
+    skPrintDataDir("  Bound Import Table:         ", dir.m_boundImport);
+    skPrintDataDir("  Import Address Table:       ", dir.m_importAddressTable);
+    skPrintDataDir("  Delay Import Descriptor:    ", dir.m_delayImportDescriptor);
+    skPrintDataDir("  CRT Runtime Header:         ", dir.m_crtRuntimeHeader);
 }
 
 

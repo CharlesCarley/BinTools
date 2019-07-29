@@ -23,36 +23,60 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "PE/skPortableSection.h"
-#include "PE/skPortableDirectory.h"
-#include "Utils/skDebugger.h"
-#include "skPrintUtils.h"
+#ifndef _skPortableDirectory_h
+#define _skPortableDirectory_h
+
+#include "PE/skPortableTypes.h"
+
+class skPortableSection;
 
 
-
-skPortableSection::skPortableSection(skBinaryFile*      owner,
-                                     const skString&    name,
-                                     void*              data,
-                                     size_t             size,
-                                     size_t             offset,
-                                     COFFSectionHeader& hdr) :
-    skSection(owner, name, data, size, offset),
-    m_header(hdr)
+class skPortableDirectory
 {
-    if (m_header.m_characteristics & CSC_HAS_CODE)
-        m_isExecutable = true;
-}
+public:
+    skPortableDirectory();
+    skPortableDirectory(skPortableSection *owner, COFFDirectoryEnum en, const COFFDataDirectory &dd);
+    
+    // Returns the start address relative to the owning section.
+    SKuint32 getAddress(void);
+    
 
-skPortableSection::~skPortableSection()
-{
-    Directories::Iterator it = m_directories.iterator();
-    while (it.hasMoreElements())
+    // Returns the type of directory associated with the extracted structure
+    inline COFFDirectoryEnum getType(void)
     {
-        delete it.getNext();
+        return m_enum;
     }
-}
 
-void skPortableSection::_addDirectory(COFFDirectoryEnum dir, const COFFDataDirectory& dd)
-{
-    m_directories.push_back(new skPortableDirectory(this, dir, dd));
-}
+
+    // Returns the type of directory associated with the extracted structure
+    inline const COFFDataDirectory &getDirectory(void)
+    {
+        return m_dir;
+    }
+
+    // Returns the relative virtual address
+    inline SKuint32 getRVA(void)
+    {
+        return m_dir.m_virtualAddress;
+    }
+
+    // Returns the relative virtual address
+    inline SKuint32 getSize(void)
+    {
+        return m_dir.m_size;
+    }
+
+
+
+    inline skPortableSection *getOwner(void)
+    {
+        return m_owner;
+    }
+
+private:
+    skPortableSection *m_owner;
+    COFFDirectoryEnum  m_enum;
+    COFFDataDirectory  m_dir;
+};
+
+#endif  //_skPortableDirectory_h

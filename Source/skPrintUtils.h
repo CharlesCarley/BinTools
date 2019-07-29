@@ -86,7 +86,7 @@ public:
     static void clear(void);
     static void pause(void);
 
-    static void dumpHex(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT, int mark = 0, bool nl = true);
+    static void dumpHex(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
 };
 
 #endif  //_skPrintUtils_h_

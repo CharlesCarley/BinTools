@@ -101,6 +101,50 @@ struct COFFDataDirectory
 };
 
 
+enum COFFDirectoryEnum
+{
+    CDE_UNKNOWN = -1,          // initial flag
+    CDE_EXPORT,                // .edata section
+    CDE_IMPORT,                // .idata
+    CDE_RESOURCE,              // .rsrc
+    CDE_EXCEPTION,             // .pdata
+    CDE_CERTIFICATE,           // Attribute certificate table
+    CDE_BASE_RELOCATION,       // .reloc
+    CDE_DEBUG,                 // .debug
+    CDE_ARCHITECTURE,          // (reserved)
+    CDE_GLOBAL_PTR,            // global ptr resister
+    CDE_THREAD_LOCAL_STORAGE,  // .tls
+    CDE_LOAD_CONFIG,           // load configuration
+    CDE_BOUND_IMPORT,          // bound import table
+    CDE_IMPORT_ADDRESS_TABLE,  // import address table
+    CDE_DELAY_IMPORT_DESC,     // delay load import
+    CDE_CRT_RUNTIME_HEADER,    //.cormeta
+    CDE_RESERVED,
+    CDE_MAX
+};
+
+
+struct COFFDataDirectories 
+{
+    COFFDataDirectory m_exportTable;
+    COFFDataDirectory m_importTable;
+    COFFDataDirectory m_resourceTable;
+    COFFDataDirectory m_exceptionTable;
+    COFFDataDirectory m_certificateTable;
+    COFFDataDirectory m_baseRelocationTable;
+    COFFDataDirectory m_debug;
+    COFFDataDirectory m_architecture;
+    COFFDataDirectory m_globPtrReg;
+    COFFDataDirectory m_threadLocalStorage;
+    COFFDataDirectory m_loadConfigTable;
+    COFFDataDirectory m_boundImport;
+    COFFDataDirectory m_importAddressTable;
+    COFFDataDirectory m_delayImportDescriptor;
+    COFFDataDirectory m_crtRuntimeHeader;
+    COFFDataDirectory m_reserved;
+};
+
+
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
 {
@@ -128,22 +172,7 @@ struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
 
 
     // Header Data Directories
-    COFFDataDirectory m_exportTable;
-    COFFDataDirectory m_importTable;
-    COFFDataDirectory m_resourceTable;
-    COFFDataDirectory m_exceptionTable;
-    COFFDataDirectory m_certificateTable;
-    COFFDataDirectory m_baseRelocationTable;
-    COFFDataDirectory m_debug;
-    COFFDataDirectory m_architecture;
-    COFFDataDirectory m_globPtrReg;
-    COFFDataDirectory m_threadLocalStorage;
-    COFFDataDirectory m_loadConfigTable;
-    COFFDataDirectory m_boundImport;
-    COFFDataDirectory m_importAddressTable;
-    COFFDataDirectory m_delayImportDescriptor;
-    COFFDataDirectory m_crtRuntimeHeader;
-    COFFDataDirectory m_reserved;
+    COFFDataDirectories m_directories;
 };
 
 
@@ -168,6 +197,30 @@ struct COFFSectionHeader
 
 
 
+struct COFFResourceDirectory
+{
+    SKuint32 m_characteristics;
+    SKuint32 m_timeStamp;
+    SKuint16 m_majorVersion;
+    SKuint16 m_minorVersion;
+    SKuint16 m_namedEntryCount;
+    SKuint16 m_idEntryCount;
+};
+
+
+struct COFFImportDirectoryTable
+{
+    SKuint32 m_nameHintRVA;
+    SKuint32 m_timeStamp;
+    SKuint32 m_forwardChain;
+    SKuint32 m_nameRVA;
+    SKuint32 m_iatAddress;
+};
+
+
+
+
+
 // Define Utils_USE_COMPILER_CHECKS via CMake to check computed sizes during build.
 // If any of these fail the compiler will spit a negative subscript error.
 SK_ASSERTCOMP(COFFOptionalHeaderCommon_sizeof, sizeof(COFFOptionalHeaderCommon) == 24);
@@ -179,6 +232,11 @@ SK_ASSERTCOMP(COFFSectionHeader_sizeof, sizeof(COFFSectionHeader) == 40);
 SK_ASSERTCOMP(SKuint64_sizeof, sizeof(SKuint64) == 8);
 SK_ASSERTCOMP(COFFDataDirectory_sizeof, sizeof(COFFDataDirectory) == 8);
 
+
+
+class skPortableFile;
+class skPortableSection;
+class skPortableDirectory;
 
 
 

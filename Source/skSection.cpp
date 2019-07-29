@@ -88,7 +88,7 @@ void skSection::initialize(void *ptr, size_t size)
 
 
 
-void skSection::dissemble(int flags)
+void skSection::dissemble(int flags, int code)
 {
     if (m_handle == -1)
     {
@@ -99,7 +99,7 @@ void skSection::dissemble(int flags)
     // filter out non executable sections.
     if (!m_isExecutable)
     {
-        skPrintUtils::dumpHex(m_data, m_startAddress, m_size, PF_DEFAULT, -1);
+        skPrintUtils::dumpHex(m_data, m_startAddress, m_size, flags, code);
         return;
 
     }
@@ -117,7 +117,10 @@ void skSection::dissemble(int flags)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
             skPrintUtils::writeAddress(i.address);
-            skPrintUtils::dumpHex(i.bytes, 0, i.size, PF_HEXDIS, -1, false);
+
+
+            int fl = flags & ~(PF_ADDRESS | PF_ASCII);
+            skPrintUtils::dumpHex(i.bytes, 0, i.size, fl, code, false);
 
             skPrintUtils::writeColor(CS_WHITE);
             skPrintf("%s\t%s\n", i.mnemonic, i.op_str);

@@ -33,8 +33,13 @@
 
 class skPortableSection : public skSection
 {
+public:
+    typedef skArray<skPortableDirectory *> Directories;
+
+
 private:
     COFFSectionHeader m_header;
+    Directories       m_directories;
 
 public:
     skPortableSection(skBinaryFile *     owner,
@@ -50,6 +55,16 @@ public:
     {
         return m_header;
     }
+
+
+
+    Directories::Iterator getDirectoryIterator(void)
+    {
+        return m_directories.iterator();
+    }
+
+
+    void _addDirectory(COFFDirectoryEnum dir, const COFFDataDirectory &dd);
 
 };
 

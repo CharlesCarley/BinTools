@@ -37,7 +37,8 @@ set(TargetName_SRC
     ELF/skElfUtils.h
     ELF/skElfSection.h
     ELF/skElfSymbol.h
-    PE/skPortableFile.h
+    PE/skPortableDirectory.h
+    PE/skPortableUtils.h
     PE/skPortableTypes.h
     PE/skPortableSection.h
     PE/skPortableUtils.h
@@ -50,6 +51,7 @@ set(TargetName_SRC
     ELF/skElfSection.cpp
     ELF/skElfSymbol.cpp
     ELF/skElfUtils.cpp
+    PE/skPortableDirectory.cpp
     PE/skPortableFile.h
     PE/skPortableTypes.h
     PE/skPortableSection.h
