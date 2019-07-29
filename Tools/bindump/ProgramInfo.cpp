@@ -147,7 +147,7 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
     if (prog.m_flags & PF_COLORIZE)
         skPrintUtils::writeColor(CS_WHITE);
     if (prog.m_flags & PF_DISASEMBLE)
-        section->dissemble(prog.m_flags);
+        section->dissemble(prog.m_flags, prog.m_code);
     else
         skPrintUtils::dumpHex(section->getPointer(),
                               section->getStartAddress(),
