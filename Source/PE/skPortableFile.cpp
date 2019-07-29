@@ -157,23 +157,19 @@ void skPortableFile::loadImpl(void)
     m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
 
     COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
-    m_sectionHeaders.reserve(m_header.m_sectionCount);
-
+    
     SKuint16 i16;
     for (i16 = 0; i16 < m_header.m_sectionCount; ++i16, ++sectionPtr)
     {
         COFFSectionHeader sh;
         skMemcpy(&sh, sectionPtr, sizeof(COFFSectionHeader));
-        m_sectionHeaders.push_back(sh);
-
+    
         char *name = (char *)sh.m_name;
         if ((*name) == '\0' || name[7] != '\0')
             continue;
 
         if (m_sectionLookup.find(name) == SK_NPOS)
         {
-            m_sectionTable.insert(name, sh);
-
             size_t size = sh.m_virtualSize;
             if (sh.m_virtualSize > sh.m_sizeOfRawData)
             {
@@ -205,7 +201,4 @@ void skPortableFile::loadImpl(void)
             skPrintf("Error - duplicate symbol name!\n");
         }
     }
-
-
-    // TODO: extract IAT
 }

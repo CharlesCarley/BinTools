@@ -117,7 +117,7 @@ void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
 
 
 
-void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
+void HexDump_PrintSectionCommon(HexDump_ProgramInfo& prog, skSection* section)
 {
     if (!section || !prog.m_fp)
         return;
@@ -133,7 +133,15 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
         skPrintUtils::writeColor(CS_LIGHT_GREY);
 
     HexDump_PrintSectionHeader(prog.m_fp, section);
+}
 
+
+void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
+{
+    if (!section || !prog.m_fp)
+        return;
+
+    HexDump_PrintSectionCommon(prog, section);
     skPrintf("\n");
 
     if (prog.m_flags & PF_COLORIZE)
@@ -148,8 +156,7 @@ void HexDump_PrintSection(HexDump_ProgramInfo& prog, skSection* section)
                               prog.m_code);
 }
 
-
-void HexDump_PrintSections(HexDump_ProgramInfo& prog)
+void HexDump_PrintHeadersCommon(HexDump_ProgramInfo& prog)
 {
     skBinaryFile* bin = prog.m_fp;
     if (bin)
@@ -204,12 +211,26 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
                 skPortableUtils::printHeader(dest);
             }
         }
+    }
+}
+
+
+void HexDump_PrintSections(HexDump_ProgramInfo& prog)
+{
+    skBinaryFile* bin = prog.m_fp;
+    if (bin)
+    {
+
+        HexDump_PrintHeadersCommon(prog);
 
         skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
         while (it.hasMoreElements())
             HexDump_PrintSection(prog, it.getNext().second);
     }
 }
+
+
+
 
 
 
@@ -259,31 +280,45 @@ void HexDump_PrintSymbols(HexDump_ProgramInfo& prog)
 }
 
 
+void HexDump_PrintAllHeaders(HexDump_ProgramInfo& prog)
+{
+    skBinaryFile* bin = prog.m_fp;
+    if (bin)
+    {
+        HexDump_PrintHeadersCommon(prog);
+
+        skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
+        while (it.hasMoreElements())
+            HexDump_PrintSectionCommon(prog, it.getNext().second);
+    }
+}
+
 
 void HexDump_Interactive(HexDump_ProgramInfo& prog)
 {
-    std::cout << "                                                      \n";
     std::cout << "Please Select From The Following Menu:                \n";
     std::cout << "                                                      \n";
     std::cout << "  Print Options:                                      \n";
     std::cout << "    1. Print a hex dump of the files contents.        \n";
     std::cout << "    2. Print section headers and the hex dump of each.\n";
     std::cout << "    3. List all loaded section names.                 \n";
-    std::cout << "    4. Display specific section name.                 \n";
+    std::cout << "    4. List all loaded symbols.                       \n";
+    std::cout << "    5. Display only headers.                          \n";
+    std::cout << "    6. Display specific section name.                 \n";
     std::cout << "         .bss, .init, .text, etc                      \n";
-    std::cout << "    5. List all loaded symbols.                       \n";
     std::cout << "                                                      \n";
     std::cout << "  Display Options:                                    \n";
     std::cout << "    A. Display ASCII                                  \n";
     std::cout << "    B. Display Binary                                 \n";
     std::cout << "    D. Display Disassembly                            \n";
     std::cout << "    H. Display Hex                                    \n";
-    std::cout << "    M. Mark specific code                             \n";
+    std::cout << "    M. Mark specific code.                            \n";
     std::cout << "                                                      \n";
     std::cout << "  File Options:                                       \n";
     std::cout << "    F. Path to file                                   \n";
     std::cout << "                                                      \n";
     std::cout << "                                        Q-Exit.       \n";
+
     char opt;
 
     cout << prog.m_fileName << ">";
@@ -324,6 +359,14 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         skPrintUtils::pause();
         break;
     case '4':
+        HexDump_PrintSymbols(prog);
+        skPrintUtils::pause();
+        break;
+    case '5':
+        HexDump_PrintAllHeaders(prog);
+        skPrintUtils::pause();
+        break;
+    case '6':
     {
         cout << "Section Name>";
         string sn;
@@ -331,12 +374,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         cout << "\n";
 
         HexDump_PrintSection(prog, sn);
-        skPrintUtils::pause();
-        break;
-    }
-    case '5':
-    {
-        HexDump_PrintSymbols(prog);
         skPrintUtils::pause();
         break;
     }

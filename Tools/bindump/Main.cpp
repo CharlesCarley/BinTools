@@ -39,7 +39,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    HexDump_ProgramInfo prog = {MS_EXIT, 0, PF_DEFAULT, -1};
+    HexDump_ProgramInfo prog = {MS_EXIT, 0, PF_DEFAULT, -1, -1};
 
     if (HexDump_ParseCommandLine(prog, argc, argv) == -1)
     {
@@ -89,23 +89,24 @@ int main(int argc, char** argv)
 
 void HexDump_Usage(void)
 {
-    std::cout << "bindump <options> <path to file>                                      \n";
-    std::cout << "                                                                      \n";
-    std::cout << "  Options:                                                            \n";
-    std::cout << "      -m [0-255]  Mark specific code.                                 \n";
-    std::cout << "                                                                      \n";
-    std::cout << "      -a          Display an ASCII table in the hex dump output.      \n";
-    std::cout << "      -b          Display a binary table in the hex dump output.      \n";
-    std::cout << "      -d          Display disassembly in code sections.               \n";
-    std::cout << "      -h          Display this help message.                          \n";
-    std::cout << "                                                                      \n";
-    std::cout << "      -o [1-4]    Interactive menu option.                            \n";
-    std::cout << "                  - 1. Print a hex dump of the files contents.        \n";
-    std::cout << "                  - 2. Print section headers and the hex dump of each.\n";
-    std::cout << "                  - 3. List all loaded section names.                 \n";
-    std::cout << "                  - 4. List all loaded symbols.                       \n";
-    std::cout << "                                                                      \n";
-    std::cout << "      -i          Run in interactive mode.                            \n";
+    std::cout << "bindump <options> <path to file>                                  \n";
+    std::cout << "                                                                  \n";
+    std::cout << "  Options:                                                        \n";
+    std::cout << "      -m [0-255]  Mark specific code.                             \n";
+    std::cout << "                                                                  \n";
+    std::cout << "      -a          Remove the ASCII table in the hex dump output.  \n";
+    std::cout << "      -b          Display a binary table in the hex dump output.  \n";
+    std::cout << "      -d          Display disassembly in code sections.           \n";
+    std::cout << "      -h          Display this help message.                      \n";
+    std::cout << "                                                                  \n";
+    std::cout << "      -o [1-5]    Interactive menu option.                        \n";
+    std::cout << "                  - 1. Print a hex dump of the files contents.    \n";
+    std::cout << "                  - 2. Print section headers and the dump of each.\n";
+    std::cout << "                  - 3. List all loaded section names.             \n";
+    std::cout << "                  - 4. List all loaded symbols.                   \n";
+    std::cout << "                  - 5. Display only headers.                      \n";
+    std::cout << "                                                                  \n";
+    std::cout << "      -i          Run in interactive mode.                        \n";
 }
 
 
@@ -145,14 +146,16 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    prog.m_opt = skClamp((int) std::strtol(argv[i], 0, 10), 1, 4);
+                    prog.m_opt = skClamp((int) std::strtol(argv[i], 0, 10), 1, 5);
             }
             break;
             case 'a':
-                prog.m_flags |= PF_ASCII;
+                prog.m_flags &= ~PF_ASCII;
                 break;
             case 'b':
                 prog.m_flags |= PF_BINARY;
+                prog.m_flags &= ~PF_ASCII;
+                prog.m_flags &= ~PF_HEX;
                 break;
             case 'd':
                 prog.m_flags |= PF_DISASEMBLE;

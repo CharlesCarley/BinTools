@@ -32,20 +32,11 @@
 
 class skPortableFile : public skBinaryFile
 {
-public:
-
-
-    // TODO: Remove all of this and go thorough m_sectionLookup instead.
-    typedef skArray<COFFSectionHeader>            Sections;
-    typedef skHashTable<char*, COFFSectionHeader> SectionTable;
-
 private:
     COFFHeader                m_header;
     COFFOptionalHeaderCommon* m_imageHeader;
     SKuint16                  m_imageBase;
     SKuint64                  m_sectionStart;
-    Sections                  m_sectionHeaders;
-    SectionTable              m_sectionTable;
 
 
     friend class skBinaryFile;

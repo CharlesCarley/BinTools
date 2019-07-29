@@ -36,7 +36,6 @@ typedef unsigned char      elf8;
 typedef unsigned short     elf16;
 typedef unsigned int       elf32;
 typedef unsigned long long elf64;
-typedef char*              elfName;
 
 class skBinaryFile;
 

@@ -43,6 +43,7 @@ struct HexDump_ProgramInfo
     int           m_flags;
     int           m_code;
     int           m_opt;
+    int           m_cache;
     string        m_fileName;
 };
 

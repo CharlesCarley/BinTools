@@ -4,9 +4,10 @@ Please Select From The Following Menu:
     1. Print a hex dump of the files contents.
     2. Print section headers and the hex dump of each.
     3. List all loaded section names.
-    4. Display specific section name.
+    4. List all loaded symbols.
+    5. Display only headers.
+    6. Display specific section name.
          .bss, .init, .text, etc
-    5. List all loaded symbols.
 
   Display Options:
     A. Display ASCII

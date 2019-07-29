@@ -34,12 +34,8 @@
 
 class skElfFile : public skBinaryFile
 {
-public:
-    typedef skArray<skElfSectionHeader64> Sections;
-
 private:
     skElfHeaderInfo64 m_header;
-    Sections          m_sections;
     elf64             m_strtab;
 
 

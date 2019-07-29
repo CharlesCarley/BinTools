@@ -176,7 +176,7 @@ void skElfFile::loadSections(void)
         SKsize sn = (SKsize)m_strtab + sp.m_name;
         if (sn < m_len)
         {
-            elfName name = (elfName)(m_data + sn);
+            char* name = (char*)(m_data + sn);
 
             // Skip the null entry
             if (name != 0 && (*name) == '\0')
