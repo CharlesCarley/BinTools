@@ -36,7 +36,6 @@ private:
     COFFHeader                m_header;
     COFFOptionalHeaderCommon* m_imageHeader;
     SKuint16                  m_headerOffs;
-    SKuint64                  m_imageBase;
     SKuint64                  m_sectionStart;
 
 

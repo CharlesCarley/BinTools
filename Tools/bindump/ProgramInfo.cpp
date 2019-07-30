@@ -368,33 +368,32 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         prog.m_fp = skBinaryFile::load(path.c_str());
         if (prog.m_fp)
             prog.m_fileName = path;
-
-        skPrintUtils::clear();
-    }
+   }
     break;
     case '1':
     {
         HexDump_PrintAll(prog);
-        skPrintUtils::pause();
+
+        skPause();
     }
     break;
     case '2':
     {
         HexDump_PrintSections(prog);
-        skPrintUtils::pause();
+        skPause();
     }
     break;
     case '3':
         HexDump_PrintSectionNames(prog);
-        skPrintUtils::pause();
+        skPause();
         break;
     case '4':
         HexDump_PrintSymbols(prog);
-        skPrintUtils::pause();
+        skPause();
         break;
     case '5':
         HexDump_PrintAllHeaders(prog);
-        skPrintUtils::pause();
+        skPause();
         break;
     case '6':
     {
@@ -404,7 +403,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         cout << "\n";
 
         HexDump_PrintSection(prog, sn);
-        skPrintUtils::pause();
+        skPause();
         break;
     }
     case 'A':
@@ -418,7 +417,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
             prog.m_flags |= PF_ASCII;
         else if (ans == 'n' || ans == 'N')
             prog.m_flags &= ~PF_ASCII;
-        skPrintUtils::clear();
     }
     break;
     case 'B':
@@ -432,7 +430,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
             prog.m_flags |= PF_BINARY;
         else if (ans == 'n' || ans == 'N')
             prog.m_flags &= ~PF_BINARY;
-        skPrintUtils::clear();
     }
     break;
     case 'D':
@@ -446,7 +443,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
             prog.m_flags |= PF_DISASEMBLE;
         else if (ans == 'n' || ans == 'N')
             prog.m_flags &= ~PF_DISASEMBLE;
-        skPrintUtils::clear();
     }
     break;
     case 'H':
@@ -461,8 +457,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
             prog.m_flags |= PF_HEX;
         else if (ans == 'n' || ans == 'N')
             prog.m_flags &= ~PF_HEX;
-
-        skPrintUtils::clear();
     }
     break;
     case 'M':
@@ -473,7 +467,6 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         cin >> sn;
 
         prog.m_code = (int)std::strtol(sn.c_str(), 0, 16);
-        skPrintUtils::clear();
     }
     break;
         break;
@@ -482,7 +475,9 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         prog.m_state = MS_EXIT;
         break;
     default:
-        skPrintUtils::clear();
         break;
     }
+
+    if (prog.m_state != MS_EXIT)
+        skClear();
 }

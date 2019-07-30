@@ -36,7 +36,6 @@
 skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_sectionStart(0),
     m_imageHeader(0),
-    m_imageBase(0),
     m_headerOffs(dos_offset)
 {
     m_fileFormat = FF_PE;
@@ -128,8 +127,6 @@ void skPortableFile::loadImpl(void)
         m_imageHeader = new COFFOptionalHeader32;
         skMemcpy(m_imageHeader, (COFFOptionalHeader32 *)ptr, sizeof(COFFOptionalHeader32));
 
-        m_imageBase = ((COFFOptionalHeader32 *)m_imageHeader)->m_imageBase;
-
 
         m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
     }
@@ -145,9 +142,10 @@ void skPortableFile::loadImpl(void)
         }
 
         m_imageHeader = new COFFOptionalHeader64;
+        
         skMemcpy(m_imageHeader, ptr, sizeof(COFFOptionalHeader64));
 
-        m_imageBase    = ((COFFOptionalHeader64 *)m_imageHeader)->m_imageBase;
+        
         m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
     }
     else
@@ -266,6 +264,7 @@ void skPortableFile::loadResourceDirectory(skPortableSection *section, skPortabl
 
 void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDirectory *directory)
 {
+
     // resolve the relative virtual address.
     SKuint32 addr = directory->getAddress();
     if (addr == (SKuint32)-1)
@@ -276,16 +275,19 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
 
     // Grab the initial pointer with the
     // offset to the directory table
-    SKuint8 *ptr = section->getPointer() + addr;
+    SKbyte *ptr = (SKbyte*)section->getPointer() + addr;
+
 
 
     // Cast the pointer to the import directory structure.
     COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
 
-    SKuint32 i    = 0,
-             len  = directory->getSize(),
-             maxl = section->getSize(),
-             ival = sizeof(COFFImportDirectoryTable);
+    SKuint32 i      = 0,
+             len    = directory->getSize(),
+             maxl   = section->getSize(),
+             ubound = maxl - addr,
+             ival   = sizeof(COFFImportDirectoryTable);
+
 
     while (i < len)
     {
@@ -293,54 +295,64 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
         if (cidt.m_nameRVA == 0)
             break;
 
+
         char *dllName = 0;
         SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
         if (addrOfDLL < maxl)
             dllName = (char *)ptr + addrOfDLL;
 
-        // scan the table
-        SKuint32 addrOfHint = cidt.m_nameHintRVA;
+
+        SKuint32 addrOfHint = cidt.m_nameHintRVA, va;
+
         for (; addrOfHint; addrOfHint+=4) // += 8 for PE32+
         {
-            char *cp = ((char *)ptr) + (addrOfHint - directory->getRVA());
-
-            // TODO: this needs to be SKuint64 fro PE32+
-            SKuint32 checkBit = *(SKuint32 *)cp;
-            if (checkBit == 0)
+            va = addrOfHint - directory->getRVA();
+            if (va > ubound)
                 break;
 
-            if (checkBit & (1 << 31)) // this needs to be (1 << 63) for PE32+
+
+            // TODO: this needs to be SKuint64 for PE32+
+          
+            SKuint32 ilt = *(SKuint32 *)(ptr + va);
+            if (ilt == 0)
+                break;
+
+
+            // this needs to be (1 << 63) for PE32+
+            if (ilt & (1 << 31))
             {
                 // lookup by ordinal
                 skPrintf("Lookup by ordinal is not implemented\n");
                 break;
+
             }
             else  // look up by name
             {
-                SKuint32 hint = checkBit - directory->getRVA();
+                SKuint32 hint = ilt - directory->getRVA();
                 if (hint == SK_NPOS)
                     continue;
 
-                SKuint16 *sp = (SKuint16 *)(((char *)ptr) + hint);
+                SKuint16 *sp = (SKuint16 *)(ptr + hint);
+                SKuint16 enpt = *(sp++);
 
-                //++ to ignore the table index part
-                cp = (char *)(++sp); 
+                SKbyte *cp = (SKbyte *)(sp); 
 
-                skString symbolName = cp;
-                if (!symbolName.empty())
+
+                skString name = cp;
+
+
+                if (!name.empty())
                 {
-                    SKsize idx = m_symTable.find(symbolName);
+                    SKsize idx = m_symTable.find(name);
                     if (idx == SK_NPOS)
                     {
-
                         skSymbol *sym = new skPortableSymbol(
                             this, 
-                            symbolName, 
+                            name, 
                             dllName, 
-                            addrOfHint  // not correct
+                            enpt  
                         );
-
-                        m_symTable.insert(symbolName, sym);
+                        m_symTable.insert(name, sym);
                     }
                 }
             }

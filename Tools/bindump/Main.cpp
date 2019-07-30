@@ -139,14 +139,14 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    prog.m_code = skClamp((int) std::strtol(argv[i], 0, 16), 0, 255);
+                    prog.m_code = skClamp((int)std::strtol(argv[i], 0, 16), 0, 255);
             }
             break;
             case 'o':
             {
                 ++i;
                 if (i < argc)
-                    prog.m_opt = skClamp((int) std::strtol(argv[i], 0, 10), 1, 5);
+                    prog.m_opt = skClamp((int)std::strtol(argv[i], 0, 10), 1, 5);
             }
             break;
             case 'a':
@@ -175,7 +175,7 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
 
     if (argc >= 2)
     {
-        prog.m_fileName = argv[argc-1];
+        prog.m_fileName = argv[argc - 1];
 
         prog.m_fp = skBinaryFile::load(argv[argc - 1]);
         if (!prog.m_fp)
@@ -184,7 +184,7 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
     else
         err = true;
 
-    
+
     if (err)
     {
         skPrintf("Missing file argument!\n");
