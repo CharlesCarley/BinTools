@@ -27,28 +27,7 @@
 #define _skPrintUtils_h_
 
 #include "Utils/Config/skConfig.h"
-
-enum skConsoleColorSpace
-{
-    CS_BLACK = 0,
-    CS_DARKBLUE,
-    CS_DARKGREEN,
-    CS_DARKCYAN,
-    CS_DARKRED,
-    CS_DARKMAGENTA,
-    CS_DARKYELLOW,
-    CS_LIGHT_GREY,
-    CS_GREY,
-    CS_BLUE,
-    CS_GREEN,
-    CS_CYAN,
-    CS_RED,
-    CS_MAGENTA,
-    CS_YELLOW,
-    CS_WHITE,
-    CS_COLOR_MAX
-};
-
+#include "Utils/skDebugger.h"
 
 
 enum skPrintFlags
@@ -68,24 +47,17 @@ enum skPrintFlags
 
 class skPrintUtils
 {
-private:
-#if SK_PLATFORM == SK_PLATFORM_WIN32
-    static void*         m_stdout;
-    static unsigned char COLOR_TABLE[16][16];
-    static unsigned char getColor(skConsoleColorSpace fore, skConsoleColorSpace back = CS_BLACK);
-#else
-    static unsigned char* getColor(skConsoleColorSpace fore, skConsoleColorSpace back = CS_BLACK);
-#endif
-
 public:
-    static void writeColor(int fg, int bg = CS_BLACK);
-    static void writeAddress(SKuint64 addr);
-
-    static void dumpColors();
-
-    static void clear(void);
+    // Halts the console and waits for the enter key
     static void pause(void);
 
+    // Clears the console
+    static void clear(void);
+
+    // Sets the foreground and background color of the console
+    static void writeColor(skConsoleColorSpace fg, skConsoleColorSpace bg = CS_BLACK);
+
+    static void writeAddress(SKuint64 addr);
     static void dumpHex(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
 };
 

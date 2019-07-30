@@ -87,15 +87,11 @@ void skPortableFile::loadImpl(void)
 
     SKuint16 optMagic;
 
-
-
     char *ptr = m_data;
 
     // Skip past the DOS stub program.
     // The PE signature is not part of the defined structure (+4)
     ptr += m_headerOffs + 4;
-
-
     skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
     switch (m_header.m_machine)
@@ -304,7 +300,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
 
         // scan the table
         SKuint32 addrOfHint = cidt.m_nameHintRVA;
-        for (; addrOfHint; addrOfHint+=4)
+        for (; addrOfHint; addrOfHint+=4) // += 8 for PE32+
         {
             char *cp = ((char *)ptr) + (addrOfHint - directory->getRVA());
 
