@@ -270,8 +270,6 @@ void skPortableFile::loadResourceDirectory(skPortableSection *section, skPortabl
 
 void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDirectory *directory)
 {
-    const skString &name = section->getName();
-
     // resolve the relative virtual address.
     SKuint32 addr = directory->getAddress();
     if (addr == (SKuint32)-1)
@@ -286,8 +284,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
     SKuint8 *ptr = section->getPointer() + addr;
 
 
-    // Cast the pointer to the import directory structure so the memory can be
-    // iterated over in fixed  blocks.
+    // Cast the pointer to the import directory structure.
     COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
 
     SKuint32 i    = 0,
@@ -340,13 +337,18 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
                 skString symbolName = cp;
                 if (!symbolName.empty())
                 {
+                    symbolName = symbolName + "@" + dllName;
                     
                     SKsize idx = m_symTable.find(symbolName);
                     if (idx == SK_NPOS)
                     {
 
-                        skSymbol *sym = new skPortableSymbol(this, symbolName, dllName, cidt.m_iatAddress);
-
+                        skSymbol *sym = new skPortableSymbol(
+                            this, 
+                            symbolName, 
+                            dllName, 
+                            cidt.m_iatAddress // not correct
+                        );
 
                         m_symTable.insert(symbolName, sym);
                     }

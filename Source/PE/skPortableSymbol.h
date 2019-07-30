@@ -26,8 +26,10 @@
 #ifndef _skPortableSymbol_h_
 #define _skPortableSymbol_h_
 
-#include "ELF/skElfTypes.h"
+#include "PE/skPortableTypes.h"
 #include "skSymbol.h"
+
+
 
 class skPortableSymbol : public skSymbol
 {
