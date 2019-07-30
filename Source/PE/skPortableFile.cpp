@@ -240,7 +240,6 @@ void skPortableFile::loadImpl(void)
                 loadImportDirectory(pes, dir);
                 break;
             case CDE_IMPORT_ADDRESS_TABLE:
-                break;
             case CDE_EXPORT:
             case CDE_EXCEPTION:
             case CDE_CERTIFICATE:
@@ -272,7 +271,6 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
 {
     const skString &name = section->getName();
 
-
     // resolve the relative virtual address.
     SKuint32 addr = directory->getAddress();
     if (addr == (SKuint32)-1)
@@ -292,18 +290,21 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
     COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
 
 
+    bool tableParsed = false;
+
     SKuint32 i    = 0,
              len  = directory->getSize(),
              maxl = section->getSize(),
              ival = sizeof(COFFImportDirectoryTable);
 
-
-
-    while (i < len)  // constrain the maximum range in case idata is not null terminated
+    while (i < len)
     {
-        const COFFImportDirectoryTable &cidt = (*idata++);
-        if (cidt.m_iatAddress == 0)
+        const COFFImportDirectoryTable &cidt = (*idata);
+        if (cidt.m_nameRVA == 0)
+        {
+            i += ival;
             break;
+        }
 
         char *dllName = 0;
 
@@ -314,82 +315,123 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
             skPrintf("%s\n", dllName);
         }
 
-        SKuint32 addrOfHint = cidt.m_nameHintRVA - directory->getRVA();
-        if (addrOfHint < maxl)
+
+        // scan the table
+        SKuint32 addrOfHint = cidt.m_nameHintRVA;
+        for (; addrOfHint; addrOfHint+=4)
         {
-            char *cp = ((char *)ptr) + addrOfHint;
+            char *cp = ((char *)ptr) + (addrOfHint - directory->getRVA());
+            SKuint32 checkBit = *(SKuint32 *)cp;
+            if (checkBit == 0)
+                break;
 
-            SKuint32 i = *(SKuint32 *)cp;
-
-
-            if (i & 0x80000000)
+            if (checkBit & (1 << 31))
             {
                 // lookup by ordinal
-                skPrintf("Lookup by ordinal\n");
+                //skPrintf("Lookup by ordinal\n");
+                break;
             }
-            else
+            else  // look up by name
             {
-                /// look up by name
-                skPrintf("Lookup by name\n");
+                SKuint32 hint = checkBit - directory->getRVA();
+                if (hint == SK_NPOS)
+                    continue;
 
-                SKuint32 hint = i  - directory->getRVA();
                 SKuint16 *sp = (SKuint16 *)(((char *)ptr) + hint);
-                SKsize    vl;
 
-                i  = *sp++;
-                cp = (char *)sp;
-                while (*cp != '\0')
-                {
-                    vl = skStringUtils::length(cp) +1;
-                    if (vl % 2 != 0)
-                        ++vl;
+                //++ to ignore the table index part
+                cp = (char *)(++sp); 
 
-
-
-                    printf("%16u : %s\n", i, cp);
-
-                    cp += vl;
-
-                    if (skStringUtils::equals(dllName, cp)==0)
-                        break;
-
-                    sp = (SKuint16 *)cp;
-
-                    i  = *sp++;
-                    if (i == 0 || i > maxl)
-                        break;
-
-                    cp = (char *)sp;
-                }
-
-
+                // skip the padding byte if the length is not even
+                printf("     %s\n", cp);
             }
-
-
-
-
-
-
-
-            skPrintf("%p\n", cp);
         }
 
 
 
 
+
+
+
+
+
+
+
+
+#if 0
+
+        if (addrOfHint < maxl && !tableParsed)
+        {
+
+            char *cp = ((char *)ptr) + addrOfHint;
+            // This needs to be 32&64
+            // 1<<31 == PE32
+            // 1<<63 == PE32+
+
+            SKuint32 checkBit = *(SKuint32 *)cp;
+
+
+            if (checkBit & (1 << 31))
+            {
+                // lookup by ordinal
+                //skPrintf("Lookup by ordinal\n");
+            }
+            else  // look up by name
+            {
+
+
+                // Grab the RVA for the hint table
+
+                SKuint32 hint = checkBit - directory->getRVA();
+                if (hint == SK_NPOS)
+                    continue;
+
+                SKuint16 *sp = (SKuint16 *)(((char *)ptr) + hint);
+                SKuint16 ti;
+                SKsize   vl;
+
+                ti = *sp++;
+                cp = (char *)sp;
+
+                // table is packed as
+                for (;;)
+                {
+                    vl = skStringUtils::length(cp) + 1;
+                    if (vl % 2 != 0)
+                        vl++;
+
+                    // skip the padding byte if the length is not even
+                    printf("%8x : %s\n",  ti, cp);
+
+                    cp += vl;
+                    sp = (SKuint16 *)cp;
+                    ti = *sp;
+
+                    if (ti == 0 || ti > m_len)
+                        break;
+
+
+
+                    cp = (char *)++sp;
+                }
+            }
+            skPrintf("\n\n");
+        }
+#endif
+
         i += ival;
+        ++idata;
     }
 }
+
 
 
 template <typename COFFOptionalHeaderVaryingBase>
 void skPortableFile::sortDataDirectories(void)
 {
     // Find the locations of the data directories
-
     COFFOptionalHeaderVaryingBase *hdr = reinterpret_cast<COFFOptionalHeaderVaryingBase *>(m_imageHeader);
-
-    COFFDataDirectories &fd = hdr->m_directories;
+    COFFDataDirectories &          fd  = hdr->m_directories;
 
     struct DataDir
     {
@@ -416,8 +458,9 @@ void skPortableFile::sortDataDirectories(void)
         {&fd.m_reserved, 0},
     };
 
+    int i;
 
-    int                    i;
+
     SectionTable::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
     {
