@@ -36,6 +36,7 @@ using namespace std;
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
+#include "PE/skPortableDirectory.h"
 #include "ProgramInfo.h"
 #include "Utils/skDebugger.h"
 #include "skBinaryFile.h"
@@ -63,8 +64,6 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
     if (prog.m_fp)
     {
         skBinaryFile::SectionTable::Iterator it = prog.m_fp->getSectionIterator();
-
-
         if (prog.m_flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_DARKYELLOW);
 
@@ -72,18 +71,56 @@ void HexDump_PrintSectionNames(HexDump_ProgramInfo& prog)
 
         if (prog.m_flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_GREY);
-       skPrintf(" Name                 Offset             Index\n\n");
+
+        skPrintf(" Name                 Offset             Index\n\n");
+
+
         if (prog.m_flags & PF_COLORIZE)
             skPrintUtils::writeColor(CS_LIGHT_GREY);
+
         int i = 0;
         while (it.hasMoreElements())
         {
-            skSection*      sec = it.getNext().second;
+            skSection* sec = it.getNext().second;
+
             const skString& str = sec->getName();
+
+
             SKuint64 offs = (SKuint64)sec->getStartAddress();
             skPrintf(" %-20s 0x%-16llx %-2u\n", str.c_str(), offs, i);
             ++i;
         }
+
+        if (prog.m_fp->getFormat() == FF_PE)
+        {
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_DARKYELLOW);
+
+            skPrintf("\nData Directories:\n\n");
+
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_GREY);
+
+            it = prog.m_fp->getSectionIterator();
+            skPrintf(" Type                 RVA                Size\n\n");
+
+            if (prog.m_flags & PF_COLORIZE)
+                skPrintUtils::writeColor(CS_LIGHT_GREY);
+
+            while (it.hasMoreElements())
+            {
+                skPortableSection* sec = reinterpret_cast<skPortableSection*>(it.getNext().second);
+
+                skPortableSection::Directories::Iterator dit = sec->getDirectoryIterator();
+                while (dit.hasMoreElements())
+                {
+                    skPortableDirectory* dir = dit.getNext();
+                    skPrintf(" %-20u 0x%-16x %-2u\n", dir->getType(), dir->getRVA(), dir->getSize());
+                }
+            }
+        }
+
+
         skPrintf("\n\n");
     }
 }
@@ -94,7 +131,6 @@ void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
     if (!section || !fp)
         return;
 
-    // access the derived class
     skFileFormat fileFormat = fp->getFormat();
 
 
@@ -220,7 +256,6 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
-
         HexDump_PrintHeadersCommon(prog);
 
         skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
@@ -228,9 +263,6 @@ void HexDump_PrintSections(HexDump_ProgramInfo& prog)
             HexDump_PrintSection(prog, it.getNext().second);
     }
 }
-
-
-
 
 
 
@@ -251,7 +283,6 @@ void HexDump_PrintSymbols(HexDump_ProgramInfo& prog)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
-
         skBinaryFile::SymbolTable::Iterator it = bin->getSymbolIterator();
 
         if (prog.m_flags & PF_COLORIZE)
@@ -271,8 +302,7 @@ void HexDump_PrintSymbols(HexDump_ProgramInfo& prog)
                 skSymbol* sym = it.getNext().second;
                 if (prog.m_flags & PF_COLORIZE)
                     skPrintUtils::writeColor(CS_LIGHT_GREY);
-    
-                
+
                 skPrintf("%16llx   %s\n", sym->getAddress(), sym->getName().c_str());
             }
         }

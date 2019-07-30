@@ -278,7 +278,6 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
         return;
     }
 
-
     // Grab the initial pointer with the
     // offset to the directory table
     SKuint8 *ptr = section->getPointer() + addr;
@@ -301,9 +300,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
         char *dllName = 0;
         SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
         if (addrOfDLL < maxl)
-        {
             dllName = (char *)ptr + addrOfDLL;
-        }
 
         // scan the table
         SKuint32 addrOfHint = cidt.m_nameHintRVA;
@@ -333,12 +330,9 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
                 //++ to ignore the table index part
                 cp = (char *)(++sp); 
 
-
                 skString symbolName = cp;
                 if (!symbolName.empty())
                 {
-                    symbolName = symbolName + "@" + dllName;
-                    
                     SKsize idx = m_symTable.find(symbolName);
                     if (idx == SK_NPOS)
                     {
@@ -347,16 +341,14 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
                             this, 
                             symbolName, 
                             dllName, 
-                            cidt.m_iatAddress // not correct
+                            addrOfHint  // not correct
                         );
 
                         m_symTable.insert(symbolName, sym);
                     }
-
                 }
             }
         }
-
         i += ival;
         ++idata;
     }
@@ -416,7 +408,6 @@ void skPortableFile::sortDataDirectories(void)
                 continue;
 
             // Is the virtual address in the section?
-
             if (dd->m_virtualAddress >= csh.m_virtualAddress && dd->m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
             {
                 pes->_addDirectory((COFFDirectoryEnum)i, *dd);
@@ -425,3 +416,4 @@ void skPortableFile::sortDataDirectories(void)
         }
     }
 }
+
