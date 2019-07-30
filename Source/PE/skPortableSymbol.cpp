@@ -23,34 +23,20 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "PE/skPortableSection.h"
-#include "PE/skPortableDirectory.h"
-#include "Utils/skDebugger.h"
-#include "skPrintUtils.h"
+#include "PE/skPortableSymbol.h"
 
 
-
-skPortableSection::skPortableSection(skBinaryFile*      owner,
-                                     const skString&    name,
-                                     void*              data,
-                                     size_t             size,
-                                     size_t             offset,
-                                     COFFSectionHeader& hdr) :
-    skSection(owner, name, data, size, offset),
-    m_header(hdr)
+skPortableSymbol::skPortableSymbol(skBinaryFile*   owner,
+                                   const skString& name,
+                                   const skString& location,
+                                   const SKuint64& rva) :
+    skSymbol(owner, name),
+    m_dll(location),
+    m_rva(rva)
 {
-    if (m_header.m_characteristics & CSC_HAS_CODE)
-        m_isExecutable = true;
 }
 
-skPortableSection::~skPortableSection()
-{
-    Directories::Iterator it = m_directories.iterator();
-    while (it.hasMoreElements())
-        delete it.getNext();
-}
 
-void skPortableSection::_addDirectory(COFFDirectoryEnum dir, const COFFDataDirectory& dd)
+skPortableSymbol::~skPortableSymbol()
 {
-    m_directories.push_back(new skPortableDirectory(this, dir, dd));
 }
