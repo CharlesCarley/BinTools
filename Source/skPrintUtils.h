@@ -48,11 +48,6 @@ enum skPrintFlags
 class skPrintUtils
 {
 public:
-    // Halts the console and waits for the enter key
-    static void pause(void);
-
-    // Clears the console
-    static void clear(void);
 
     // Sets the foreground and background color of the console
     static void writeColor(skConsoleColorSpace fg, skConsoleColorSpace bg = CS_BLACK);

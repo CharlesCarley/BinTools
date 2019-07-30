@@ -41,16 +41,6 @@ void skPrintUtils::writeColor(skConsoleColorSpace fg, skConsoleColorSpace bg)
 }
 
 
-void skPrintUtils::clear(void)
-{
-    skDebugger::clear();
-}
-
-void skPrintUtils::pause(void)
-{
-    skDebugger::pause();
-    skDebugger::clear();
-}
 
 
 void skPrintUtils_Hexdump(void* ptr, SKsize start, SKsize stop, int flags, int mark, bool nl);

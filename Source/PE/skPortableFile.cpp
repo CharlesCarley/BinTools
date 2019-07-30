@@ -288,13 +288,11 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
              ubound = maxl - addr,
              ival   = sizeof(COFFImportDirectoryTable);
 
-
     while (i < len)
     {
         const COFFImportDirectoryTable &cidt = (*idata);
         if (cidt.m_nameRVA == 0)
             break;
-
 
         char *dllName = 0;
         SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
@@ -310,13 +308,10 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
             if (va > ubound)
                 break;
 
-
             // TODO: this needs to be SKuint64 for PE32+
-          
             SKuint32 ilt = *(SKuint32 *)(ptr + va);
             if (ilt == 0)
                 break;
-
 
             // this needs to be (1 << 63) for PE32+
             if (ilt & (1 << 31))
@@ -332,15 +327,12 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
                 if (hint == SK_NPOS)
                     continue;
 
-                SKuint16 *sp = (SKuint16 *)(ptr + hint);
-                SKuint16 enpt = *(sp++);
+                SKuint16 *sp   = (SKuint16 *)(ptr + hint);
 
-                SKbyte *cp = (SKbyte *)(sp); 
-
+                SKuint16 exnt = *(sp++);
+                SKbyte * cp   = (SKbyte *)(sp); 
 
                 skString name = cp;
-
-
                 if (!name.empty())
                 {
                     SKsize idx = m_symTable.find(name);
@@ -350,7 +342,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
                             this, 
                             name, 
                             dllName, 
-                            enpt  
+                            exnt  
                         );
                         m_symTable.insert(name, sym);
                     }
