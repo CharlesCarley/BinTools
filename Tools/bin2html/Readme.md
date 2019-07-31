@@ -1,5 +1,5 @@
 # bin2html
-bin2html is a tool that prints structured information about the executable file formats ELF and PE to HTML. 
+bin2html is a tool that prints structured information about the ELF and PE executable file formats to HTML. 
 
 
 #### bin2html Usage

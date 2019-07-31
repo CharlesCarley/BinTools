@@ -1,5 +1,5 @@
 # bindump
-Bin dump is a tool that prints structured information about the executable file formats ELF and PE.
+Bin dump is a tool that prints structured information about the  ELF and PE executable file formats.
 
 #### bindump Usage
 
