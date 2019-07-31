@@ -528,7 +528,7 @@ void b2Sections(void)
 
 void b2Write(void)
 {
-    gs_ctx.m_ofile.open(gs_ctx.m_outputFile, std::ios::out | std::ios::trunc);
+    gs_ctx.m_ofile.open(gs_ctx.m_outputFile, std::ios::binary | std::ios::out | std::ios::trunc);
 
     if (!gs_ctx.m_ofile.is_open())
     {
