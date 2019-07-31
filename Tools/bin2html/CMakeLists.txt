@@ -24,9 +24,12 @@
 set(TargetName          bin2html)
 set(TargetName_GRP      "Tools")
 
+#include (Data2Array)
+#add_templates_text(Templates.h Footer.html Header.html)
 
 set(TargetName_SRC 
     Main.cpp
+    Templates.h 
     Header.html
     Footer.html
 )

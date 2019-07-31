@@ -204,7 +204,10 @@ void skElfFile::loadSections(void)
                 }
                 else
                 {
-                    skPrintf("Error - Section size exceeds the amount of allocated memory.\n");
+
+                    SKuint64 len = sp.m_offset + sp.m_size;
+
+                    skPrintf("Error - Section size exceeds the amount of allocated memory (%llu).\n", len - m_len);
                 }
             }
             else

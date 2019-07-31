@@ -27,6 +27,7 @@ project(BinTools)
 set(CMAKE_MODULE_PATH 
     ${BinTools_SOURCE_DIR}/CMake
     ${BinTools_SOURCE_DIR}/Extern/Utils/CMake
+    ${BinTools_SOURCE_DIR}/Tools/Data2Array/CMake
 )
 set(FOLDER_NAME "External")
 set(USE_FOLDERS TRUE)
@@ -39,5 +40,6 @@ subdirs(Extern/capstone)
 
 subdirs(Source)
 subdirs(Test)
+#subdirs(Tools/Data2Array)
 subdirs(Tools/bindump)
 subdirs(Tools/bin2html)

@@ -197,7 +197,6 @@ void HexDump_PrintHeadersCommon(HexDump_ProgramInfo& prog)
     skBinaryFile* bin = prog.m_fp;
     if (bin)
     {
-        // access the derived class
         skFileFormat fileFormat = bin->getFormat();
 
         if (fileFormat == FF_ELF)

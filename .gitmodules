@@ -1,3 +1,6 @@
 [submodule "Extern/Utils"]
 	path = Extern/Utils
 	url = https://github.com/snailrose/Utils.git
+[submodule "Tools/Data2Array"]
+	path = Tools/Data2Array
+	url = https://github.com/CharlesCarley/Data2Array.git
