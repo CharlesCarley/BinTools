@@ -31,6 +31,7 @@ set(TargetName_SRC
     Main.cpp
     Templates.h 
     Header.html
+    Readme.md
     Footer.html
 )
 

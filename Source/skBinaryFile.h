@@ -43,9 +43,9 @@ protected:
     skFileFormat          m_fileFormat;
     skFileFormatType      m_fileFormatType;
     skMachineArchitecture m_arch;
+    SectionTable          m_sectionLookup;
+    SymbolTable           m_symTable;
 
-    SectionTable m_sectionLookup;
-    SymbolTable  m_symTable;
 
 
     // Protected constructor. Load files via the static interface

@@ -127,8 +127,6 @@ void skElfFile::loadImpl(void)
         return;
     }
 
-    m_symTable.reserve(256);
-
     if (m_fileFormatType == FFT_32BIT)
     {
         loadSections<skElfSectionHeader32>();
@@ -169,7 +167,7 @@ void skElfFile::loadSections(void)
     secPtr   = (skElfSectionHeader*)(m_data + offs);
 
     // Store each section one by one.
-    for (i = offs; i < offe && secPtr; i += sizeof(skElfSectionHeader), ++secPtr)
+    for (i = 0; i < m_header.m_sectionTableEntryCount; ++i, secPtr++)
     {
         const skElfSectionHeader& sp = (*secPtr);
 
@@ -204,10 +202,8 @@ void skElfFile::loadSections(void)
                 }
                 else
                 {
-
                     SKuint64 len = sp.m_offset + sp.m_size;
-
-                    skPrintf("Error - Section size exceeds the amount of allocated memory (%llu).\n", len - m_len);
+                    skPrintf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
                 }
             }
             else
@@ -241,6 +237,13 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 
         symPtr = (skElfSymbolHeader*)sym->getPointer();
         strPtr = (SKint8*)str->getPointer();
+
+        if (hdr.m_entSize == 0)
+        {
+            skPrintf("Error - No entries in the string table.\n");
+            return;
+        }
+
 
         // Total number of elements
         SKuint64 entryLen = hdr.m_size / hdr.m_entSize;

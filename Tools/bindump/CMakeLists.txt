@@ -29,6 +29,7 @@ set(TargetName_SRC
     ProgramInfo.h
     ProgramInfo.cpp
     Main.cpp
+    Readme.md
 )
 
 include_directories(

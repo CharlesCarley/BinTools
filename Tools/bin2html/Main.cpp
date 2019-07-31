@@ -43,9 +43,8 @@ using namespace std;
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
 #include "Templates.h"
-#include "skBinaryFile.h"
-
 #include "capstone/capstone.h"
+#include "skBinaryFile.h"
 
 
 struct b2ProgramInfo
@@ -53,6 +52,7 @@ struct b2ProgramInfo
     skBinaryFile* m_fp;
     string        m_inputFile;
     string        m_outputFile;
+    int           m_opt;
     stringstream  m_stream;
     ofstream      m_ofile;
 };
@@ -75,6 +75,7 @@ int main(int argc, char** argv)
     gs_ctx.m_fp         = 0;
     gs_ctx.m_inputFile  = "";
     gs_ctx.m_outputFile = "";
+    gs_ctx.m_opt        = 0;
 
 
     if (b2ParseCommandLine(argc, argv) == -1)
@@ -97,7 +98,12 @@ int main(int argc, char** argv)
 
 void b2Usage(void)
 {
-    std::cout << "bin2html -o <output html file> -i <path to executable>\n";
+    std::cout << "bin2html <options> -o <output html file> -i <path to executable>\n";
+    std::cout << "                                                                \n";
+    std::cout << "    <options>                                                   \n";
+    std::cout << "        -h    Display this help message.                        \n";
+    std::cout << "        -d    Output Disassembly only.                          \n";
+    std::cout << "                                                                \n";
 }
 
 
@@ -153,6 +159,14 @@ int b2ParseCommandLine(int argc, char** argv)
                 }
                 break;
             }
+            case 'd':
+                gs_ctx.m_opt = 1;
+                break;
+            case 'x':
+                gs_ctx.m_opt = 2;
+                break;
+            case 'h':
+                return -1;
             default:
                 std::cout << "Unknown argument '" << sw << "'\n";
                 return -1;
@@ -250,10 +264,8 @@ template <typename T>
 void b2HeaderRowX(const string& name, const T& val, int w)
 {
     Stream << "<tr><td class=\"l\">" << name << "</td><td class=\"r\">"
-           << "0x" << std::setw(w) << std::setfill('0') << hex << val << "</td></tr>";
+           << "0x" << hex << val << "</td></tr>";
 }
-
-
 
 void b2HeaderRowX(const string& name, const SKuint32& val)
 {
@@ -270,30 +282,22 @@ void b2HeaderRowX(const string& name, const SKuint16& val)
     b2HeaderRowX<SKuint16>(name, val, 4);
 }
 
-
-
 void b2HeaderRowT(const string& name, const SKuint32& val)
 {
     char buf[32];
-
     std::strftime(buf, 32, "%D %r", std::localtime((time_t*)&val));
     Stream
         << "<tr><td class=\"l\">" << name << "</td><td class=\"r\">"
         << buf << "</td></tr>";
 }
 
-
-
 void b2SpanAddress(SKuint64 addr)
 {
     SKuint64 iv = addr;
-
     b2OpenSpan("address");
-    Stream << right << hex << uppercase << setw(16) << setfill(' ') << iv;
+    Stream << right << hex << uppercase << iv;
     b2CloseSpan();
 }
-
-
 
 void b2TableOpen(const string& name)
 {
@@ -302,13 +306,10 @@ void b2TableOpen(const string& name)
     Stream << "<tr>\n";
 }
 
-
 void b2TableClose(void)
 {
     Stream << "\n</tr></table>\n";
 }
-
-
 
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 void b2PEHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
@@ -342,7 +343,7 @@ void b2FileHeader(void)
         b2Clear();
 
 
-        b2TableOpen("File Header" );
+        b2TableOpen("File Header");
         skFileFormat fileFormat = bin->getFormat();
 
         if (fileFormat == FF_ELF)
@@ -413,7 +414,7 @@ void b2FileHeader(void)
 }
 
 
-void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline,  bool skip = true)
+void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline, bool skip = true)
 {
     SKuint64 j, mid = perline / 2;
     for (j = 0; j < perline; j++)
@@ -503,7 +504,6 @@ void b2WriteHex(SKuint8* ptr, SKuint64 start, SKuint64 stop)
 
 void b2WriteHexDisassembly(SKuint8* ptr, SKuint64 start, SKuint64 stop)
 {
-
     skBinaryFile* bin = gs_ctx.m_fp;
     if (bin && ptr)
     {
@@ -535,23 +535,23 @@ void bWriteDisassembly(skMachineArchitecture arch, skFileFormatType ff, SKuint8*
     switch (arch)
     {
     case IS_SPARC:
-        carch =  CS_ARCH_SPARC;
+        carch = CS_ARCH_SPARC;
         break;
     case IS_MPS:
-        carch =CS_ARCH_MIPS;
+        carch = CS_ARCH_MIPS;
         break;
     case IS_POWERPC:
-        carch=CS_ARCH_PPC;
+        carch = CS_ARCH_PPC;
         break;
     case IS_S390:
-        carch=CS_ARCH_SPARC;
+        carch = CS_ARCH_SPARC;
         break;
     case IS_AARCH64:
-        carch=CS_ARCH_ARM64;
+        carch = CS_ARCH_ARM64;
         break;
     case IS_X8664:
     case IS_X86:
-        carch= CS_ARCH_X86;
+        carch = CS_ARCH_X86;
         break;
     default:
         break;
@@ -633,24 +633,28 @@ void b2Sections(void)
                 b2HeaderRow("Size of Header", (SKuint32)sizeof(COFFSectionHeader));
                 b2TableClose();
 
-
-                if (pes->isExectuable())
+                if (gs_ctx.m_opt != 2)
                 {
-                    bWriteDisassembly(
-                        bin->getArchitecture(),
-                        bin->getPlatformType(),
-                        pes->getPointer(),
-                        pes->getStartAddress(),
-                        pes->getSize());
+                    if (pes->isExectuable())
+                    {
+                        bWriteDisassembly(
+                            bin->getArchitecture(),
+                            bin->getPlatformType(),
+                            pes->getPointer(),
+                            pes->getStartAddress(),
+                            pes->getSize());
+                    }
+                    else
+                    {
+                        if (gs_ctx.m_opt == 0)
+                        {
+                            b2WriteHex(
+                                pes->getPointer(),
+                                pes->getStartAddress(),
+                                pes->getSize());
+                        }
+                    }
                 }
-                else
-                {
-                    b2WriteHex(
-                        pes->getPointer(),
-                        pes->getStartAddress(),
-                        pes->getSize());
-                }
-
             }
             else if (fmt == FF_ELF)
             {
@@ -678,25 +682,28 @@ void b2Sections(void)
 
                 b2TableClose();
 
-
-                if (elfs->isExectuable())
+                if (gs_ctx.m_opt != 2)
                 {
-                    bWriteDisassembly(
-                        bin->getArchitecture(),
-                        bin->getPlatformType(),
-                        elfs->getPointer(),
-                        elfs->getStartAddress(),
-                        elfs->getSize());
-
+                    if (elfs->isExectuable())
+                    {
+                        bWriteDisassembly(
+                            bin->getArchitecture(),
+                            bin->getPlatformType(),
+                            elfs->getPointer(),
+                            elfs->getStartAddress(),
+                            elfs->getSize());
+                    }
+                    else
+                    {
+                        if (gs_ctx.m_opt == 0)
+                        {
+                            b2WriteHex(
+                                elfs->getPointer(),
+                                elfs->getStartAddress(),
+                                elfs->getSize());
+                        }
+                    }
                 }
-                else
-                {
-                    b2WriteHex(
-                        elfs->getPointer(),
-                        elfs->getStartAddress(),
-                        elfs->getSize());
-                }
-
             }
         }
 
