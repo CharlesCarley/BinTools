@@ -614,6 +614,9 @@ void b2Sections(void)
         {
             const skBinaryFile::SectionTable::Pair& pair = it.getNext();
 
+            cout << "Writing Section ==> " << pair.first.c_str() << std::endl;
+
+
             if (fmt == FF_PE)
             {
                 skPortableSection* pes = reinterpret_cast<skPortableSection*>(pair.second);
@@ -637,6 +640,8 @@ void b2Sections(void)
                 {
                     if (pes->isExectuable())
                     {
+                        cout << "\tGenerating Disassembly." << std::endl;
+
                         bWriteDisassembly(
                             bin->getArchitecture(),
                             bin->getPlatformType(),
@@ -648,6 +653,8 @@ void b2Sections(void)
                     {
                         if (gs_ctx.m_opt == 0)
                         {
+                            cout << "\tGenerating Hexdump." << std::endl;
+
                             b2WriteHex(
                                 pes->getPointer(),
                                 pes->getStartAddress(),
@@ -686,6 +693,8 @@ void b2Sections(void)
                 {
                     if (elfs->isExectuable())
                     {
+                        cout << "\tGenerating Disassembly." << std::endl;
+
                         bWriteDisassembly(
                             bin->getArchitecture(),
                             bin->getPlatformType(),
@@ -697,6 +706,8 @@ void b2Sections(void)
                     {
                         if (gs_ctx.m_opt == 0)
                         {
+                            cout << "\tGenerating Hexdump." << std::endl;
+
                             b2WriteHex(
                                 elfs->getPointer(),
                                 elfs->getStartAddress(),
@@ -718,12 +729,15 @@ void b2Sections(void)
 void b2Write(void)
 {
     gs_ctx.m_ofile.open(gs_ctx.m_outputFile, std::ios::binary | std::ios::out | std::ios::trunc);
+    cout << "Opening file ==> " << gs_ctx.m_outputFile << std::endl;
 
     if (!gs_ctx.m_ofile.is_open())
     {
         cout << "Failed to open output file.\n";
         return;
     }
+
+
 
     gs_ctx.m_ofile.write(HEADER, HEADER_SIZE);
 
@@ -733,6 +747,7 @@ void b2Write(void)
 
     b2Flush();
 
+    cout << "Closing file ==> " << gs_ctx.m_outputFile << std::endl;
     gs_ctx.m_ofile.write(FOOTER, FOOTER_SIZE);
     gs_ctx.m_ofile.close();
 }
