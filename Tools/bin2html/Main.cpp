@@ -45,6 +45,7 @@ using namespace std;
 #include "Templates.h"
 #include "skBinaryFile.h"
 
+#include "capstone/capstone.h"
 
 
 struct b2ProgramInfo
@@ -285,7 +286,7 @@ void b2HeaderRowT(const string& name, const SKuint32& val)
 
 void b2SpanAddress(SKuint64 addr)
 {
-    SKuint64 iv = addr + (4 << 24);
+    SKuint64 iv = addr;
 
     b2OpenSpan("address");
     Stream << right << hex << uppercase << setw(16) << setfill(' ') << iv;
@@ -412,13 +413,16 @@ void b2FileHeader(void)
 }
 
 
-void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
+void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline,  bool skip = true)
 {
     SKuint64 j, mid = perline / 2;
     for (j = 0; j < perline; j++)
     {
-        if (j % mid == 0)
-            Stream << " ";
+        if (skip)
+        {
+            if (j % mid == 0)
+                Stream << " ";
+        }
 
         if (i + j < size)
         {
@@ -497,6 +501,104 @@ void b2WriteHex(SKuint8* ptr, SKuint64 start, SKuint64 stop)
 
 
 
+void b2WriteHexDisassembly(SKuint8* ptr, SKuint64 start, SKuint64 stop)
+{
+
+    skBinaryFile* bin = gs_ctx.m_fp;
+    if (bin && ptr)
+    {
+        SKuint64 i, b = 16;
+        for (i = 0; i < stop; i += b)
+        {
+            b2SpanAddress(i + start);
+            Stream << " ";
+            b2WriteHexLine(ptr, i, stop, b, false);
+        }
+    }
+}
+
+
+void b2WriteString(const string& str)
+{
+    b2OpenSpan("hex1");
+    Stream << left << str << "\t";
+    b2CloseSpan();
+}
+
+
+void bWriteDisassembly(skMachineArchitecture arch, skFileFormat ff, SKuint8* ptr, SKuint64 start, SKuint64 stop)
+{
+    cs_insn* insn;
+
+    cs_arch carch = CS_ARCH_ALL;
+
+    switch (arch)
+    {
+    case IS_SPARC:
+        carch =  CS_ARCH_SPARC;
+        break;
+    case IS_MPS:
+        carch =CS_ARCH_MIPS;
+        break;
+    case IS_POWERPC:
+        carch=CS_ARCH_PPC;
+        break;
+    case IS_S390:
+        carch=CS_ARCH_SPARC;
+        break;
+    case IS_AARCH64:
+        carch=CS_ARCH_ARM64;
+        break;
+    case IS_X8664:
+    case IS_X86:
+        carch= CS_ARCH_X86;
+        break;
+    default:
+        break;
+    }
+
+
+    cs_mode mode = ff == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
+
+    csh handle;
+
+    cs_err err = cs_open(carch, mode, (csh*)&handle);
+    if (err != CS_ERR_OK)
+    {
+        skPrintf("Capstone Error: cs_open returned %i\n", err);
+        return;
+    }
+
+
+    b2OpenPre();
+
+
+    size_t count = cs_disasm(handle, (uint8_t*)ptr, (size_t)stop, start, 0, &insn);
+    if (count > 0)
+    {
+        size_t j;
+        for (j = 0; j < count; j++)
+        {
+            cs_insn& i = insn[j];
+            b2WriteHexDisassembly(i.bytes, i.address, i.size);
+            Stream << " ";
+
+            b2WriteString(i.mnemonic);
+            Stream << " ";
+            b2WriteString(i.op_str);
+            Stream << "\n";
+        }
+
+        cs_free(insn, count);
+    }
+
+
+    b2ClosePre();
+
+    cs_close(&handle);
+}
+
+
 // Write out all sections
 void b2Sections(void)
 {
@@ -534,6 +636,12 @@ void b2Sections(void)
 
                 if (pes->isExectuable())
                 {
+                    bWriteDisassembly(
+                        bin->getArchitecture(),
+                        bin->getFormat(),
+                        pes->getPointer(),
+                        pes->getStartAddress(),
+                        pes->getSize());
                 }
                 else
                 {
@@ -573,6 +681,12 @@ void b2Sections(void)
 
                 if (elfs->isExectuable())
                 {
+                    bWriteDisassembly(
+                        bin->getArchitecture(),
+                        bin->getFormat(),
+                        elfs->getPointer(),
+                        elfs->getStartAddress(),
+                        elfs->getSize());
 
                 }
                 else
