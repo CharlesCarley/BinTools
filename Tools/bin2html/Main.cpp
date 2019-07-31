@@ -526,7 +526,7 @@ void b2WriteString(const string& str)
 }
 
 
-void bWriteDisassembly(skMachineArchitecture arch, skFileFormat ff, SKuint8* ptr, SKuint64 start, SKuint64 stop)
+void bWriteDisassembly(skMachineArchitecture arch, skFileFormatType ff, SKuint8* ptr, SKuint64 start, SKuint64 stop)
 {
     cs_insn* insn;
 
@@ -638,7 +638,7 @@ void b2Sections(void)
                 {
                     bWriteDisassembly(
                         bin->getArchitecture(),
-                        bin->getFormat(),
+                        bin->getPlatformType(),
                         pes->getPointer(),
                         pes->getStartAddress(),
                         pes->getSize());
@@ -683,7 +683,7 @@ void b2Sections(void)
                 {
                     bWriteDisassembly(
                         bin->getArchitecture(),
-                        bin->getFormat(),
+                        bin->getPlatformType(),
                         elfs->getPointer(),
                         elfs->getStartAddress(),
                         elfs->getSize());
