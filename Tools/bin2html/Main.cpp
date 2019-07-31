@@ -71,8 +71,8 @@ static b2ProgramInfo gs_ctx;
 
 int main(int argc, char** argv)
 {
-    gs_ctx.m_fp = 0;
-    gs_ctx.m_inputFile = "";
+    gs_ctx.m_fp         = 0;
+    gs_ctx.m_inputFile  = "";
     gs_ctx.m_outputFile = "";
 
 
@@ -239,6 +239,12 @@ void b2HeaderRow(const string& name, const T& dt)
     Stream << "<tr><td class=\"l\">" << name << "</td><td class=\"r\">" << ss.str() << "</td></tr>";
 }
 
+
+void b2HeaderRow(const string& name, const string& dt)
+{
+    Stream << "<tr><td class=\"l\">" << name << "</td><td class=\"r\">" << dt << "</td></tr>";
+}
+
 template <typename T>
 void b2HeaderRowX(const string& name, const T& val, int w)
 {
@@ -333,15 +339,40 @@ void b2FileHeader(void)
     if (bin)
     {
         b2Clear();
-        b2TableOpen("File Header");
 
+
+        b2TableOpen("File Header" );
         skFileFormat fileFormat = bin->getFormat();
 
         if (fileFormat == FF_ELF)
         {
             skElfFile*               elf    = static_cast<skElfFile*>(bin);
             const skElfHeaderInfo64& header = elf->getHeader();
-            skElfUtils::printElfHeader(header);
+
+
+            char tmpBuf[32];
+            skElfUtils::getPlatformId(header, tmpBuf, 32);
+            b2HeaderRow("Class", tmpBuf);
+            skElfUtils::getByteOrder(header, tmpBuf, 32);
+            b2HeaderRow("Data", tmpBuf);
+            skElfUtils::getVersion(header, tmpBuf, 32);
+            b2HeaderRow("Version", tmpBuf);
+            skElfUtils::getABI(header, tmpBuf, 32);
+            b2HeaderRow("OS/ABI", tmpBuf);
+            skElfUtils::getType(header, tmpBuf, 32);
+            b2HeaderRow("Type", tmpBuf);
+            skElfUtils::getArch(header, tmpBuf, 32);
+            b2HeaderRow("Architecture", tmpBuf);
+            b2HeaderRow("Entry", header.m_entry);
+            b2HeaderRow("Program Offset", header.m_programOffset);
+            b2HeaderRow("Section Offset", header.m_sectionOffset);
+            b2HeaderRow("Flags", (int)header.m_flags);
+            b2HeaderRow("Program Header Size", (int)header.m_headerSizeInBytes);
+            b2HeaderRow("Program Header Count", (int)header.m_headerEntryCount);
+            b2HeaderRow("Section Entry", (int)header.m_sectionTableEntrySize);
+            b2HeaderRow("Section Count", (int)header.m_sectionTableEntryCount);
+            b2HeaderRow("Header Table Index", (int)header.m_sectionTableIndex);
+            b2HeaderRow("sizeof", (SKuint32)sizeof(header));
         }
         else if (fileFormat == FF_PE)
         {
@@ -384,13 +415,10 @@ void b2FileHeader(void)
 void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
 {
     SKuint64 j, mid = perline / 2;
-
-
     for (j = 0; j < perline; j++)
     {
         if (j % mid == 0)
             Stream << " ";
-
 
         if (i + j < size)
         {
@@ -399,8 +427,6 @@ void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
                 b2OpenSpan("hex0");
             else
                 b2OpenSpan("hex1");
-
-
             Stream
                 << hex << uppercase << setfill('0') << setw(2)
                 << ch;
@@ -418,7 +444,6 @@ void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
 void b2WriteAsciiLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
 {
     SKuint64 j;
-
     b2OpenSpan("ascii");
     Stream << "|";
 
@@ -480,8 +505,6 @@ void b2Sections(void)
     {
         skFileFormat fmt = bin->getFormat();
 
-
-
         b2Clear();
         skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
 
@@ -508,13 +531,58 @@ void b2Sections(void)
                 b2HeaderRow("Size of Header", (SKuint32)sizeof(COFFSectionHeader));
                 b2TableClose();
 
-                b2WriteHex(
-                    pes->getPointer(),
-                    pes->getStartAddress(),
-                    pes->getSize());
+
+                if (pes->isExectuable())
+                {
+                }
+                else
+                {
+                    b2WriteHex(
+                        pes->getPointer(),
+                        pes->getStartAddress(),
+                        pes->getSize());
+                }
+
             }
             else if (fmt == FF_ELF)
             {
+                skElfSection* elfs = reinterpret_cast<skElfSection*>(pair.second);
+
+                const skElfSectionHeader64& esh = elfs->getHeader();
+                b2TableOpen(string("Section: ") + pair.first.c_str());
+
+
+                char tmpBuf[32];
+                b2HeaderRow("Name", esh.m_name);
+
+                skElfUtils::getSectionType(esh, tmpBuf, 32);
+                b2HeaderRow("Type", string(tmpBuf));
+
+                b2HeaderRow("Flags", esh.m_flags);
+                b2HeaderRowX("Virtual Address", esh.m_addr);
+                b2HeaderRowX("Offset", esh.m_offset);
+                b2HeaderRow("Size", esh.m_size);
+                b2HeaderRow("Link", esh.m_link);
+                b2HeaderRow("Extra Info", esh.m_info);
+                b2HeaderRow("Alignment", esh.m_addrAlign);
+                b2HeaderRow("Entry Table Size", esh.m_entSize);
+                b2HeaderRow("Size Of", sizeof(esh));
+
+                b2TableClose();
+
+
+                if (elfs->isExectuable())
+                {
+
+                }
+                else
+                {
+                    b2WriteHex(
+                        elfs->getPointer(),
+                        elfs->getStartAddress(),
+                        elfs->getSize());
+                }
+
             }
         }
 
