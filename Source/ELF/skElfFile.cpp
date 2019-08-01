@@ -32,7 +32,6 @@
 #include "ELF/skElfSymbol.h"
 #include "ELF/skElfUtils.h"
 #include "Utils/skString.h"
-#include "skPrintUtils.h"
 #include "skSection.h"
 
 
@@ -54,7 +53,7 @@ void skElfFile::loadImpl(void)
 {
     if (m_data == 0)
     {
-        skPrintf("No data was loaded prior to calling load\n");
+        printf("No data was loaded prior to calling load\n");
         return;
     }
 
@@ -65,7 +64,7 @@ void skElfFile::loadImpl(void)
         m_fileFormatType = FFT_64BIT;
     else
     {
-        skPrintf("Unknown class descriptor found in the file header.\n");
+        printf("Unknown class descriptor found in the file header.\n");
         return;
     }
 
@@ -123,7 +122,7 @@ void skElfFile::loadImpl(void)
 
     if (m_arch == IS_NONE)
     {
-        skPrintf("Unknown machine architecture found in the file header");
+        printf("Unknown machine architecture found in the file header");
         return;
     }
 
@@ -156,7 +155,7 @@ void skElfFile::loadSections(void)
 
     if (offe > m_len)
     {
-        skPrintf("Error - The section header's offset exceeds the amount of allocated memory.\n");
+        printf("Error - The section header's offset exceeds the amount of allocated memory.\n");
         return;
     }
 
@@ -203,13 +202,13 @@ void skElfFile::loadSections(void)
                 else
                 {
                     SKuint64 len = sp.m_offset + sp.m_size;
-                    skPrintf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
+                    printf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
                 }
             }
             else
             {
                 // this is an error, it shouldn't have duplicate sections
-                skPrintf("Error - duplicate section name!\n");
+                printf("Error - duplicate section name!\n");
             }
         }
     }
@@ -240,7 +239,7 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 
         if (hdr.m_entSize == 0)
         {
-            skPrintf("Error - No entries in the string table.\n");
+            printf("Error - No entries in the string table.\n");
             return;
         }
 
@@ -256,7 +255,7 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             // Make sure that the index is at least in range.
             if (syml.m_name >= str->getSize())
             {
-                skPrintf("Error - The size of the symbol name exceeds the size of the string table.\n");
+                printf("Error - The size of the symbol name exceeds the size of the string table.\n");
                 break;
             }
 

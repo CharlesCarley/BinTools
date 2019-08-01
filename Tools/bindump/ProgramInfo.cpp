@@ -33,14 +33,16 @@ using namespace std;
 #include "ELF/skElfFile.h"
 #include "ELF/skElfSection.h"
 #include "ELF/skElfUtils.h"
+#include "Extras/skElfPrintUtils.h"
+#include "Extras/skPortablePrintUtils.h"
+#include "PE/skPortableDirectory.h"
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
-#include "PE/skPortableDirectory.h"
 #include "ProgramInfo.h"
 #include "Utils/skDebugger.h"
 #include "skBinaryFile.h"
-#include "skPrintUtils.h"
+#include "Extras/skPrintUtils.h"
 #include "skSection.h"
 #include "skSymbol.h"
 
@@ -140,7 +142,7 @@ void HexDump_PrintSectionHeader(skBinaryFile* fp, skSection* section)
 
         const skElfSectionHeader64& header = sectionHeader->getHeader();
 
-        skElfUtils::printSectionHeader(header);
+        skElfPrintUtils::printSectionHeader(header);
     }
     else if (fileFormat == FF_PE)
     {
@@ -212,7 +214,7 @@ void HexDump_PrintHeadersCommon(HexDump_ProgramInfo& prog)
                 skPrintUtils::writeColor(CS_LIGHT_GREY);
 
             const skElfHeaderInfo64& header = elf->getHeader();
-            skElfUtils::printElfHeader(header);
+            skElfPrintUtils::printElfHeader(header);
         }
         else if (fileFormat == FF_PE)
         {
@@ -367,7 +369,7 @@ void HexDump_Interactive(HexDump_ProgramInfo& prog)
         prog.m_fp = skBinaryFile::load(path.c_str());
         if (prog.m_fp)
             prog.m_fileName = path;
-   }
+    }
     break;
     case '1':
     {

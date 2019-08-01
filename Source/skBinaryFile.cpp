@@ -32,7 +32,6 @@
 #include "Utils/skFileStream.h"
 #include "skDefaultFile.h"
 #include "skSection.h"
-#include "skPrintUtils.h"
 #include "skSymbol.h"
 
 
@@ -46,7 +45,7 @@ skBinaryFile *skBinaryFile::load(const char *file)
 
     if (!fs.isOpen())
     {
-        skPrintf("failed to open file %s\n", file);
+        printf("failed to open file %s\n", file);
         return 0;
     }
 
@@ -83,14 +82,14 @@ skBinaryFile *skBinaryFile::load(const char *file)
             else
             {
                 // defaults to the generic skDefaultFile.
-                skPrintf("skBinaryFile::load: - PE signature was not found.\n");
+                printf("skBinaryFile::load: - PE signature was not found.\n");
             }
         }
         else
         {
             // Or perhaps a DOS program was passed in.
             // This is looking for PE only right now.
-            skPrintf("Invalid PE offset\n");
+            printf("Invalid PE offset\n");
 
 
             // Seek back to the start of the file and use 
@@ -139,7 +138,7 @@ void skBinaryFile::load(skStream &fstream)
 {
     if (!fstream.isOpen())
     {
-        skPrintf("load called on a closed file\n");
+        printf("load called on a closed file\n");
         return;
     }
 

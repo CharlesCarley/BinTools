@@ -28,7 +28,7 @@
 #include "Utils/skMemoryUtils.h"
 #include "capstone/capstone.h"
 #include "skBinaryFile.h"
-#include "skPrintUtils.h"
+#include "Extras/skPrintUtils.h"
 
 
 
@@ -81,7 +81,7 @@ void skSection::initialize(void *ptr, size_t size)
     cs_err err = cs_open(arch, mode, (csh *)&m_handle);
     if (err != CS_ERR_OK)
     {
-        skPrintf("Capstone Error: cs_open returned %i\n", err);
+        printf("Capstone Error: cs_open returned %i\n", err);
         return;
     }
 }
@@ -92,7 +92,7 @@ void skSection::dissemble(int flags, int code)
 {
     if (m_handle == -1)
     {
-        skPrintf("dissemble was called with an invalid handle.\n");
+        printf("dissemble was called with an invalid handle.\n");
         return;
     }
 
@@ -123,7 +123,7 @@ void skSection::dissemble(int flags, int code)
             skPrintUtils::dumpHex(i.bytes, 0, i.size, fl, code, false);
 
             skPrintUtils::writeColor(CS_WHITE);
-            skPrintf("%s\t%s\n", i.mnemonic, i.op_str);
+            printf("%s\t%s\n", i.mnemonic, i.op_str);
         }
 
         cs_free(insn, count);

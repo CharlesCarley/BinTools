@@ -23,23 +23,21 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#ifndef _skElfUtils_h_
-#define _skElfUtils_h_
+#ifndef _skPortableUtils_h_
+#define _skPortableUtils_h_
 
-#include "ELF/skElfTypes.h"
+#include "PE/skPortableTypes.h"
 
-class skElfUtils
+
+class skPortableUtils
 {
 public:
+    static void printHeader(const COFFHeader& header);
+    static void printHeader(const COFFSectionHeader& header);
 
-    static void copyHeader(skElfSectionHeader64& header, const skElfSectionHeader64& header64Bit);
-    static void copyHeader(skElfSectionHeader64& header, const skElfSectionHeader32& header32Bit);
-
-    static void copyHeader(skElfSymbol64& header, const skElfSymbol64& header64Bit);
-    static void copyHeader(skElfSymbol64& header, const skElfSymbol32& header32Bit);
-
-    static void copyHeader(skElfHeaderInfo64& header, const skElfHeaderInfo32& header32Bit);
+    static void printHeader(const COFFOptionalHeader32& header);
+    static void printHeader(const COFFOptionalHeader64& header);
 };
 
 
-#endif  //_skElfUtils_h_
+#endif  //_skPortableUtils_h_

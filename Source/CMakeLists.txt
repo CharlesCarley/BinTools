@@ -25,52 +25,104 @@ set(TargetName          BinaryFile)
 set(TargetName_GRP      "")
 
 
-set(TargetName_SRC
+
+set(TargetName_HDR
     skBinaryFile.h
     skBinaryFileCommon.h
     skDefaultFile.h
-    skPrintUtils.h
     skSection.h
     skSymbol.h
+)
+
+
+set(TargetName_SRC
+    skBinaryFile.cpp
+    skDefaultFile.cpp
+    skSection.cpp
+    skSymbol.cpp
+)
+
+# ------------------------------------------------------------------------------
+#  ELF  
+
+set(TargetName_ELF_HDR
     ELF/skElfFile.h
     ELF/skElfTypes.h
     ELF/skElfUtils.h
     ELF/skElfSection.h
     ELF/skElfSymbol.h
-    PE/skPortableDirectory.h
-    PE/skPortableUtils.h
-    PE/skPortableTypes.h
-    PE/skPortableSection.h
-    PE/skPortableSymbol.h
-    PE/skPortableUtils.h
-    skBinaryFile.cpp
-    skDefaultFile.cpp
-    skPrintUtils.cpp
-    skSection.cpp
-    skSymbol.cpp
+)
+
+set(TargetName_ELF_SRC
     ELF/skElfFile.cpp
     ELF/skElfSection.cpp
     ELF/skElfSymbol.cpp
     ELF/skElfUtils.cpp
-    PE/skPortableDirectory.cpp
-    PE/skPortableFile.h
+)
+
+
+
+# ------------------------------------------------------------------------------
+#  PE  
+
+set(TargetName_PE_HDR
+    PE/skPortableDirectory.h
     PE/skPortableTypes.h
     PE/skPortableSection.h
-    PE/skPortableUtils.h
+    PE/skPortableSymbol.h
+)
+
+set(TargetName_PE_SRC
+    PE/skPortableDirectory.cpp
     PE/skPortableFile.cpp
     PE/skPortableSection.cpp
     PE/skPortableSymbol.cpp
-    PE/skPortableUtils.cpp
 )
+
+
+
+# ------------------------------------------------------------------------------
+#  Extras  
+
+set(TargetName_OPT_HDR
+    Extras/skPrintUtils.h
+    Extras/skElfPrintUtils.h
+    Extras/skPortablePrintUtils.h
+)
+
+set(TargetName_OPT_SRC
+    Extras/skPrintUtils.cpp
+    Extras/skElfPrintUtils.cpp
+    Extras/skPortablePrintUtils.cpp
+)
+
+
+
+
+
 
 include_directories(. 
     ${BinTools_SOURCE_DIR}/Extern
     ${CAPSTONE_INCLUDE}
 )
 
-add_library(${TargetName} ${TargetName_SRC})
+
+
+add_library(${TargetName} 
+	${TargetName_SRC}
+	${TargetName_HDR}
+	${TargetName_OPT_SRC}
+	${TargetName_OPT_HDR}
+	${TargetName_ELF_SRC}
+	${TargetName_ELF_HDR}
+	${TargetName_PE_SRC}
+	${TargetName_PE_HDR}
+)
+
+
 target_link_libraries(${TargetName} ${CAPSTONE_LIB})
 
 if (BinTools_USE_FOLDERS)
     set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
 endif()
+
