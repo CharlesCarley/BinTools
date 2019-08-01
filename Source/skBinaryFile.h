@@ -84,6 +84,23 @@ public:
         return m_arch;
     }
 
+
+    // Returns the number of loaded sections.
+    inline SKsize getSectionCount(void)
+    {
+        return m_sectionLookup.size();
+    }
+
+
+    // Returns the section at the specified index or NULL if the supplied index is out of bounds. 
+    inline skSection* getSection(SKsize idx)
+    {
+        if (idx < m_sectionLookup.size())
+            return m_sectionLookup.at(idx);
+        return 0;
+    }
+
+
     // Returns an iterator for all sections
     inline SectionTable::Iterator getSectionIterator(void)
     {

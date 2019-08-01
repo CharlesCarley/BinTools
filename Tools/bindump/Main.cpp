@@ -54,6 +54,7 @@ int main(int argc, char** argv)
     if (prog.m_state == MS_MAIN)
     {
         // enter into interactive mode
+        skClear();
         while (prog.m_state == MS_MAIN)
             HexDump_Interactive(prog);
     }

@@ -21,22 +21,35 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.6)
-project(BinTools)
+set(TargetName          apicheck)
+set(TargetName_GRP      "Tools")
 
-set(CMAKE_MODULE_PATH 
-    ${BinTools_SOURCE_DIR}/CMake
-    ${BinTools_SOURCE_DIR}/Extern/Utils/CMake
-    ${BinTools_SOURCE_DIR}/Tools/Data2Array/CMake
+
+set(TargetName_SRC 
+    Main.cpp
 )
-set(FOLDER_NAME "External")
-set(USE_FOLDERS TRUE)
-subdirs(Extern/Utils)
 
-include(Configure)
-subdirs(CMake)
-subdirs(Extern/capstone)
+include_directories(
+    ${BINARYFILE_INCLUDE}
+    ${UTILS_INCLUDE}
+)
 
-subdirs(Source Test)
-subdirs(Tools/bindump)
-subdirs(Tools/apicheck)
+add_executable(${TargetName} ${TargetName_SRC})
+
+target_link_libraries(
+    ${TargetName} 
+    ${BINFILE_LIB}
+    ${UTILS_LIB}
+)
+
+if (BinTools_USE_FOLDERS)
+    set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
+endif()
+
+
+if (NOT WIN32)
+    add_custom_command(TARGET ${TargetName} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${TargetName} "${CMAKE_BINARY_DIR}/${TargetName}"
+    )
+endif()
+
