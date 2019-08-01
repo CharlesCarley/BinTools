@@ -25,9 +25,6 @@
 */
 #include "PE/skPortableSection.h"
 #include "PE/skPortableDirectory.h"
-#include "Utils/skDebugger.h"
-#include "skPrintUtils.h"
-
 
 
 skPortableSection::skPortableSection(skBinaryFile*      owner,
