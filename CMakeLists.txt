@@ -37,9 +37,5 @@ include(Configure)
 subdirs(CMake)
 subdirs(Extern/capstone)
 
-
-subdirs(Source)
-subdirs(Test)
-#subdirs(Tools/Data2Array)
+subdirs(Source Test)
 subdirs(Tools/bindump)
-subdirs(Tools/bin2html)

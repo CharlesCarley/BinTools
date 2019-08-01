@@ -14,9 +14,7 @@ This project is an experimental repository for examining executable files and fo
 - Keep the BinaryFile library simple and separate from any tools/tests written with it.
 
 
-##### Test tools
+#### Test tools
 
 - [bindump](https://github.com/CharlesCarley/BinTools/blob/master/Tools/bindump)
-- [bin2html](https://github.com/CharlesCarley/BinTools/blob/master/Tools/bin2html)
-
 

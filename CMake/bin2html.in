@@ -1,5 +1,0 @@
-bin2html <options> -o <output html file> -i <path to executable>
-
-    <options>
-        -h    Display this help message.
-        -d    Output Disassembly only.
