@@ -295,7 +295,7 @@ void b2SpanAddress(SKuint64 addr)
 {
     SKuint64 iv = addr;
     b2OpenSpan("address");
-    Stream << right << hex << uppercase << iv;
+    Stream <<  nouppercase  << right << std::setw(8) << std::setfill('0') <<  hex  << iv;
     b2CloseSpan();
 }
 
@@ -414,12 +414,16 @@ void b2FileHeader(void)
 }
 
 
-void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline, bool skip = true)
+void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline, bool space = true)
 {
     SKuint64 j, mid = perline / 2;
+
+    int  lch    = -1;
+    bool isOpen = false;
+
     for (j = 0; j < perline; j++)
     {
-        if (skip)
+        if (space)
         {
             if (j % mid == 0)
                 Stream << " ";
@@ -428,20 +432,41 @@ void b2WriteHexLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline, b
         if (i + j < size)
         {
             int ch = ptr[i + j];
+
             if (ch == 0x00 || ch == 0xCC)
-                b2OpenSpan("hex0");
+            {
+                if (lch != ch)
+                {
+                    if (isOpen)
+                        b2CloseSpan();
+                    b2OpenSpan("hex0");
+                    lch    = ch;
+                    isOpen = true;
+                }
+            }
             else
-                b2OpenSpan("hex1");
+            {
+                if (lch != ch)
+                {
+                    if (isOpen)
+                        b2CloseSpan();
+                    b2OpenSpan("hex1");
+                    lch    = ch;
+                    isOpen = true;
+                }
+            }
             Stream
                 << hex << uppercase << setfill('0') << setw(2)
                 << ch;
-            b2CloseSpan();
         }
         else
             Stream << "  ";
 
         Stream << " ";
     }
+
+    if (isOpen)
+        b2CloseSpan();
 }
 
 
@@ -452,28 +477,52 @@ void b2WriteAsciiLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
     b2OpenSpan("ascii");
     Stream << "|";
 
+    int  lch    = -1;
+    bool isOpen = false;
+
+
     for (j = 0; j < perline; j++)
     {
         if (i + j < size)
         {
             int ch = ptr[i + j];
             if (ch == 0x00 || ch == 0xCC)
-                b2OpenSpan("ascii0");
+            {
+                if (lch != ch)
+                {
+                    if (isOpen)
+                        b2CloseSpan();
+                    b2OpenSpan("ascii0");
+                    lch    = ch;
+                    isOpen = true;
+                }
+
+            }
             else
-                b2OpenSpan("ascii1");
+            {
+                if (lch != ch)
+                {
+                    if (isOpen)
+                        b2CloseSpan();
+                    b2OpenSpan("ascii1");
+                    lch    = ch;
+                    isOpen = true;
+                }
+            }
 
             if (ch >= 0x20 && ch < 0x7F)
                 Stream << (char)ch;
             else
                 Stream << '.';
-
-            b2CloseSpan();
         }
         else
         {
             Stream << ".";
         }
     }
+    if (isOpen)
+        b2CloseSpan();
+
     Stream << "|";
     b2CloseSpan();
 }
@@ -507,7 +556,7 @@ void b2WriteHexDisassembly(SKuint8* ptr, SKuint64 start, SKuint64 stop)
     skBinaryFile* bin = gs_ctx.m_fp;
     if (bin && ptr)
     {
-        SKuint64 i, b = 16;
+        SKuint64 i, b = 12;
         for (i = 0; i < stop; i += b)
         {
             b2SpanAddress(i + start);
