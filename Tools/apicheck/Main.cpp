@@ -23,18 +23,19 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include<iostream>
-#include<iomanip>
-#include "skBinaryFile.h"
+#include <iomanip>
+#include <iostream>
 #include "Utils/skDebugger.h"
+#include "skBinaryFile.h"
+#include "skSection.h"
+
 using namespace std;
 
-#define bcDefaultFill setw(16) << setfill(' ')  << right
+#define bcDefaultFill setw(16) << setfill(' ') << right
 
 struct bcProgramInfo
 {
-    skBinaryFile *m_fp;
-
+    skBinaryFile* m_fp;
 };
 
 
@@ -45,8 +46,7 @@ static bcProgramInfo gs_ctx;
 
 
 
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     gs_ctx.m_fp = 0;
 
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     }
 
     gs_ctx.m_fp = skBinaryFile::load(argv[1]);
-    
+
     bcPrintBinaryFile();
 
 
@@ -73,15 +73,26 @@ void bcPrintBinaryFile(void)
     if (fp)
     {
         cout << "Architecture:  ";
-        cout << bcDefaultFill  << (int)fp->getArchitecture() << endl;
+        cout << bcDefaultFill << (int)fp->getArchitecture() << endl;
 
         cout << "FileFormat:    ";
-        cout << bcDefaultFill << (int) fp->getFormat() << endl;
+        cout << bcDefaultFill << (int)fp->getFormat() << endl;
 
         cout << "Length:        ";
         cout << bcDefaultFill << fp->getLength() << endl;
 
         cout << "Section Count: ";
         cout << bcDefaultFill << fp->getSectionCount() << endl;
+
+
+        SKsize size = fp->getSectionCount();
+
+        if (size > 0)
+        {
+            skSection* sec = fp->getSection(size - 1);
+            if (sec)
+            {            
+            }
+        }
     }
 }
