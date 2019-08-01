@@ -93,7 +93,7 @@ public:
 
 
     // Returns the section at the specified index or NULL if the supplied index is out of bounds. 
-    inline skSection* getSection(SKsize idx)
+    skSection* getSection(SKsize idx)
     {
         if (idx < m_sectionLookup.size())
             return m_sectionLookup.at(idx);
