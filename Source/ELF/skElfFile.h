@@ -87,13 +87,13 @@ public:
     
 private:
 
-    template <typename skElfSymbol>
-    void loadSections(void);
+    template <typename skElfSectionHeader>
+    void loadSections(skStream &stream);
 
     template <typename skElfSymbolHeader>
     void loadSymbolTable(const char* str, const char* sym);
 
-    virtual void loadImpl(void);
+    virtual void loadImpl(skStream& stream);
 };
 
 #endif  //_skElfFileHeader_h_

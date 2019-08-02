@@ -52,11 +52,21 @@ void HexDump_PrintAll(HexDump_ProgramInfo& prog)
 {
     if (prog.m_fp)
     {
-        skPrintUtils::dumpHex((void*)prog.m_fp->getPointer(),
-                              0,
-                              prog.m_fp->getLength(),
-                              prog.m_flags,
-                              prog.m_code);
+
+        skBinaryFile::SectionTable::Iterator it = prog.m_fp->getSectionIterator();
+        while (it.hasMoreElements())
+        {
+            skSection* sec = it.getNext().second;
+
+            skPrintUtils::dumpHex(sec->getPointer(),
+                                  sec->getStartAddress(),
+                                  sec->getSize(),
+                                  prog.m_flags,
+                                  prog.m_code);
+
+            skPrintf("%16s*\n", " ");
+        }
+
     }
 }
 

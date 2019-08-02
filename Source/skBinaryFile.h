@@ -147,7 +147,7 @@ public:
 protected:
     // Called from load.
     // loadImpl is responsible for converting the underlying data into this interface.
-    virtual void loadImpl(void) = 0;
+    virtual void loadImpl(skStream& stream) = 0;
 };
 
 #endif  //_skBinaryFile_h_

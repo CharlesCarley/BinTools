@@ -67,12 +67,9 @@ void skSection::initialize(void *ptr, size_t size)
     if (!ptr || size == 0)
         return;
 
-    m_data = new ValueType[size + 1];
-    skMemcpy(m_data, ptr, size);
-
-    m_data[size] = 0;
-    m_size       = size;
-
+    // passes ownership!
+    m_data = (SKuint8 *)ptr;
+    m_size = size;
 
     cs_arch arch = skSection_getCapStoneArch(m_owner->getArchitecture());
 

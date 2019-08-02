@@ -82,7 +82,7 @@ private:
     void sortDataDirectories(void);
 
 
-    virtual void loadImpl(void);
+    virtual void loadImpl(skStream& stream);
 };
 
 #endif  //_skPortableFile_h_

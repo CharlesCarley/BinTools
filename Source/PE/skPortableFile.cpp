@@ -29,6 +29,7 @@
 #include "PE/skPortableSymbol.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skMemoryUtils.h"
+#include "Utils/skFileStream.h"
 #include "skSection.h"
 
 
@@ -76,22 +77,16 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest)
 
 
 
-void skPortableFile::loadImpl(void)
+void skPortableFile::loadImpl(skStream& stream)
 {
-    if (m_data == 0)
-    {
-        skPrintf("No data was loaded prior to calling load\n");
-        return;
-    }
 
     SKuint16 optMagic;
 
-    char *ptr = m_data;
+    // Skip past the DOS stub program, and the PE signature 
+    // since it is not part of the defined structure (+4)
+    stream.seek(m_headerOffs + 4, SEEK_CUR);
+    stream.read(&m_header, sizeof(COFFHeader));
 
-    // Skip past the DOS stub program.
-    // The PE signature is not part of the defined structure (+4)
-    ptr += m_headerOffs + 4;
-    skMemcpy(&m_header, ptr, sizeof(COFFHeader));
 
     switch (m_header.m_machine)
     {
@@ -106,18 +101,21 @@ void skPortableFile::loadImpl(void)
 
     if (m_arch == IS_NONE)
     {
-        skPrintf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
+        printf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
         return;
     }
-    ptr += sizeof(COFFHeader);
 
-    optMagic = (*(SKuint16 *)ptr);
+    // Pick out the magic for testing.
+    stream.read(&optMagic, 2);
+    // put it back
+    stream.seek(-2, SEEK_CUR); 
+
     if (optMagic == COFF_MAG_PE32)
     {
         // runtime sanity check
         if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
         {
-            skPrintf("COFFOptionalHeader32 not properly aligned %u-%u\n",
+            printf("COFFOptionalHeader32 not properly aligned %u-%u\n",
                      (SKuint32)sizeof(COFFOptionalHeader32),
                      m_header.m_optionalHeaderSize);
 
@@ -125,45 +123,43 @@ void skPortableFile::loadImpl(void)
         }
 
         m_imageHeader = new COFFOptionalHeader32;
-        skMemcpy(m_imageHeader, (COFFOptionalHeader32 *)ptr, sizeof(COFFOptionalHeader32));
-
+        stream.read(m_imageHeader, sizeof(COFFOptionalHeader32));
 
         m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
     }
     else if (optMagic == COFF_MAG_PE64)
     {
-        // runtime sanity check
+        // Make sure it's valid
         if (sizeof(COFFOptionalHeader64) != m_header.m_optionalHeaderSize)
         {
-            skPrintf("COFFOptionalHeader64 not properly aligned %u-%u\n",
+            printf("COFFOptionalHeader64 not properly aligned %u-%u\n",
                      (SKuint32)sizeof(COFFOptionalHeader64),
                      m_header.m_optionalHeaderSize);
             return;
         }
 
         m_imageHeader = new COFFOptionalHeader64;
-        
-        skMemcpy(m_imageHeader, ptr, sizeof(COFFOptionalHeader64));
+        stream.read(m_imageHeader, sizeof(COFFOptionalHeader64));
 
-        
         m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
     }
     else
     {
-        skPrintf("COFFOptionalHeader: Unknown header type!\n");
+        printf("COFFOptionalHeader: Unknown header type!\n");
         return;
     }
 
     // Set the file format type now that it's known to be one or the other.
     m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
 
-    COFFSectionHeader *sectionPtr = reinterpret_cast<COFFSectionHeader *>(m_data + m_sectionStart);
+    // seek to the section
+    stream.seek(m_sectionStart, SEEK_SET);
 
     SKuint16 i16;
-    for (i16 = 0; i16 < m_header.m_sectionCount; ++i16, ++sectionPtr)
+    for (i16 = 0; i16 < m_header.m_sectionCount; ++i16)
     {
         COFFSectionHeader sh;
-        skMemcpy(&sh, sectionPtr, sizeof(COFFSectionHeader));
+        stream.read(&sh, sizeof(COFFSectionHeader));
 
         char *name = (char *)sh.m_name;
         if ((*name) == '\0' || name[7] != '\0')
@@ -178,12 +174,25 @@ void skPortableFile::loadImpl(void)
                 size = sh.m_sizeOfRawData;
             }
 
-            if (sh.m_pointerToRawData + size < m_len)
+            if (size < m_len)
             {
+
+                // Read the section data
+
+                // save the location
+                SKsize pos = stream.position();
+                stream.seek(sh.m_pointerToRawData, SEEK_SET);
+
+
+                SKuint8 *data = new SKuint8[size + 1];
+                stream.read(data, size);
+                stream.seek(pos, SEEK_SET);
+                data[size] = 0;
+
                 skSection *section = new skPortableSection(
                     this,
                     name,
-                    m_data + sh.m_pointerToRawData,
+                    data,
                     (SKsize)size,
                     sh.m_pointerToRawData,
                     sh);
@@ -192,13 +201,13 @@ void skPortableFile::loadImpl(void)
             }
             else
             {
-                skPrintf("Error - Section size exceeds the amount of memory allocated.\n");
+                printf("Error - Section size exceeds the amount of memory allocated.\n");
             }
         }
         else
         {
             // this is an error, it shouldn't have duplicate symbols
-            skPrintf("Error - duplicate symbol name!\n");
+            printf("Error - duplicate symbol name!\n");
         }
     }
 
@@ -317,7 +326,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
             if (ilt & (1 << 31))
             {
                 // lookup by ordinal
-                skPrintf("Lookup by ordinal is not implemented\n");
+                printf("Lookup by ordinal is not implemented\n");
                 break;
 
             }

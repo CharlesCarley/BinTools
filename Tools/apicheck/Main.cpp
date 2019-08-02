@@ -31,7 +31,8 @@
 
 using namespace std;
 
-#define bcDefaultFill setw(16) << setfill(' ') << right
+#define bcDefaultFill setw(24) << setfill(' ') << left
+#define bcDefaultFillh setw(12) << setfill(' ') << left
 
 struct bcProgramInfo
 {
@@ -72,26 +73,33 @@ void bcPrintBinaryFile(void)
     skBinaryFile* fp = gs_ctx.m_fp;
     if (fp)
     {
-        cout << "Architecture:  ";
+        cout << bcDefaultFill << "Architecture:";
         cout << bcDefaultFill << (int)fp->getArchitecture() << endl;
 
-        cout << "FileFormat:    ";
+        cout << bcDefaultFill << "FileFormat:";
         cout << bcDefaultFill << (int)fp->getFormat() << endl;
 
-        cout << "Length:        ";
+        cout << bcDefaultFill  << "Length: ";
         cout << bcDefaultFill << fp->getLength() << endl;
 
-        cout << "Section Count: ";
-        cout << bcDefaultFill << fp->getSectionCount() << endl;
+        cout << bcDefaultFill  << "Section Count:"; 
+        cout << fp->getSectionCount() << endl;
 
 
         SKsize size = fp->getSectionCount();
 
         if (size > 0)
         {
-            skSection* sec = fp->getSection(size - 1);
-            if (sec)
-            {            
+            SKsize i;
+
+            for (i = 0; i < size; ++i)
+            {
+                skSection* sec = fp->getSection(i);
+                if (sec)
+                {
+                    cout << bcDefaultFill << "Section Count" << sec->getName().c_str() << endl;
+                }
+
             }
         }
     }

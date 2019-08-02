@@ -24,13 +24,13 @@
 -------------------------------------------------------------------------------
 */
 #include "ELF/skElfFile.h"
-#include <capstone/capstone.h>
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
 #include "ELF/skElfSection.h"
 #include "ELF/skElfSymbol.h"
 #include "ELF/skElfUtils.h"
+#include "Utils/skFileStream.h"
 #include "Utils/skString.h"
 #include "skSection.h"
 
@@ -49,18 +49,19 @@ skElfFile::~skElfFile()
 }
 
 
-void skElfFile::loadImpl(void)
+void skElfFile::loadImpl(skStream& stream)
 {
-    if (m_data == 0)
-    {
-        printf("No data was loaded prior to calling load\n");
-        return;
-    }
+    SKuint8 desc;
+
+    // Extract the class out of the header
+    stream.seek(EMN_CLASS, SEEK_SET);
+    stream.read(&desc, 1);
+    stream.seek(0, SEEK_SET);
 
     // Find the file's platform type.
-    if (*(m_data + EMN_CLASS) == 1)
+    if (desc == 1)
         m_fileFormatType = FFT_32BIT;
-    else if (*(m_data + EMN_CLASS) == 2)
+    else if (desc == 2)
         m_fileFormatType = FFT_64BIT;
     else
     {
@@ -68,16 +69,17 @@ void skElfFile::loadImpl(void)
         return;
     }
 
+
     if (m_fileFormatType == FFT_32BIT)
     {
         // Read as 32 bit then store as a 64bit type
         skElfHeaderInfo32 header;
-        skMemcpy(&header, (char*)m_data, sizeof(skElfHeaderInfo32));
+        stream.read(&header, sizeof(skElfHeaderInfo32));
         skElfUtils::copyHeader(m_header, header);
     }
     else
     {
-        skMemcpy(&m_header, (char*)m_data, sizeof(skElfHeaderInfo64));
+        stream.read(&m_header, sizeof(skElfHeaderInfo64));
     }
 
 
@@ -128,13 +130,13 @@ void skElfFile::loadImpl(void)
 
     if (m_fileFormatType == FFT_32BIT)
     {
-        loadSections<skElfSectionHeader32>();
+        loadSections<skElfSectionHeader32>(stream);
         loadSymbolTable<skElfSymbol32>(".dynstr", ".dynsym");
         loadSymbolTable<skElfSymbol32>(".strtab", ".symtab");
     }
     else
     {
-        loadSections<skElfSectionHeader64>();
+        loadSections<skElfSectionHeader64>(stream);
         loadSymbolTable<skElfSymbol64>(".dynstr", ".dynsym");
         loadSymbolTable<skElfSymbol64>(".strtab", ".symtab");
     }
@@ -142,11 +144,11 @@ void skElfFile::loadImpl(void)
 
 
 template <typename skElfSectionHeader>
-void skElfFile::loadSections(void)
+void skElfFile::loadSections(skStream &stream)
 {
     elf64 offs, offe, i;
 
-    if (!m_data || m_len == 0 || m_len == (size_t)-1)
+    if (m_len == 0 || m_len == (size_t)-1)
         return;
 
     // The section headers are packed in m_data[start:end]
@@ -159,40 +161,63 @@ void skElfFile::loadSections(void)
         return;
     }
 
-    // Find the offset
-    skElfSectionHeader* secPtr = (skElfSectionHeader*)(m_data + (offe - sizeof(skElfSectionHeader)));
-    
-    m_strtab = secPtr->m_offset;
-    secPtr   = (skElfSectionHeader*)(m_data + offs);
+    // Read the last section for resolving names.
+    // TODO: Fix this. It shouldn't assume that the string table is last.
+    stream.seek(offe - sizeof(skElfSectionHeader), SEEK_SET);
+    skElfSectionHeader strtab;
+    stream.read(&strtab, sizeof(skElfSectionHeader));
+    m_strtab = strtab.m_offset;
 
+
+    stream.seek(offs, SEEK_SET);
+    
     // Store each section one by one.
-    for (i = 0; i < m_header.m_sectionTableEntryCount; ++i, secPtr++)
+    for (i = 0; i < m_header.m_sectionTableEntryCount; ++i)
     {
-        const skElfSectionHeader& sp = (*secPtr);
+        skElfSectionHeader sp;
+        stream.read(&sp, sizeof(skElfSectionHeader));
+
 
         SKsize sn = (SKsize)m_strtab + sp.m_name;
         if (sn < m_len)
         {
-            char* name = (char*)(m_data + sn);
+            SKsize loc = stream.position();
+            char   tempBuf[64];
+            stream.seek(sn, SEEK_SET);
+            stream.read(tempBuf, 64);
+            stream.seek(loc, SEEK_SET);
 
+            char* name = (char*)tempBuf;
             // Skip the null entry
             if (name != 0 && (*name) == '\0')
                 continue;
 
             if (m_sectionLookup.find(name) == SK_NPOS)
             {
-                if (sp.m_offset + sp.m_size < m_len)
+                if (sp.m_size < m_len)
                 {
                     skElfSectionHeader64 header;
+                 
                     if (m_fileFormatType == FFT_32BIT)
-                        skElfUtils::copyHeader(header, *((skElfSectionHeader32*)secPtr));
+                        skElfUtils::copyHeader(header, sp);
                     else
-                        skElfUtils::copyHeader(header, *((skElfSectionHeader64*)secPtr));
+                        skElfUtils::copyHeader(header, sp);
+
+
+                    loc  = stream.position();
+                    stream.seek(sp.m_offset, SEEK_SET);
+
+
+                    SKuint8* data = new SKuint8[(size_t)sp.m_size + 1];
+                    stream.read(data, (size_t)sp.m_size);
+                    data[sp.m_size] = 0;
+                    stream.seek(loc, SEEK_SET);
+
 
                     skSection* section = new skElfSection(
                         this,
                         name,
-                        m_data + sp.m_offset,
+                        data,
                         (SKsize)sp.m_size,
                         (size_t)sp.m_offset,
                         header);
@@ -222,7 +247,7 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
         return;
 
     // Some symbols are nonexistent in a stripped binary (.strtab, .symtab)
- 
+
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
 

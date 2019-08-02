@@ -24,6 +24,7 @@
 -------------------------------------------------------------------------------
 */
 #include "skDefaultFile.h"
+#include "Utils/skFileStream.h"
 
 
 skDefaultFile::skDefaultFile()
@@ -34,7 +35,11 @@ skDefaultFile ::~skDefaultFile()
 {
 }
 
-void skDefaultFile::loadImpl(void)
+void skDefaultFile::loadImpl(skStream& stream)
 {
-    m_fileFormat = FF_ANY;
+    m_data = new char[m_len + 1];
+    m_len  = stream.read(m_data, m_len);
+
+    m_data[m_len] = 0;
+    m_fileFormat  = FF_ANY;
 }

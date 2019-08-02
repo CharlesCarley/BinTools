@@ -28,7 +28,6 @@
 #include <limits>
 #include "ELF/skElfFile.h"
 #include "PE/skPortableFile.h"
-#include "Utils/skDebugger.h"
 #include "Utils/skFileStream.h"
 #include "skDefaultFile.h"
 #include "skSection.h"
@@ -143,10 +142,13 @@ void skBinaryFile::load(skStream &fstream)
     }
 
 
+    // grab the length 
     m_len  = fstream.size();
-    m_data = new char[m_len + 1];
-    m_len  = fstream.read(m_data, m_len);
-    m_data[m_len] = 0;
 
-    loadImpl();
+
+    //m_data = new char[m_len + 1];
+    //m_len  = fstream.read(m_data, m_len);
+    //m_data[m_len] = 0;
+
+    loadImpl(fstream);
 }

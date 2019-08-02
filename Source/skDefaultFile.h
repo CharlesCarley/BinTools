@@ -46,7 +46,7 @@ public:
 
 
 protected:
-    virtual void loadImpl(void);
+    virtual void loadImpl(skStream& stream);
 };
 
 #endif  //_skDefaultFile_h_
