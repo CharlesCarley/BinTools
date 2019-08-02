@@ -29,7 +29,6 @@ set(TargetName_GRP      "")
 set(TargetName_HDR
     skBinaryFile.h
     skBinaryFileCommon.h
-    skDefaultFile.h
     skSection.h
     skSymbol.h
 )
@@ -37,7 +36,6 @@ set(TargetName_HDR
 
 set(TargetName_SRC
     skBinaryFile.cpp
-    skDefaultFile.cpp
     skSection.cpp
     skSymbol.cpp
 )

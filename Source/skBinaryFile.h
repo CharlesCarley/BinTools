@@ -38,7 +38,6 @@ public:
     typedef skHashTable<skString, skSymbol *>  SymbolTable;
 
 protected:
-    char *                m_data;
     SKsize                m_len;
     skFileFormat          m_fileFormat;
     skFileFormatType      m_fileFormatType;
@@ -134,13 +133,6 @@ public:
     {
         return m_len;
     }
-
-    // Returns a pointer to the underlying allocated memory.
-    inline const void *getPointer(void)
-    {
-        return m_data;
-    }
-
 
     virtual SKuint64 getEntryPoint(void) = 0;
 

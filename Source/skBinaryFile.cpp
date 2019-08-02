@@ -29,7 +29,6 @@
 #include "ELF/skElfFile.h"
 #include "PE/skPortableFile.h"
 #include "Utils/skFileStream.h"
-#include "skDefaultFile.h"
 #include "skSection.h"
 #include "skSymbol.h"
 
@@ -97,19 +96,14 @@ skBinaryFile *skBinaryFile::load(const char *file)
         }
     }
 
-    // This should eventually go away
-    // If the file cannot be loaded or there is a read error 
-    // this function should always return NULL.
-    if (!rval)
-        rval = new skDefaultFile(); 
-    rval->load(fs);
+    if (rval)
+        rval->load(fs);
     return rval;
 }
 
 
 
-skBinaryFile::skBinaryFile() :
-    m_data(0),
+skBinaryFile::skBinaryFile():
     m_len(0),
     m_fileFormat(FF_UNKNOWN),
     m_fileFormatType(FFT_UNKNOWN),
@@ -120,8 +114,7 @@ skBinaryFile::skBinaryFile() :
 
 skBinaryFile::~skBinaryFile()
 {
-    delete[] m_data;
-
+    
     SectionTable::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
         delete it.getNext().second;
@@ -144,11 +137,5 @@ void skBinaryFile::load(skStream &fstream)
 
     // grab the length 
     m_len  = fstream.size();
-
-
-    //m_data = new char[m_len + 1];
-    //m_len  = fstream.read(m_data, m_len);
-    //m_data[m_len] = 0;
-
     loadImpl(fstream);
 }
