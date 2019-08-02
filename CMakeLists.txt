@@ -39,4 +39,4 @@ subdirs(Extern/capstone)
 
 subdirs(Source Test)
 subdirs(Tools/bindump)
-subdirs(Tools/apicheck)
+#subdirs(Tools/apicheck)

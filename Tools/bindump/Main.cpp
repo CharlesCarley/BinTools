@@ -30,10 +30,10 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "Extras/skPrintUtils.h"
 #include "ProgramInfo.h"
 #include "Utils/skDebugger.h"
 #include "skBinaryFile.h"
-#include "Extras/skPrintUtils.h"
 
 
 
@@ -161,7 +161,7 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
                 prog.m_flags |= PF_DISASEMBLE;
                 break;
             case 'h':
-                HexDump_Usage();
+                //HexDump_Usage();
                 return -1;
             case 'i':
                 prog.m_state = MS_MAIN;
@@ -187,7 +187,7 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
 
     if (err)
     {
-        skPrintf("Missing file argument!\n");
+        skPrintf("Unable to load file\n");
         return -1;
     }
     return 0;

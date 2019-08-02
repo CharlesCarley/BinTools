@@ -26,26 +26,27 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "PE/skPortableUtils.h"
-#include <time.h>
 #include "Utils/skDebugger.h"
+#include "Utils/skTimer.h"
 #include "skPrintUtils.h"
 
 
 
 void skPortableUtils::printHeader(const COFFHeader& header)
 {
-    size_t bw;
-    char buf[32];
+    SKuint32 bw;
+    char   buf[32];
 
+    
     skPrintf("  Machine:                    %u\n", header.m_machine);
     skPrintf("  Section Count:              %u\n", header.m_sectionCount);
 
-    bw = strftime(buf, 32, "%D %r", localtime((time_t*)&header.m_timeDateStamp));
-    if (buf[0] != 0 && bw > 0)
+    bw = skGetTimeString(buf, 32, "%D %r", header.m_timeDateStamp);
+    if (bw != SK_NPOS)
         skPrintf("  Timestamp:                  %s\n", buf);
     else
         skPrintf("  Timestamp:                  %u\n", header.m_timeDateStamp);
-        
+
     skPrintf("  Symbol Table Offset:        %u\n", header.m_symbolTableOffset);
     skPrintf("  Number Of Symbols:          %u\n", header.m_symbolCount);
     skPrintf("  Optional Header Size:       %u\n", header.m_optionalHeaderSize);
@@ -102,7 +103,7 @@ void skPortableUtils_printHeader(const COFFOptionalHeader<COFFOptionalHeaderVary
     skPrintUtils::writeColor(CS_LIGHT_GREY);
 
 
-    const COFFDataDirectories &dir = header.m_directories;
+    const COFFDataDirectories& dir = header.m_directories;
 
 
 

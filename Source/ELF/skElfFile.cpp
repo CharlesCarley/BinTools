@@ -197,12 +197,7 @@ void skElfFile::loadSections(skStream &stream)
                 if (sp.m_size < m_len)
                 {
                     skElfSectionHeader64 header;
-                 
-                    if (m_fileFormatType == FFT_32BIT)
-                        skElfUtils::copyHeader(header, sp);
-                    else
-                        skElfUtils::copyHeader(header, sp);
-
+                    skElfUtils::copyHeader(header, sp);
 
                     loc  = stream.position();
                     stream.seek(sp.m_offset, SEEK_SET);
