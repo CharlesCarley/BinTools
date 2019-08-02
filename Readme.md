@@ -17,5 +17,4 @@ This project is an experimental repository for examining executable files and fo
 #### Test tools
 
 - [bindump](https://github.com/CharlesCarley/BinTools/blob/master/Tools/bindump)
-- [apicheck](https://github.com/CharlesCarley/BinTools/blob/master/Tools/apicheck)
 
