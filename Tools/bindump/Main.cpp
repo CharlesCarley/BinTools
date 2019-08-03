@@ -81,6 +81,7 @@ int main(int argc, char** argv)
     }
 
     delete prog.m_fp;
+
     skPrintUtils::writeColor(CS_WHITE);
     return 0;
 }
@@ -98,6 +99,7 @@ void HexDump_Usage(void)
     std::cout << "      -b          Display a binary table in the hex dump output.  \n";
     std::cout << "      -d          Display disassembly in code sections.           \n";
     std::cout << "      -h          Display this help message.                      \n";
+    std::cout << "      -xc         Remove color output.                            \n";
     std::cout << "                                                                  \n";
     std::cout << "      -o [1-5]    Interactive menu option.                        \n";
     std::cout << "                  - 1. Print a hex dump of the files contents.    \n";
@@ -161,11 +163,18 @@ int HexDump_ParseCommandLine(HexDump_ProgramInfo& prog, int argc, char** argv)
                 prog.m_flags |= PF_DISASEMBLE;
                 break;
             case 'h':
-                //HexDump_Usage();
                 return -1;
             case 'i':
                 prog.m_state = MS_MAIN;
                 break;
+            case 'x':
+            {
+                if (offs < alen)
+                    sw = ch[offs++];
+                if (sw == 'c')
+                    skDebugger::setPrintFlag(skDebugger::PF_DISABLE_COLOR);
+                break;
+            }
             default:
                 skPrintf("unknown argument '%c'\n", sw);
                 return -1;

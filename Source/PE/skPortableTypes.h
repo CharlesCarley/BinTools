@@ -40,7 +40,7 @@ enum COFFMagic
 enum COFFMachineType
 {
     CMT_NONE  = 0,
-    CMT_AMD64 = 0x01D3,
+    CMT_AMD64 = 0x8664,
     CMT_ARM   = 0x01C0,
     CMT_ARM64 = 0xAA64,
     CMT_I386  = 0x014C,

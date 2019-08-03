@@ -7,6 +7,7 @@ bindump <options> <path to file>
       -b          Display a binary table in the hex dump output.
       -d          Display disassembly in code sections.
       -h          Display this help message.
+      -xc         Remove color output.
 
       -o [1-5]    Interactive menu option.
                   - 1. Print a hex dump of the files contents.
