@@ -67,7 +67,7 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest)
 {
     // The file format type is the only indicator for determining
     // how m_imageHeader can be cast to the correct value.
-    if (m_imageHeader && m_fileFormatType == FFT_32BIT)
+    if (m_imageHeader && m_fileFormatType == FFT_64BIT)
     {
         COFFOptionalHeader64 *h64 = (COFFOptionalHeader64 *)m_imageHeader;
 

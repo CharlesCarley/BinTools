@@ -60,9 +60,9 @@ void skPortableUtils::getPlatformId(const COFFOptionalHeaderCommon& inf, char de
 {
     dest[0] = 0;
     if (inf.m_magic == COFF_MAG_PE32)
-        sk_strncpy(dest, len, "PE32", 64);
+        sk_strncpy(dest, len, "PE32", len);
     else if (inf.m_magic == COFF_MAG_PE64)
-        sk_strncpy(dest, len, "PE32+", 64);
+        sk_strncpy(dest, len, "PE32+", len);
     else
-        sk_strncpy(dest, len, "Unknown Header Magic", 64);
+        sk_strncpy(dest, len, "Unknown Header Magic", len);
 }
