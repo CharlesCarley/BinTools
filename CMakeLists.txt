@@ -39,8 +39,8 @@ set(USE_FOLDERS         TRUE)
 set(Utils_SOURCE_DIR    "${BinTools_SOURCE_DIR}/Extern/Utils")
 
 
-include (ConfigureUtils)
 include(Configure)
+include (ConfigureUtils)
 
 subdirs(Extern/Utils)
 subdirs(Extern/capstone)
