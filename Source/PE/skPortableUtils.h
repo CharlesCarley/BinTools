@@ -27,11 +27,53 @@
 #define _skPortableUtils_h_
 
 #include "PE/skPortableTypes.h"
+#include "Utils/skString.h"
 
 
 class skPortableUtils
 {
 public:
+
+    static void getMachine(const COFFHeader& inf, char dest[], int len)
+    {
+     
+        dest[0] = 0;
+        switch (inf.m_machine)
+        {
+        case CMT_AMD64:
+            sk_strncpy(dest, len, "AMD64", 16);
+        case CMT_ARM:
+            sk_strncpy(dest, len, "ARM", 16);
+            break;
+        case CMT_ARM64:
+            sk_strncpy(dest, len, "ARM64", 16);
+            break;
+        case CMT_IA64:
+            sk_strncpy(dest, len, "IA64", 16);
+            break;
+        case CMT_I386:
+            sk_strncpy(dest, len, "I386", 16);
+            break;
+        default:
+            sk_strncpy(dest, len, "Unhandled", 16);
+            break;
+        }
+    }
+
+
+    static void getPlatformId(const COFFOptionalHeaderCommon& inf, char dest[], int len)
+    {
+        dest[0] = 0;
+        if (inf.m_magic == COFF_MAG_PE32)
+            sk_strncpy(dest, len, "PE32", 64);
+        else if (inf.m_magic == COFF_MAG_PE64)
+            sk_strncpy(dest, len, "PE32+", 64);
+        else
+            sk_strncpy(dest, len, "Unknown Header Magic", 64);
+    }
+
+
+
     static void printHeader(const COFFHeader& header);
     static void printHeader(const COFFSectionHeader& header);
 

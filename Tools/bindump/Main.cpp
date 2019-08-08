@@ -605,12 +605,14 @@ static void b2PrintElfSectionHeader(const skElfSectionHeader<T>& sh)
 
 
 
-void b2PrintPEHeader(const COFFHeader& header)
+void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& optional)
 {
     SKuint32 bw;
     char     buf[32];
 
-    printf("  Machine:                    %u\n", header.m_machine);
+
+    skPortableUtils::getMachine(header, buf, 16);
+    printf("  Machine:                    %s\n", buf);
     printf("  Section Count:              %u\n", header.m_sectionCount);
 
     bw = skGetTimeString(buf, 32, "%D %r", header.m_timeDateStamp);
@@ -623,6 +625,19 @@ void b2PrintPEHeader(const COFFHeader& header)
     printf("  Number Of Symbols:          %u\n", header.m_symbolCount);
     printf("  Optional Header Size:       %u\n", header.m_optionalHeaderSize);
     printf("  Characteristics:            0x%x\n", header.m_characteristics);
+    
+    printf("\n");
+
+    skPortableUtils::getPlatformId(optional, buf, 16);
+    printf("  Magic:                      %s\n", buf);
+    printf("  Version:                    %u.%u\n", optional.m_majorVersion, optional.m_minorVersion);
+    printf("  Sizeof Code:                %u\n", optional.m_sizeofCode);
+    printf("  Sizeof Init Data:           %u\n", optional.m_sizeofInitData);
+    printf("  Sizeof BSS Data:            %u\n", optional.m_sizeofBSSData);
+    printf("  Entry Point:                0x%X\n", optional.m_entryPoint);
+    printf("  Base Of Code:               %u\n", optional.m_baseOfCode);
+
+    printf("\n");
 }
 
 void b2PrintPESectionHeader(const COFFSectionHeader& header)
@@ -800,7 +815,7 @@ void b2PrintHeadersCommon(void)
 
 
         b2WriteColor(CS_LIGHT_GREY);
-        b2PrintPEHeader(pe->getCommonHeader());
+        b2PrintPEHeader(pe->getHeader(), pe->getCommonHeader());
 
 
         // Print the varying header.

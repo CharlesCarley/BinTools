@@ -45,11 +45,22 @@ private:
 public:
     virtual ~skPortableFile();
 
-
-    // Returns the header that is common amongst both object files and image files.
-    inline const COFFHeader& getCommonHeader(void)
+    
+    // Returns the file header
+    inline const COFFHeader& getHeader(void)
     {
         return m_header;
+    }
+
+    // Returns the header that is common amongst both object files and image files.
+    COFFOptionalHeaderCommon getCommonHeader(void)
+    {
+        // This needs to create a copy since it is stored 
+        // in a pointer that may or may not be valid.
+        COFFOptionalHeaderCommon res = {};
+        if (m_imageHeader)
+            res = (*m_imageHeader);
+        return res;
     }
 
 

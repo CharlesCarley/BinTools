@@ -75,7 +75,7 @@ struct COFFOptionalHeaderCommon
     SKuint8  m_minorVersion;
     SKuint32 m_sizeofCode;
     SKuint32 m_sizeofInitData;
-    SKuint32 m_sizeofBSSdData;
+    SKuint32 m_sizeofBSSData;
     SKuint32 m_entryPoint;
     SKuint32 m_baseOfCode;
 };
