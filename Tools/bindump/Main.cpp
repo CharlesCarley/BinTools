@@ -445,7 +445,7 @@ void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, int mark, bo
 void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
 {
     // filter out invalid input
-    if (ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
+    if (!ptr || ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
         return;
 
 
@@ -477,80 +477,80 @@ void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
 
 void b2PrintAll(void)
 {
-    if (ctx.m_fp)
+    if (!ctx.m_fp)
+        return;
+
+    skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
+    while (it.hasMoreElements())
     {
-        skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
-        while (it.hasMoreElements())
-        {
-            skSection* sec = it.getNext().second;
+        skSection* sec = it.getNext().second;
 
-            b2DumpHex(sec->getPointer(),
-                      sec->getStartAddress(),
-                      sec->getSize(),
-                      ctx.m_flags,
-                      ctx.m_code);
+        b2DumpHex(sec->getPointer(),
+                  sec->getStartAddress(),
+                  sec->getSize(),
+                  ctx.m_flags,
+                  ctx.m_code);
 
-            printf("%16s*\n", " ");
-        }
+        printf("%16s*\n", " ");
     }
 }
 
 
 void b2PrintSectionNames(void)
 {
-    if (ctx.m_fp)
-    {
-        skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
+    if (!ctx.m_fp)
+        return;
 
+    skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
+
+    b2WriteColor(CS_DARKYELLOW);
+    printf("\nSections:\n\n");
+
+
+    b2WriteColor(CS_GREY);
+    printf(" Name                 Offset             Index\n\n");
+
+
+
+    b2WriteColor(CS_LIGHT_GREY);
+    int i = 0;
+    while (it.hasMoreElements())
+    {
+        skSection* sec = it.getNext().second;
+
+        const skString& str = sec->getName();
+
+        SKuint64 offs = (SKuint64)sec->getStartAddress();
+        printf(" %-20s 0x%-16llx %-2u\n", str.c_str(), offs, i);
+        ++i;
+    }
+
+    if (ctx.m_fp->getFormat() == FF_PE)
+    {
         b2WriteColor(CS_DARKYELLOW);
-        printf("\nSections:\n\n");
+        printf("\nData Directories:\n\n");
 
 
         b2WriteColor(CS_GREY);
-        printf(" Name                 Offset             Index\n\n");
-
+        it = ctx.m_fp->getSectionIterator();
+        printf(" Type                 RVA                Size\n\n");
 
 
         b2WriteColor(CS_LIGHT_GREY);
-        int i = 0;
         while (it.hasMoreElements())
         {
-            skSection* sec = it.getNext().second;
+            skPortableSection* sec = reinterpret_cast<skPortableSection*>(it.getNext().second);
 
-            const skString& str = sec->getName();
-
-            SKuint64 offs = (SKuint64)sec->getStartAddress();
-            printf(" %-20s 0x%-16llx %-2u\n", str.c_str(), offs, i);
-            ++i;
-        }
-
-        if (ctx.m_fp->getFormat() == FF_PE)
-        {
-            b2WriteColor(CS_DARKYELLOW);
-            printf("\nData Directories:\n\n");
-
-
-            b2WriteColor(CS_GREY);
-            it = ctx.m_fp->getSectionIterator();
-            printf(" Type                 RVA                Size\n\n");
-
-
-            b2WriteColor(CS_LIGHT_GREY);
-            while (it.hasMoreElements())
+            skPortableSection::Directories::Iterator dit = sec->getDirectoryIterator();
+            while (dit.hasMoreElements())
             {
-                skPortableSection* sec = reinterpret_cast<skPortableSection*>(it.getNext().second);
-
-                skPortableSection::Directories::Iterator dit = sec->getDirectoryIterator();
-                while (dit.hasMoreElements())
-                {
-                    skPortableDirectory* dir = dit.getNext();
-                    printf(" %-20u 0x%-16x %-2u\n", dir->getType(), dir->getRVA(), dir->getSize());
-                }
+                skPortableDirectory* dir = dit.getNext();
+                printf(" %-20u 0x%-16x %-2u\n", dir->getType(), dir->getRVA(), dir->getSize());
             }
         }
-
-        printf("\n\n");
     }
+
+    printf("\n\n");
 }
 
 
@@ -773,49 +773,49 @@ void b2PrintSection(skSection* section)
 
 void b2PrintHeadersCommon(void)
 {
-    skBinaryFile* bin = ctx.m_fp;
-    if (bin)
+    if (!ctx.m_fp)
+        return;
+
+
+    skFileFormat fileFormat = ctx.m_fp->getFormat();
+
+    if (fileFormat == FF_ELF)
     {
-        skFileFormat fileFormat = bin->getFormat();
+        skElfFile* elf = static_cast<skElfFile*>(ctx.m_fp);
 
-        if (fileFormat == FF_ELF)
+        b2WriteColor(CS_DARKYELLOW);
+        printf("File Header:\n\n");
+
+
+        b2WriteColor(CS_LIGHT_GREY);
+        b2PrintElfHeader(elf->getHeader());
+    }
+    else if (fileFormat == FF_PE)
+    {
+        skPortableFile* pe = static_cast<skPortableFile*>(ctx.m_fp);
+
+
+        b2WriteColor(CS_DARKYELLOW);
+        printf("File Header:\n\n");
+
+
+        b2WriteColor(CS_LIGHT_GREY);
+        b2PrintPEHeader(pe->getCommonHeader());
+
+
+        // Print the varying header.
+        skFileFormatType fpt = pe->getPlatformType();
+        if (fpt == FFT_32BIT)
         {
-            skElfFile* elf = static_cast<skElfFile*>(bin);
-
-            b2WriteColor(CS_DARKYELLOW);
-            printf("File Header:\n\n");
-
-
-            b2WriteColor(CS_LIGHT_GREY);
-            b2PrintElfHeader(elf->getHeader());
+            COFFOptionalHeader32 dest;
+            pe->getOptionalHeader(dest);
+            b2PrintPE32Header(dest);
         }
-        else if (fileFormat == FF_PE)
+        else if (fpt == FFT_64BIT)
         {
-            skPortableFile* pe = static_cast<skPortableFile*>(bin);
-
-
-            b2WriteColor(CS_DARKYELLOW);
-            printf("File Header:\n\n");
-
-
-            b2WriteColor(CS_LIGHT_GREY);
-            b2PrintPEHeader(pe->getCommonHeader());
-
-
-            // Print the varying header.
-            skFileFormatType fpt = pe->getPlatformType();
-            if (fpt == FFT_32BIT)
-            {
-                COFFOptionalHeader32 dest;
-                pe->getOptionalHeader(dest);
-                b2PrintPE32Header(dest);
-            }
-            else if (fpt == FFT_64BIT)
-            {
-                COFFOptionalHeader64 dest;
-                pe->getOptionalHeader(dest);
-                b2PrintPE64Header(dest);
-            }
+            COFFOptionalHeader64 dest;
+            pe->getOptionalHeader(dest);
+            b2PrintPE64Header(dest);
         }
     }
 }
@@ -868,15 +868,16 @@ void b2PrintSymbols(void)
             skSymbol* sym = it.getNext().second;
 
             b2WriteColor(ctx.m_fp->getFormat() == FF_ELF ? CS_DARKYELLOW : CS_LIGHT_GREY);
-            printf("%s  - 0x%-16llx\n", sym->getName().c_str(), sym->getAddress());
+            printf("\t0x%-16llx %s\n", sym->getAddress() , sym->getName().c_str());
 
             if (ctx.m_fp->getFormat() == FF_ELF)
             {
-                b2WriteColor(CS_LIGHT_GREY);
-                skElfSymbol*         est  = reinterpret_cast<skElfSymbol*>(sym);
+                skElfSymbol* est = reinterpret_cast<skElfSymbol*>(sym);
+
                 const skElfSymbol64& esym = est->getSymbol();
 
-                printf("\tname   %u\n\tinfo   %u\n\tother  %u\n\tindex   %u\n\tsize   %llu\n",
+                b2WriteColor(CS_LIGHT_GREY);
+                printf("\t  name   %u\n\t  info   %u\n\t  other  %u\n\t  index  %u\n\t  size   %llu\n",
                        esym.m_name,
                        esym.m_info & 0xF,
                        esym.m_other,
