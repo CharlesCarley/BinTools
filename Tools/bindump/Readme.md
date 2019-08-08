@@ -9,13 +9,11 @@ Bin dump is a tool that prints structured information about the  ELF and PE exec
 bindump <options> <path to file>
 
   Options:
-      -m [0-255]  Mark specific code.
-
-      -a          Remove the ASCII table in the hex dump output.
-      -b          Display a binary table in the hex dump output.
-      -d          Display disassembly in code sections.
       -h          Display this help message.
+      -m [0-255]  Mark specific code.
+      -d          Display disassembly in code sections.
       -xc         Remove color output.
+      -xa         Remove the ASCII table in the hex dump output.
 
       -o [1-5]    Interactive menu option.
                   - 1. Print a hex dump of the files contents.
@@ -44,10 +42,9 @@ Please Select From The Following Menu:
 
   Display Options:
     A. Display ASCII
-    B. Display Binary
     D. Display Disassembly
     H. Display Hex
-    M. Mark specific code.
+    M. Mark specific code
 
   File Options:
     F. Path to file

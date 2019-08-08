@@ -31,18 +31,18 @@ using namespace std;
 #include <stdlib.h>
 #include <string.h>
 #include "ELF/skElfFile.h"
+#include "ELF/skElfPrintUtils.h"
 #include "ELF/skElfSection.h"
 #include "ELF/skElfSymbol.h"
 #include "ELF/skElfUtils.h"
-#include "ELF/skElfPrintUtils.h"
 #include "PE/skPortableDirectory.h"
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skTimer.h"
-#include "skBinaryFile.h"
 #include "capstone/capstone.h"
+#include "skBinaryFile.h"
 
 enum b2MenuState
 {
@@ -56,13 +56,12 @@ enum b2PrintFlags
     PF_COLORIZE   = (1 << 0),
     PF_HEX        = (1 << 1),
     PF_ASCII      = (1 << 2),
-    PF_BINARY     = (1 << 3),
-    PF_ADDRESS    = (1 << 4),
-    PF_DISASEMBLE = (1 << 5),  // ignores hex in place of disassembly
+    PF_ADDRESS    = (1 << 3),
+    PF_DISASEMBLE = (1 << 4),  // ignores hex in place of disassembly
     PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
-    PF_BIN        = PF_COLORIZE | PF_BINARY,
     PF_HEXDIS     = PF_COLORIZE | PF_HEX,
 };
+
 
 struct b2ProgramInfo
 {
@@ -86,13 +85,13 @@ bool b2Alloc(const char* prog);
 
 void b2WriteColor(skConsoleColorSpace cs);
 void b2WriteAddress(SKuint64 addr);
-void b2DumpHex(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
+
+void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
 void b2Dissemble(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
 
 void b2MarkColor(int c, int mark);
 void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
 void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
-
 
 void b2PrintAll(void);
 void b2PrintSectionNames(void);
@@ -154,13 +153,11 @@ void b2Usage(void)
     std::cout << "bindump <options> <path to file>                                  \n";
     std::cout << "                                                                  \n";
     std::cout << "  Options:                                                        \n";
-    std::cout << "      -m [0-255]  Mark specific code.                             \n";
-    std::cout << "                                                                  \n";
-    std::cout << "      -a          Remove the ASCII table in the hex dump output.  \n";
-    std::cout << "      -b          Display a binary table in the hex dump output.  \n";
-    std::cout << "      -d          Display disassembly in code sections.           \n";
     std::cout << "      -h          Display this help message.                      \n";
+    std::cout << "      -m [0-255]  Mark specific code.                             \n";
+    std::cout << "      -d          Display disassembly in code sections.           \n";
     std::cout << "      -xc         Remove color output.                            \n";
+    std::cout << "      -xa         Remove the ASCII table in the hex dump output.  \n";
     std::cout << "                                                                  \n";
     std::cout << "      -o [1-5]    Interactive menu option.                        \n";
     std::cout << "                  - 1. Print a hex dump of the files contents.    \n";
@@ -239,12 +236,13 @@ bool b2Alloc(const char* prog)
 
 
     cs_mode mode = fp->getPlatformType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
-    cs_err err = cs_open(arch, mode, (csh*)&ctx.m_handle);
+    cs_err  err  = cs_open(arch, mode, (csh*)&ctx.m_handle);
     if (err != CS_ERR_OK)
     {
         printf("Capstone Error: cs_open returned %i\n", err);
         return false;
     }
+
     return true;
 }
 
@@ -288,14 +286,6 @@ int b2ParseCommandLine(int argc, char** argv)
                     ctx.m_opt = skClamp((int)std::strtol(argv[i], 0, 10), 1, 5);
             }
             break;
-            case 'a':
-                ctx.m_flags &= ~PF_ASCII;
-                break;
-            case 'b':
-                ctx.m_flags |= PF_BINARY;
-                ctx.m_flags &= ~PF_ASCII;
-                ctx.m_flags &= ~PF_HEX;
-                break;
             case 'd':
                 ctx.m_flags |= PF_DISASEMBLE;
                 break;
@@ -310,6 +300,8 @@ int b2ParseCommandLine(int argc, char** argv)
                     sw = ch[offs++];
                 if (sw == 'c')
                     skDebugger::setPrintFlag(skDebugger::PF_DISABLE_COLOR);
+                else if (sw == 'a')
+                    ctx.m_flags &= ~PF_ASCII;
                 break;
             }
             default:
@@ -347,24 +339,26 @@ void b2WriteColor(skConsoleColorSpace cs)
 
 void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
 {
-    SKsize j;
+    SKuint8 c;
+    SKsize  j;
+
+    if (!cp || offs == SK_NPOS || max == SK_NPOS)
+        return;
+
     for (j = 0; j < 16; ++j)
     {
-        if (cp)
+        if (j % 8 == 0)
+            printf(" ");
+
+        if (offs + j < max)
         {
-            if (j % 8 == 0)
-                printf(" ");
+            c = (SKint32)cp[offs + j];
 
-            if (offs + j < max)
-            {
-                unsigned char np = (unsigned char)cp[offs + j];
-
-                b2MarkColor((int)np, mark);
-                printf("%02X ", (np));
-            }
-            else
-                printf("   ");
+            b2MarkColor(c, mark);
+            printf("%02X ", c);
         }
+        else
+            printf("   ");
     }
 }
 
@@ -372,25 +366,25 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
 
 void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
 {
-    SKsize j;
-    if (!cp)
+    SKint32 c;
+    SKsize  j;
+
+    if (!cp || offs == SK_NPOS || max == SK_NPOS)
         return;
 
 
     b2WriteColor(CS_WHITE);
-
     printf(" |");
     for (j = 0; j < 16; ++j)
     {
         if (offs + j < max)
         {
-            unsigned char np = (unsigned char)cp[offs + j];
+            c = (SKint32)cp[offs + j];
 
 
-            b2MarkColor((int)np, mark);
-
-            if (np >= 0x20 && np < 0x7F)
-                printf("%c", np);
+            b2MarkColor(c, mark);
+            if (c >= 0x20 && c < 0x7F)
+                printf("%c", c);
             else
                 printf(".");
         }
@@ -398,10 +392,10 @@ void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
             printf(" ");
     }
 
-
     b2WriteColor(CS_WHITE);
     printf("|");
 }
+
 
 
 void b2MarkColor(int c, int mark)
@@ -423,10 +417,17 @@ void b2WriteAddress(SKuint64 addr)
 }
 
 
-void b2DumpHex(void* ptr, size_t offset, size_t len, int flags, int mark, bool nl)
+void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, int mark, bool nl)
 {
-    char* cp = (char*)ptr;
-    for (SKsize i = 0; i < len; i += 16)
+    if (!ptr || offset == SK_NPOS || len == SK_NPOS)
+        return;
+
+
+    SKsize i;
+    char*  cp = (char*)ptr;
+
+
+    for (i = 0; i < len; i += 16)
     {
         if (flags & PF_ADDRESS)
             b2WriteAddress((size_t)(i + offset));
@@ -443,19 +444,19 @@ void b2DumpHex(void* ptr, size_t offset, size_t len, int flags, int mark, bool n
 
 void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
 {
-    // filter out invalid input 
+    // filter out invalid input
     if (ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
         return;
 
 
-    cs_insn *insn;
-    size_t count = cs_disasm(ctx.m_handle, (uint8_t*)ptr, len, offset, 0, &insn);
+    cs_insn* insn;
+    size_t   count = cs_disasm(ctx.m_handle, (uint8_t*)ptr, len, offset, 0, &insn);
     if (count > 0)
     {
         size_t j;
         for (j = 0; j < count; j++)
         {
-            cs_insn &i = insn[j];
+            cs_insn& i = insn[j];
 
             b2WriteColor(CS_LIGHT_GREY);
             b2WriteAddress(i.address);
@@ -463,7 +464,7 @@ void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
 
 
             int fl = flags & ~(PF_ADDRESS | PF_ASCII);
-            b2DumpHex(i.bytes, 0, i.size, fl, 0x00, false);
+            b2DumpHex(i.bytes, 0, i.size, fl, -1, false);
 
             b2WriteColor(CS_WHITE);
             printf("%s\t%s\n", i.mnemonic, i.op_str);
@@ -601,8 +602,6 @@ static void b2PrintElfSectionHeader(const skElfSectionHeader<T>& sh)
     printf("  Entry Table Size:  %u\n", (int)sh.m_entSize);
     printf("  sizeof:            %u\n", (SKuint32)sizeof(sh));
 }
-
-
 
 
 
@@ -761,7 +760,6 @@ void b2PrintSection(skSection* section)
                     section->getStartAddress(),
                     section->getSize(),
                     ctx.m_flags);
-
     }
     else
     {
@@ -770,7 +768,6 @@ void b2PrintSection(skSection* section)
                   section->getSize(),
                   ctx.m_flags,
                   ctx.m_code);
-
     }
 }
 
@@ -826,68 +823,65 @@ void b2PrintHeadersCommon(void)
 
 void b2PrintSections(void)
 {
-    skBinaryFile* bin = ctx.m_fp;
-    if (bin)
-    {
-        b2PrintHeadersCommon();
+    if (!ctx.m_fp)
+        return;
 
-        skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
-        while (it.hasMoreElements())
-            b2PrintSection(it.getNext().second);
-    }
+    b2PrintHeadersCommon();
+
+    skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
+    while (it.hasMoreElements())
+        b2PrintSection(it.getNext().second);
 }
 
 
 
 void b2PrintSection(const std::string& name)
 {
-    skBinaryFile* bin = ctx.m_fp;
-    if (bin)
-    {
-        skSection* sec = bin->getSection(name.c_str());
-        if (sec != 0)
-            b2PrintSection(sec);
-    }
+    if (!ctx.m_fp)
+        return;
+
+    skSection* sec = ctx.m_fp->getSection(name.c_str());
+    if (sec != 0)
+        b2PrintSection(sec);
 }
+
 
 
 void b2PrintSymbols(void)
 {
-    skBinaryFile* bin = ctx.m_fp;
-    if (bin)
+    if (!ctx.m_fp)
+        return;
+
+    skBinaryFile::SymbolTable::Iterator it = ctx.m_fp->getSymbolIterator();
+
+    b2WriteColor(CS_DARKYELLOW);
+    printf("\nSymbols:\n\n");
+
+
+    b2WriteColor(CS_GREY);
+    if (!it.hasMoreElements())
+        printf("No symbols.\n");
+    else
     {
-        skBinaryFile::SymbolTable::Iterator it = bin->getSymbolIterator();
-
-
-        b2WriteColor(CS_DARKYELLOW);
-        printf("\nSymbols:\n\n");
-
-
-        b2WriteColor(CS_GREY);
-        if (!it.hasMoreElements())
-            printf("No symbols.\n");
-        else
+        while (it.hasMoreElements())
         {
-            while (it.hasMoreElements())
+            skSymbol* sym = it.getNext().second;
+
+            b2WriteColor(ctx.m_fp->getFormat() == FF_ELF ? CS_DARKYELLOW : CS_LIGHT_GREY);
+            printf("%s  - 0x%-16llx\n", sym->getName().c_str(), sym->getAddress());
+
+            if (ctx.m_fp->getFormat() == FF_ELF)
             {
-                skSymbol* sym = it.getNext().second;
-
-                b2WriteColor(CS_DARKYELLOW);
-                printf("%s:0x%-16llx\n", sym->getName().c_str(), sym->getAddress());
-
                 b2WriteColor(CS_LIGHT_GREY);
-                if (bin->getFormat() == FF_ELF)
-                {
-                    skElfSymbol*         est  = reinterpret_cast<skElfSymbol*>(sym);
-                    const skElfSymbol64& esym = est->getSymbol();
+                skElfSymbol*         est  = reinterpret_cast<skElfSymbol*>(sym);
+                const skElfSymbol64& esym = est->getSymbol();
 
-                    printf("\tname   %u\n\tinfo   %u\n\tother  %u\n\tindex   %u\n\tsize   %llu\n",
-                             esym.m_name,
-                             esym.m_info & 0xF,
-                             esym.m_other,
-                             esym.m_sectionIdx,
-                             esym.m_size);
-                }
+                printf("\tname   %u\n\tinfo   %u\n\tother  %u\n\tindex   %u\n\tsize   %llu\n",
+                       esym.m_name,
+                       esym.m_info & 0xF,
+                       esym.m_other,
+                       esym.m_sectionIdx,
+                       esym.m_size);
             }
         }
     }
@@ -896,16 +890,16 @@ void b2PrintSymbols(void)
 
 void b2PrintAllHeaders(void)
 {
-    skBinaryFile* bin = ctx.m_fp;
-    if (bin)
-    {
-        b2PrintHeadersCommon();
+    if (!ctx.m_fp)
+        return;
 
-        skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();
-        while (it.hasMoreElements())
-            b2PrintSectionCommon(it.getNext().second);
-    }
+    b2PrintHeadersCommon();
+
+    skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
+    while (it.hasMoreElements())
+        b2PrintSectionCommon(it.getNext().second);
 }
+
 
 
 void b2Interactive(void)
@@ -923,10 +917,9 @@ void b2Interactive(void)
     std::cout << "                                                      \n";
     std::cout << "  Display Options:                                    \n";
     std::cout << "    A. Display ASCII                                  \n";
-    std::cout << "    B. Display Binary                                 \n";
     std::cout << "    D. Display Disassembly                            \n";
     std::cout << "    H. Display Hex                                    \n";
-    std::cout << "    M. Mark specific code.                            \n";
+    std::cout << "    M. Mark specific code                             \n";
     std::cout << "                                                      \n";
     std::cout << "  File Options:                                       \n";
     std::cout << "    F. Path to file                                   \n";
@@ -989,7 +982,7 @@ void b2Interactive(void)
     case 'A':
     case 'a':
     {
-        cout << "Display ASCII ? (Y|N)>";
+        cout << "Display ASCII ? y/n\n>";
         char ans;
         cin >> ans;
 
@@ -999,23 +992,10 @@ void b2Interactive(void)
             ctx.m_flags &= ~PF_ASCII;
     }
     break;
-    case 'B':
-    case 'b':
-    {
-        cout << "Display binary? (Y|N)>";
-        char ans;
-        cin >> ans;
-
-        if (ans == 'y' || ans == 'Y')
-            ctx.m_flags |= PF_BINARY;
-        else if (ans == 'n' || ans == 'N')
-            ctx.m_flags &= ~PF_BINARY;
-    }
-    break;
     case 'D':
     case 'd':
     {
-        cout << "Display disassembly? (Y|N)>";
+        cout << "Display disassembly? y/n\n>";
         char ans;
         cin >> ans;
 
@@ -1028,7 +1008,7 @@ void b2Interactive(void)
     case 'H':
     case 'h':
     {
-        cout << "Display hex? (Y|N)>";
+        cout << "Display hex? y/n\n>";
         char ans;
         cin >> ans;
 

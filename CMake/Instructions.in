@@ -11,10 +11,9 @@ Please Select From The Following Menu:
 
   Display Options:
     A. Display ASCII
-    B. Display Binary
     D. Display Disassembly
     H. Display Hex
-    M. Mark specific code.
+    M. Mark specific code
 
   File Options:
     F. Path to file
