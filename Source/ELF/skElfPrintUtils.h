@@ -30,7 +30,7 @@
 #include "Utils/skString.h"
 #include "ELF/skElfTypes.h"
 
-#define sk_strncpy(dest, size, source, count) skStringUtils::copyn(dest, source, size)
+#define sk_strncpy(dest, size, source, count) skStringUtils::copyn(dest, source, size, count)
 
 
 class skElfPrintUtils
