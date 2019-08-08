@@ -31,6 +31,21 @@ set(TargetName_HDR
     skBinaryFileCommon.h
     skSection.h
     skSymbol.h
+
+    # ELF
+    ELF/skElfFile.h
+    ELF/skElfTypes.h
+    ELF/skElfUtils.h
+    ELF/skElfSection.h
+    ELF/skElfSymbol.h
+    ELF/skElfPrintUtils.h
+
+    # PE
+    PE/skPortableDirectory.h
+    PE/skPortableTypes.h
+    PE/skPortableSection.h
+    PE/skPortableSymbol.h
+
 )
 
 
@@ -38,45 +53,21 @@ set(TargetName_SRC
     skBinaryFile.cpp
     skSection.cpp
     skSymbol.cpp
-)
-
-# ------------------------------------------------------------------------------
-#  ELF  
-
-set(TargetName_ELF_HDR
-    ELF/skElfFile.h
-    ELF/skElfTypes.h
-    ELF/skElfUtils.h
-    ELF/skElfSection.h
-    ELF/skElfSymbol.h
-    ELF/skElfPrintUtils.h
-)
-
-set(TargetName_ELF_SRC
+    
+    # ELF 
     ELF/skElfFile.cpp
     ELF/skElfSection.cpp
     ELF/skElfSymbol.cpp
     ELF/skElfUtils.cpp
-)
 
-
-
-# ------------------------------------------------------------------------------
-#  PE  
-
-set(TargetName_PE_HDR
-    PE/skPortableDirectory.h
-    PE/skPortableTypes.h
-    PE/skPortableSection.h
-    PE/skPortableSymbol.h
-)
-
-set(TargetName_PE_SRC
+    #  PE  
     PE/skPortableDirectory.cpp
     PE/skPortableFile.cpp
     PE/skPortableSection.cpp
     PE/skPortableSymbol.cpp
 )
+
+
 
 
 
@@ -89,10 +80,6 @@ include_directories(.
 add_library(${TargetName} 
 	${TargetName_SRC}
 	${TargetName_HDR}
-	${TargetName_ELF_SRC}
-	${TargetName_ELF_HDR}
-	${TargetName_PE_SRC}
-	${TargetName_PE_HDR}
 )
 
 if (BinTools_USE_FOLDERS)
