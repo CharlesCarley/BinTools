@@ -18,3 +18,19 @@ This project is an experimental repository for examining executable files and fo
 
 - [bindump](https://github.com/CharlesCarley/BinTools/blob/master/Tools/bindump)
 
+
+## Building
+
+#### External modules 
+BinTools depends on the external Utils repository. Once the BinTools repository has been cloned, the Utils submodule must also be cloned with the following command.
+```
+git submodule update -–init --checkout
+```  
+#### Building with CMake 
+
+BinTools uses CMake to generate its MakeFiles. From the root of the BinTools repository issue the following commands. 
+```
+mkdir build
+cd build
+cmake ..
+```
