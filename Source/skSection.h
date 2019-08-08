@@ -32,16 +32,11 @@
 
 class skSection
 {
-public:
-    SK_DECLARE_TYPE(unsigned char);
-
-
 protected:
-    PointerType   m_data;
+    SKuint8 *     m_data;
     size_t        m_size;
     skString      m_name;
     skBinaryFile *m_owner;
-    size_t        m_handle;  // capstone handle
     size_t        m_startAddress;
     bool          m_isExecutable;
 
@@ -74,7 +69,7 @@ public:
 
 
     // Returns direct access to the allocated memory for this section.
-    inline PointerType getPointer(void)
+    inline SKuint8* getPointer(void)
     {
         return m_data;
     }
@@ -90,16 +85,6 @@ public:
     {
         return m_startAddress;
     }
-
-
-    // print the disassembly to stdout
-    // This should eventually move to a client library beside
-    // this library
-    void dissemble(int flags = 0, int code = -1);
-
-
-private:
-    void initialize(void *ptr, size_t size);
 };
 
 #endif  //_skBinaryFile_h_

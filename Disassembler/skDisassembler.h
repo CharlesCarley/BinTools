@@ -23,4 +23,8 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "ELF/skElfUtils.h"
+#ifndef _skDisassembler_h_
+#define _skDisassembler_h_
+
+
+#endif//_skDisassembler_h_

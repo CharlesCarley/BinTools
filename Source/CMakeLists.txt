@@ -49,6 +49,7 @@ set(TargetName_ELF_HDR
     ELF/skElfUtils.h
     ELF/skElfSection.h
     ELF/skElfSymbol.h
+    ELF/skElfPrintUtils.h
 )
 
 set(TargetName_ELF_SRC
@@ -79,29 +80,8 @@ set(TargetName_PE_SRC
 
 
 
-# ------------------------------------------------------------------------------
-#  Extras  
-
-set(TargetName_OPT_HDR
-    Extras/skPrintUtils.h
-    Extras/skElfPrintUtils.h
-    Extras/skPortablePrintUtils.h
-)
-
-set(TargetName_OPT_SRC
-    Extras/skPrintUtils.cpp
-    Extras/skElfPrintUtils.cpp
-    Extras/skPortablePrintUtils.cpp
-)
-
-
-
-
-
-
 include_directories(. 
     ${BinTools_SOURCE_DIR}/Extern
-    ${CAPSTONE_INCLUDE}
 )
 
 
@@ -109,16 +89,11 @@ include_directories(.
 add_library(${TargetName} 
 	${TargetName_SRC}
 	${TargetName_HDR}
-	${TargetName_OPT_SRC}
-	${TargetName_OPT_HDR}
 	${TargetName_ELF_SRC}
 	${TargetName_ELF_HDR}
 	${TargetName_PE_SRC}
 	${TargetName_PE_HDR}
 )
-
-
-target_link_libraries(${TargetName} ${CAPSTONE_LIB})
 
 if (BinTools_USE_FOLDERS)
     set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")

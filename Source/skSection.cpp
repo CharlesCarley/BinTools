@@ -26,13 +26,7 @@
 #include "skSection.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skMemoryUtils.h"
-#include "capstone/capstone.h"
 #include "skBinaryFile.h"
-#include "Extras/skPrintUtils.h"
-
-
-
-cs_arch skSection_getCapStoneArch(skMachineArchitecture set);
 
 
 
@@ -41,18 +35,16 @@ skSection::skSection(skBinaryFile *owner, const skString &name, void *data, size
     m_data(0),
     m_size(0),
     m_owner(owner),
-    m_handle(-1),
     m_startAddress(offset),
     m_isExecutable(false)
 {
-    initialize(data, size);
+    // passes ownership!
+    m_data = (SKuint8 *)data;
+    m_size = size;
 }
 
 skSection::~skSection()
 {
-    if (m_handle != -1)
-        cs_close(&m_handle);
-
     if (m_data)
     {
         delete[] m_data;
@@ -61,91 +53,3 @@ skSection::~skSection()
     m_size = 0;
 }
 
-
-void skSection::initialize(void *ptr, size_t size)
-{
-    if (!ptr || size == 0)
-        return;
-
-    // passes ownership!
-    m_data = (SKuint8 *)ptr;
-    m_size = size;
-
-    cs_arch arch = skSection_getCapStoneArch(m_owner->getArchitecture());
-
-    cs_mode mode = m_owner->getPlatformType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
-
-    cs_err err = cs_open(arch, mode, (csh *)&m_handle);
-    if (err != CS_ERR_OK)
-    {
-        printf("Capstone Error: cs_open returned %i\n", err);
-        return;
-    }
-}
-
-
-
-void skSection::dissemble(int flags, int code)
-{
-    if (m_handle == -1)
-    {
-        printf("dissemble was called with an invalid handle.\n");
-        return;
-    }
-
-    // filter out non executable sections.
-    if (!m_isExecutable)
-    {
-        skPrintUtils::dumpHex(m_data, m_startAddress, m_size, flags, code);
-        return;
-
-    }
-
-    cs_insn *insn;
-
-    size_t count = cs_disasm(m_handle, (uint8_t *)m_data, (size_t)m_size, m_startAddress, 0, &insn);
-    if (count > 0)
-    {
-        size_t j;
-        for (j = 0; j < count; j++)
-        {
-            cs_insn &i = insn[j];
-            if (flags & PF_COLORIZE)
-                skPrintUtils::writeColor(CS_LIGHT_GREY);
-
-            skPrintUtils::writeAddress(i.address);
-
-
-            int fl = flags & ~(PF_ADDRESS | PF_ASCII);
-            skPrintUtils::dumpHex(i.bytes, 0, i.size, fl, code, false);
-
-            skPrintUtils::writeColor(CS_WHITE);
-            printf("%s\t%s\n", i.mnemonic, i.op_str);
-        }
-
-        cs_free(insn, count);
-    }
-}
-
-cs_arch skSection_getCapStoneArch(skMachineArchitecture set)
-{
-    switch (set)
-    {
-    case IS_SPARC:
-        return CS_ARCH_SPARC;
-    case IS_MPS:
-        return CS_ARCH_MIPS;
-    case IS_POWERPC:
-        return CS_ARCH_PPC;
-    case IS_S390:
-        return CS_ARCH_SPARC;
-    case IS_AARCH64:
-        return CS_ARCH_ARM64;
-    case IS_X8664:
-    case IS_X86:
-        return CS_ARCH_X86;
-    default:
-        break;
-    }
-    return CS_ARCH_ALL;
-}

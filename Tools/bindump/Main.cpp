@@ -34,16 +34,15 @@ using namespace std;
 #include "ELF/skElfSection.h"
 #include "ELF/skElfSymbol.h"
 #include "ELF/skElfUtils.h"
-#include "Extras/skElfPrintUtils.h"
-#include "Extras/skPortablePrintUtils.h"
-#include "Extras/skPrintUtils.h"
+#include "ELF/skElfPrintUtils.h"
 #include "PE/skPortableDirectory.h"
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
 #include "Utils/skDebugger.h"
+#include "Utils/skTimer.h"
 #include "skBinaryFile.h"
-
+#include "capstone/capstone.h"
 
 enum b2MenuState
 {
@@ -51,6 +50,19 @@ enum b2MenuState
     MS_EXIT,
 };
 
+enum b2PrintFlags
+{
+    PF_NONE       = 0,
+    PF_COLORIZE   = (1 << 0),
+    PF_HEX        = (1 << 1),
+    PF_ASCII      = (1 << 2),
+    PF_BINARY     = (1 << 3),
+    PF_ADDRESS    = (1 << 4),
+    PF_DISASEMBLE = (1 << 5),  // ignores hex in place of disassembly
+    PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
+    PF_BIN        = PF_COLORIZE | PF_BINARY,
+    PF_HEXDIS     = PF_COLORIZE | PF_HEX,
+};
 
 struct b2ProgramInfo
 {
@@ -59,7 +71,8 @@ struct b2ProgramInfo
     int           m_flags;
     int           m_code;
     int           m_opt;
-    string        m_fileName;
+    size_t        m_handle;
+    string        m_fname;
 };
 
 
@@ -67,9 +80,18 @@ int  b2ParseCommandLine(int argc, char** argv);
 void b2Usage(void);
 void b2Interactive(void);
 
+
+void b2Free(void);
+bool b2Alloc(const char* prog);
+
 void b2WriteColor(skConsoleColorSpace cs);
 void b2WriteAddress(SKuint64 addr);
 void b2DumpHex(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
+void b2Dissemble(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
+
+void b2MarkColor(int c, int mark);
+void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
+void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
 
 
 void b2PrintAll(void);
@@ -78,7 +100,7 @@ void b2PrintSections(void);
 void b2PrintSymbols(void);
 
 
-b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1};
+b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1, SK_NPOS};
 
 
 int main(int argc, char** argv)
@@ -86,17 +108,14 @@ int main(int argc, char** argv)
     if (b2ParseCommandLine(argc, argv) == -1)
     {
         b2Usage();
-
-        if (ctx.m_fp)
-            delete ctx.m_fp;
-
+        b2Free();
         return -1;
     }
 
     if (ctx.m_state == MS_MAIN)
     {
         // enter into interactive mode
-        skClear();
+        skConsoleClear();
         while (ctx.m_state == MS_MAIN)
             b2Interactive();
     }
@@ -122,8 +141,8 @@ int main(int argc, char** argv)
         }
     }
 
-    delete ctx.m_fp;
 
+    b2Free();
     b2WriteColor(CS_WHITE);
     return 0;
 }
@@ -151,6 +170,82 @@ void b2Usage(void)
     std::cout << "                  - 5. Display only headers.                      \n";
     std::cout << "                                                                  \n";
     std::cout << "      -i          Run in interactive mode.                        \n";
+}
+
+
+
+void b2Free(void)
+{
+    // Cleanup capstone
+    if (ctx.m_handle != SK_NPOS)
+    {
+        cs_close(&ctx.m_handle);
+        ctx.m_handle = SK_NPOS;
+    }
+
+    if (ctx.m_fp)
+    {
+        delete ctx.m_fp;
+        ctx.m_fp = 0;
+    }
+}
+
+bool b2Alloc(const char* prog)
+{
+    skBinaryFile* fp;
+
+
+    // Load the file
+    fp = ctx.m_fp = skBinaryFile::load(prog);
+    if (!ctx.m_fp)
+        return false;
+
+    // used for interactive mode
+    ctx.m_fname = prog;
+
+
+    // initialize the capstone engine
+    if (ctx.m_handle != SK_NPOS)
+        cs_close(&ctx.m_handle);
+
+
+
+    cs_arch arch = CS_ARCH_ALL;
+    switch (fp->getArchitecture())
+    {
+    case IS_SPARC:
+        arch = CS_ARCH_SPARC;
+        break;
+    case IS_MPS:
+        arch = CS_ARCH_MIPS;
+        break;
+    case IS_POWERPC:
+        arch = CS_ARCH_PPC;
+        break;
+    case IS_S390:
+        arch = CS_ARCH_SPARC;
+        break;
+    case IS_AARCH64:
+        arch = CS_ARCH_ARM64;
+        break;
+    case IS_X8664:
+    case IS_X86:
+        arch = CS_ARCH_X86;
+        break;
+    default:
+        break;
+    }
+
+
+
+    cs_mode mode = fp->getPlatformType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
+    cs_err err = cs_open(arch, mode, (csh*)&ctx.m_handle);
+    if (err != CS_ERR_OK)
+    {
+        printf("Capstone Error: cs_open returned %i\n", err);
+        return false;
+    }
+    return true;
 }
 
 
@@ -218,7 +313,7 @@ int b2ParseCommandLine(int argc, char** argv)
                 break;
             }
             default:
-                skPrintf("unknown argument '%c'\n", sw);
+                printf("unknown argument '%c'\n", sw);
                 return -1;
             }
         }
@@ -226,10 +321,7 @@ int b2ParseCommandLine(int argc, char** argv)
 
     if (argc >= 2)
     {
-        ctx.m_fileName = argv[argc - 1];
-
-        ctx.m_fp = skBinaryFile::load(argv[argc - 1]);
-        if (!ctx.m_fp)
+        if (!b2Alloc(argv[argc - 1]))
             err = true;
     }
     else
@@ -238,7 +330,7 @@ int b2ParseCommandLine(int argc, char** argv)
 
     if (err)
     {
-        skPrintf("Unable to load file\n");
+        printf("Unable to load file\n");
         return -1;
     }
     return 0;
@@ -253,11 +345,6 @@ void b2WriteColor(skConsoleColorSpace cs)
 
 
 
-void b2doMarkColor(int c, int mark);
-void b2writeAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
-void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
-
-
 void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
 {
     SKsize j;
@@ -266,24 +353,24 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
         if (cp)
         {
             if (j % 8 == 0)
-                skPrintf(" ");
+                printf(" ");
 
             if (offs + j < max)
             {
                 unsigned char np = (unsigned char)cp[offs + j];
 
-                b2doMarkColor((int)np, mark);
-                skPrintf("%02X ", (np));
+                b2MarkColor((int)np, mark);
+                printf("%02X ", (np));
             }
             else
-                skPrintf("   ");
+                printf("   ");
         }
     }
 }
 
 
 
-void b2writeAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
+void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
 {
     SKsize j;
     if (!cp)
@@ -292,7 +379,7 @@ void b2writeAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
 
     b2WriteColor(CS_WHITE);
 
-    skPrintf(" |");
+    printf(" |");
     for (j = 0; j < 16; ++j)
     {
         if (offs + j < max)
@@ -300,24 +387,24 @@ void b2writeAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
             unsigned char np = (unsigned char)cp[offs + j];
 
 
-            b2doMarkColor((int)np, mark);
+            b2MarkColor((int)np, mark);
 
             if (np >= 0x20 && np < 0x7F)
-                skPrintf("%c", np);
+                printf("%c", np);
             else
-                skPrintf(".");
+                printf(".");
         }
         else
-            skPrintf(" ");
+            printf(" ");
     }
 
 
     b2WriteColor(CS_WHITE);
-    skPrintf("|");
+    printf("|");
 }
 
 
-void b2doMarkColor(int c, int mark)
+void b2MarkColor(int c, int mark)
 {
     if (c == mark)
         b2WriteColor(CS_RED);
@@ -332,7 +419,7 @@ void b2doMarkColor(int c, int mark)
 void b2WriteAddress(SKuint64 addr)
 {
     b2WriteColor(CS_GREY);
-    skPrintf("%16llx  ", addr);
+    printf("%16llx  ", addr);
 }
 
 
@@ -346,9 +433,43 @@ void b2DumpHex(void* ptr, size_t offset, size_t len, int flags, int mark, bool n
         if (flags & PF_HEX)
             b2WriteHex(cp, i, len, flags, mark);
         if (flags & PF_ASCII)
-            b2writeAscii(cp, i, len, flags, mark);
+            b2WriteAscii(cp, i, len, flags, mark);
         if (nl)
-            skPrintf("\n");
+            printf("\n");
+    }
+}
+
+
+
+void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
+{
+    // filter out invalid input 
+    if (ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
+        return;
+
+
+    cs_insn *insn;
+    size_t count = cs_disasm(ctx.m_handle, (uint8_t*)ptr, len, offset, 0, &insn);
+    if (count > 0)
+    {
+        size_t j;
+        for (j = 0; j < count; j++)
+        {
+            cs_insn &i = insn[j];
+
+            b2WriteColor(CS_LIGHT_GREY);
+            b2WriteAddress(i.address);
+
+
+
+            int fl = flags & ~(PF_ADDRESS | PF_ASCII);
+            b2DumpHex(i.bytes, 0, i.size, fl, 0x00, false);
+
+            b2WriteColor(CS_WHITE);
+            printf("%s\t%s\n", i.mnemonic, i.op_str);
+        }
+
+        cs_free(insn, count);
     }
 }
 
@@ -368,7 +489,7 @@ void b2PrintAll(void)
                       ctx.m_flags,
                       ctx.m_code);
 
-            skPrintf("%16s*\n", " ");
+            printf("%16s*\n", " ");
         }
     }
 }
@@ -381,11 +502,11 @@ void b2PrintSectionNames(void)
         skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
 
         b2WriteColor(CS_DARKYELLOW);
-        skPrintf("\nSections:\n\n");
+        printf("\nSections:\n\n");
 
 
         b2WriteColor(CS_GREY);
-        skPrintf(" Name                 Offset             Index\n\n");
+        printf(" Name                 Offset             Index\n\n");
 
 
 
@@ -398,19 +519,19 @@ void b2PrintSectionNames(void)
             const skString& str = sec->getName();
 
             SKuint64 offs = (SKuint64)sec->getStartAddress();
-            skPrintf(" %-20s 0x%-16llx %-2u\n", str.c_str(), offs, i);
+            printf(" %-20s 0x%-16llx %-2u\n", str.c_str(), offs, i);
             ++i;
         }
 
         if (ctx.m_fp->getFormat() == FF_PE)
         {
             b2WriteColor(CS_DARKYELLOW);
-            skPrintf("\nData Directories:\n\n");
+            printf("\nData Directories:\n\n");
 
 
             b2WriteColor(CS_GREY);
             it = ctx.m_fp->getSectionIterator();
-            skPrintf(" Type                 RVA                Size\n\n");
+            printf(" Type                 RVA                Size\n\n");
 
 
             b2WriteColor(CS_LIGHT_GREY);
@@ -422,14 +543,172 @@ void b2PrintSectionNames(void)
                 while (dit.hasMoreElements())
                 {
                     skPortableDirectory* dir = dit.getNext();
-                    skPrintf(" %-20u 0x%-16x %-2u\n", dir->getType(), dir->getRVA(), dir->getSize());
+                    printf(" %-20u 0x%-16x %-2u\n", dir->getType(), dir->getRVA(), dir->getSize());
                 }
             }
         }
 
-        skPrintf("\n\n");
+        printf("\n\n");
     }
 }
+
+
+
+template <typename T>
+void b2PrintElfHeader(const skElfHeaderInfo<T>& inf)
+{
+    char tmpBuf[32];
+    skElfPrintUtils::getPlatformId(inf, tmpBuf, 32);
+    printf("  Class:                  %s\n", tmpBuf);
+    skElfPrintUtils::getByteOrder(inf, tmpBuf, 32);
+    printf("  Data:                   %s\n", tmpBuf);
+    skElfPrintUtils::getVersion(inf, tmpBuf, 32);
+    printf("  Version:                %s\n", tmpBuf);
+    skElfPrintUtils::getABI(inf, tmpBuf, 32);
+    printf("  OS/ABI:                 %s\n", tmpBuf);
+    skElfPrintUtils::getType(inf, tmpBuf, 32);
+    printf("  Type:                   %s\n", tmpBuf);
+    skElfPrintUtils::getArch(inf, tmpBuf, 32);
+    printf("  Architecture:           %s\n", tmpBuf);
+    printf("  Entry:                  0x%llx\n", inf.m_entry);
+    printf("  Program Offset:         0x%llx\n", inf.m_programOffset);
+    printf("  Section Offset:         0x%llx\n", inf.m_sectionOffset);
+    printf("  Flags:                  %u\n", (int)inf.m_flags);
+    printf("  Program Header Size:    %u\n", (int)inf.m_headerSizeInBytes);
+    printf("  Program Header Count:   %u\n", (int)inf.m_headerEntryCount);
+    printf("  Section Entry:          %u\n", (int)inf.m_sectionTableEntrySize);
+    printf("  Section Count:          %u\n", (int)inf.m_sectionTableEntryCount);
+    printf("  Header Table Index:     %u\n", (int)inf.m_sectionTableIndex);
+    printf("  sizeof:                 %u\n\n", (SKuint32)sizeof(inf));
+}
+
+
+
+template <typename T>
+static void b2PrintElfSectionHeader(const skElfSectionHeader<T>& sh)
+{
+    char tmpBuf[32];
+    printf("  Name:              %u\n", sh.m_name);
+    skElfPrintUtils::getSectionType(sh, tmpBuf, 32);
+    printf("  Type:              %s\n", tmpBuf);
+    printf("  Flags:             %u\n", (int)sh.m_flags);
+    printf("  Virtual Address:   %u\n", (int)sh.m_addr);
+    printf("  Offset:            0x%llx\n", sh.m_offset);
+    printf("  Size:              %u\n", (int)sh.m_size);
+    printf("  Link:              %u\n", (int)sh.m_link);
+    printf("  Extra Info:        %u\n", (int)sh.m_info);
+    printf("  Alignment:         %u\n", (int)sh.m_addrAlign);
+    printf("  Entry Table Size:  %u\n", (int)sh.m_entSize);
+    printf("  sizeof:            %u\n", (SKuint32)sizeof(sh));
+}
+
+
+
+
+
+void b2PrintPEHeader(const COFFHeader& header)
+{
+    SKuint32 bw;
+    char     buf[32];
+
+    printf("  Machine:                    %u\n", header.m_machine);
+    printf("  Section Count:              %u\n", header.m_sectionCount);
+
+    bw = skGetTimeString(buf, 32, "%D %r", header.m_timeDateStamp);
+    if (bw != SK_NPOS)
+        printf("  Timestamp:                  %s\n", buf);
+    else
+        printf("  Timestamp:                  %u\n", header.m_timeDateStamp);
+
+    printf("  Symbol Table Offset:        %u\n", header.m_symbolTableOffset);
+    printf("  Number Of Symbols:          %u\n", header.m_symbolCount);
+    printf("  Optional Header Size:       %u\n", header.m_optionalHeaderSize);
+    printf("  Characteristics:            0x%x\n", header.m_characteristics);
+}
+
+void b2PrintPESectionHeader(const COFFSectionHeader& header)
+{
+    printf("  Name:                       %s\n", header.m_name);
+    printf("  Virtual Size:               %u\n", header.m_virtualSize);
+    printf("  Virtual Address:            0x%x\n", header.m_virtualAddress);
+    printf("  Size of Raw Data:           %u\n", header.m_sizeOfRawData);
+    printf("  Pointer To Raw Data:        0x%x\n", header.m_pointerToRawData);
+    printf("  Relocation Table:           %u\n", header.m_pointerToRelocations);
+    printf("  Relocation Count:           %u\n", header.m_numberOfRelocations);
+    printf("  Line Number Location:       0x%x\n", header.m_pointerToLineNumbers);
+    printf("  Line Number Count:          %u\n", header.m_numberOfLineNumbers);
+    printf("  Characteristics:            0x%x\n", header.m_characteristics);
+    printf("  Size of Header:             %u\n", (SKuint32)sizeof(COFFSectionHeader));
+}
+
+void b2PrintDataDir(const char* msg, const COFFDataDirectory& dd)
+{
+    if (dd.m_size)
+        printf("%s0x%x,%u\n", msg, dd.m_virtualAddress, dd.m_size);
+    else
+        printf("%s0\n", msg);
+}
+
+template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
+void b2PrintPEVaryingHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
+{
+    printf("  ImageBase:                  0x%llx\n", (SKuint64)header.m_imageBase);
+    printf("  Section Alignment:          %u\n", header.m_sectionAlignment);
+    printf("  File Alignment:             %u\n", header.m_fileAlignment);
+    printf("  Operating System Version:   %u.%u\n", header.m_majOpSysVersion, header.m_minOpSysVersion);
+    printf("  Image Version:              %u.%u\n", header.m_majImSysVersion, header.m_minImSysVersion);
+    printf("  Sub System Version:         %u.%u\n", header.m_majSubSysVersion, header.m_minSubSysVersion);
+    printf("  Image Size:                 0x%x,%u\n", header.m_sizeOfImage, header.m_sizeOfImage);
+    printf("  Size of Headers:            %u\n", header.m_sizeOfHeaders);
+    printf("  Checksum:                   %u\n", header.m_checkSum);
+    printf("  Subsystem:                  %u\n", header.m_subsystem);
+    printf("  DLL Characteristics:        0x%llx\n", (SKuint64)header.m_dllCharacteristics);
+    printf("  Stack Reserve Size:         %llu\n", (SKuint64)header.m_sizeOfStackReserve);
+    printf("  Stack Commit Size:          %llu\n", (SKuint64)header.m_sizeOfStackCommit);
+    printf("  Stack Heap Reserve:         %llu\n", (SKuint64)header.m_sizeOfHeapReserve);
+    printf("  Stack Commit Size:          %llu\n", (SKuint64)header.m_sizeOfHeapCommit);
+    printf("  Loader Flags:               0x%x\n", header.m_loaderFlags);
+    printf("  RVA and Size Count:         %u\n\n", header.m_numberOfRvaAndSizes);
+
+
+    b2WriteColor(CS_DARKYELLOW);
+    printf("Data Directories\n\n");
+    b2WriteColor(CS_LIGHT_GREY);
+
+
+    const COFFDataDirectories& dir = header.m_directories;
+
+
+
+    b2PrintDataDir("  Export Table:               ", dir.m_exportTable);
+    b2PrintDataDir("  Import Table:               ", dir.m_importTable);
+    b2PrintDataDir("  Resource Table:             ", dir.m_resourceTable);
+    b2PrintDataDir("  Exception Table:            ", dir.m_exceptionTable);
+    b2PrintDataDir("  Certificate Table:          ", dir.m_certificateTable);
+    b2PrintDataDir("  Base Relocation Table:      ", dir.m_baseRelocationTable);
+    b2PrintDataDir("  Debug Table:                ", dir.m_debug);
+    b2PrintDataDir("  Architecture (Reserved):    ", dir.m_architecture);
+    b2PrintDataDir("  Global Pointer Register:    ", dir.m_globPtrReg);
+    b2PrintDataDir("  Thread Local Storage:       ", dir.m_threadLocalStorage);
+    b2PrintDataDir("  Loader Config Table:        ", dir.m_loadConfigTable);
+    b2PrintDataDir("  Bound Import Table:         ", dir.m_boundImport);
+    b2PrintDataDir("  Import Address Table:       ", dir.m_importAddressTable);
+    b2PrintDataDir("  Delay Import Descriptor:    ", dir.m_delayImportDescriptor);
+    b2PrintDataDir("  CRT Runtime Header:         ", dir.m_crtRuntimeHeader);
+}
+
+
+void b2PrintPE32Header(const COFFOptionalHeader32& header)
+{
+    b2PrintPEVaryingHeader<COFFOptionalHeaderCommonPE32, SKuint32>(header);
+}
+
+
+void b2PrintPE64Header(const COFFOptionalHeader64& header)
+{
+    b2PrintPEVaryingHeader<COFFOptionalHeaderCommonPE64, SKuint64>(header);
+}
+
 
 
 void b2PrintSectionHeader(skBinaryFile* fp, skSection* section)
@@ -437,21 +716,16 @@ void b2PrintSectionHeader(skBinaryFile* fp, skSection* section)
     if (!section || !fp)
         return;
 
-    skFileFormat fileFormat = fp->getFormat();
+    skFileFormat format = fp->getFormat();
 
-
-    if (fileFormat == FF_ELF)
+    switch (fp->getFormat())
     {
-        skElfSection*               sectionHeader = static_cast<skElfSection*>(section);
-        const skElfSectionHeader64& header        = sectionHeader->getHeader();
-        skElfPrintUtils::printSectionHeader(header);
-    }
-    else if (fileFormat == FF_PE)
-    {
-        skPortableSection*       pe     = static_cast<skPortableSection*>(section);
-        const COFFSectionHeader& header = pe->getHeader();
-
-        skPortableUtils::printHeader(header);
+    case FF_ELF:
+        b2PrintElfSectionHeader(static_cast<skElfSection*>(section)->getHeader());
+        break;
+    case FF_PE:
+        b2PrintPESectionHeader(static_cast<skPortableSection*>(section)->getHeader());
+        break;
     }
 }
 
@@ -462,11 +736,8 @@ void b2PrintSectionCommon(skSection* section)
     if (!section || !ctx.m_fp)
         return;
 
-    const skString& name = section->getName();
-
-
     b2WriteColor(CS_DARKYELLOW);
-    skPrintf("\nSection Header: %s\n\n", name.c_str());
+    printf("\nSection Header: %s\n\n", section->getName().c_str());
 
 
     b2WriteColor(CS_LIGHT_GREY);
@@ -480,18 +751,27 @@ void b2PrintSection(skSection* section)
         return;
 
     b2PrintSectionCommon(section);
-    skPrintf("\n");
+    printf("\n");
 
 
     b2WriteColor(CS_WHITE);
-    if (ctx.m_flags & PF_DISASEMBLE)
-        section->dissemble(ctx.m_flags, ctx.m_code);
+    if (ctx.m_flags & PF_DISASEMBLE && section->isExectuable())
+    {
+        b2Dissemble(section->getPointer(),
+                    section->getStartAddress(),
+                    section->getSize(),
+                    ctx.m_flags);
+
+    }
     else
+    {
         b2DumpHex(section->getPointer(),
                   section->getStartAddress(),
                   section->getSize(),
                   ctx.m_flags,
                   ctx.m_code);
+
+    }
 }
 
 void b2PrintHeadersCommon(void)
@@ -505,14 +785,12 @@ void b2PrintHeadersCommon(void)
         {
             skElfFile* elf = static_cast<skElfFile*>(bin);
 
-
             b2WriteColor(CS_DARKYELLOW);
-            skPrintf("File Header:\n\n");
+            printf("File Header:\n\n");
 
 
             b2WriteColor(CS_LIGHT_GREY);
-            const skElfHeaderInfo64& header = elf->getHeader();
-            skElfPrintUtils::printElfHeader(header);
+            b2PrintElfHeader(elf->getHeader());
         }
         else if (fileFormat == FF_PE)
         {
@@ -520,12 +798,11 @@ void b2PrintHeadersCommon(void)
 
 
             b2WriteColor(CS_DARKYELLOW);
-            skPrintf("File Header:\n\n");
+            printf("File Header:\n\n");
 
 
             b2WriteColor(CS_LIGHT_GREY);
-            const COFFHeader& header = pe->getCommonHeader();
-            skPortableUtils::printHeader(header);
+            b2PrintPEHeader(pe->getCommonHeader());
 
 
             // Print the varying header.
@@ -534,13 +811,13 @@ void b2PrintHeadersCommon(void)
             {
                 COFFOptionalHeader32 dest;
                 pe->getOptionalHeader(dest);
-                skPortableUtils::printHeader(dest);
+                b2PrintPE32Header(dest);
             }
             else if (fpt == FFT_64BIT)
             {
                 COFFOptionalHeader64 dest;
                 pe->getOptionalHeader(dest);
-                skPortableUtils::printHeader(dest);
+                b2PrintPE64Header(dest);
             }
         }
     }
@@ -583,12 +860,12 @@ void b2PrintSymbols(void)
 
 
         b2WriteColor(CS_DARKYELLOW);
-        skPrintf("\nSymbols:\n\n");
+        printf("\nSymbols:\n\n");
 
 
         b2WriteColor(CS_GREY);
         if (!it.hasMoreElements())
-            skPrintf("No symbols.\n");
+            printf("No symbols.\n");
         else
         {
             while (it.hasMoreElements())
@@ -596,7 +873,7 @@ void b2PrintSymbols(void)
                 skSymbol* sym = it.getNext().second;
 
                 b2WriteColor(CS_DARKYELLOW);
-                skPrintf("%s:0x%-16llx\n", sym->getName().c_str(), sym->getAddress());
+                printf("%s:0x%-16llx\n", sym->getName().c_str(), sym->getAddress());
 
                 b2WriteColor(CS_LIGHT_GREY);
                 if (bin->getFormat() == FF_ELF)
@@ -604,7 +881,7 @@ void b2PrintSymbols(void)
                     skElfSymbol*         est  = reinterpret_cast<skElfSymbol*>(sym);
                     const skElfSymbol64& esym = est->getSymbol();
 
-                    skPrintf("\tname   %u\n\tinfo   %u\n\tother  %u\n\tindex   %u\n\tsize   %llu\n",
+                    printf("\tname   %u\n\tinfo   %u\n\tother  %u\n\tindex   %u\n\tsize   %llu\n",
                              esym.m_name,
                              esym.m_info & 0xF,
                              esym.m_other,
@@ -658,7 +935,7 @@ void b2Interactive(void)
 
     char opt;
 
-    cout << ctx.m_fileName << ">";
+    cout << ctx.m_fname << ">";
     cin >> opt;
 
     switch (opt)
@@ -669,12 +946,8 @@ void b2Interactive(void)
         cout << "Path to file: ";
         string path;
         cin >> path;
-        if (ctx.m_fp)
-            delete ctx.m_fp;
-
-        ctx.m_fp = skBinaryFile::load(path.c_str());
-        if (ctx.m_fp)
-            ctx.m_fileName = path;
+        b2Free();
+        b2Alloc(path.c_str());
     }
     break;
     case '1':
@@ -786,5 +1059,5 @@ void b2Interactive(void)
     }
 
     if (ctx.m_state != MS_EXIT)
-        skClear();
+        skConsoleClear();
 }
