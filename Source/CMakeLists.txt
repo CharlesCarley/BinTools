@@ -45,6 +45,7 @@ set(TargetName_HDR
     PE/skPortableTypes.h
     PE/skPortableSection.h
     PE/skPortableSymbol.h
+    PE/skPortableUtils.h
 
 )
 
@@ -65,6 +66,7 @@ set(TargetName_SRC
     PE/skPortableFile.cpp
     PE/skPortableSection.cpp
     PE/skPortableSymbol.cpp
+    PE/skPortableUtils.cpp
 )
 
 
