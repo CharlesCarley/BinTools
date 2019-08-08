@@ -27,13 +27,14 @@
 #define _skPortableUtils_h_
 
 #include "PE/skPortableTypes.h"
+class skString;
 
 class skPortableUtils
 {
 public:
     static void getMachine(const COFFHeader& inf, char dest[], int len);
     static void getPlatformId(const COFFOptionalHeaderCommon& inf, char dest[], int len);
-
+    static void getCharacteristicsString16(const SKuint16& inf, skString& dest);
 };
 
 

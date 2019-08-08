@@ -607,8 +607,10 @@ static void b2PrintElfSectionHeader(const skElfSectionHeader<T>& sh)
 
 void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& optional)
 {
+    skString str;
+  
     SKuint32 bw;
-    char     buf[32];
+    char         buf[32];
 
 
     skPortableUtils::getMachine(header, buf, 16);
@@ -624,8 +626,10 @@ void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& o
     printf("  Symbol Table Offset:        %u\n", header.m_symbolTableOffset);
     printf("  Number Of Symbols:          %u\n", header.m_symbolCount);
     printf("  Optional Header Size:       %u\n", header.m_optionalHeaderSize);
-    printf("  Characteristics:            0x%x\n", header.m_characteristics);
-    
+
+    skPortableUtils::getCharacteristicsString16(header.m_characteristics, str);
+    printf("  Characteristics:            0x%x %s\n", header.m_characteristics, str.c_str());
+
     printf("\n");
 
     skPortableUtils::getPlatformId(optional, buf, 16);
@@ -639,6 +643,8 @@ void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& o
 
     printf("\n");
 }
+
+
 
 void b2PrintPESectionHeader(const COFFSectionHeader& header)
 {
@@ -883,7 +889,7 @@ void b2PrintSymbols(void)
             skSymbol* sym = it.getNext().second;
 
             b2WriteColor(ctx.m_fp->getFormat() == FF_ELF ? CS_DARKYELLOW : CS_LIGHT_GREY);
-            printf("\t0x%-16llx %s\n", sym->getAddress() , sym->getName().c_str());
+            printf("\t0x%-16llx %s\n", sym->getAddress(), sym->getName().c_str());
 
             if (ctx.m_fp->getFormat() == FF_ELF)
             {

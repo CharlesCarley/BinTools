@@ -40,19 +40,38 @@ enum COFFMagic
 enum COFFMachineType
 {
     CMT_NONE  = 0,
-    CMT_AMD64 = 0x8664,
-    CMT_ARM   = 0x01C0,
-    CMT_ARM64 = 0xAA64,
-    CMT_I386  = 0x014C,
-    CMT_IA64  = 0x0200,
+    CMT_AMD64 = 0x8664, // x64
+    CMT_ARM   = 0x01C0, // ARM little endian (byte swapping is not implemented)
+    CMT_ARM64 = 0xAA64, // ARM64 little endian 
+    CMT_I386  = 0x014C, // Intel 386 or later processors.
+    CMT_IA64  = 0x0200, // Intel Itanium processor family.
 };
 
 
 
-enum COFFSectionCharacteristics
+
+enum COFFCharacteristics
 {
-    CSC_HAS_CODE    = 0x00000020,
-    CSC_CAN_EXECUTE = 0x20000000
+    // 16 bit Characteristics
+    CC_RELOC_STRIPPED     = 0x0001,
+    CC_EXE_IMAGE          = 0x0002,
+    CC_LINENO_STRIPPED    = 0x0004,
+    CC_LOCAL_SYM_STRIPPED = 0x0008, // Depreciated should be 0
+    CC_TRIM_WS            = 0x0010, // Depreciated should be 0
+    CC_LARGE_ADDR_AWARE   = 0x0020, 
+    CC_RESERVED           = 0x0040, 
+    CC_BYTES_REVERSED_LO  = 0x0080, // Depreciated should be 0
+    CC_FILE_32BIT         = 0x0100,
+    CC_DEBUG_STRIPPED     = 0x0200,
+    CC_FILE_RUN_FROM_SWAP = 0x0400,
+    CC_NET_RUN_FROM_SWAP  = 0x0800,
+    CC_SYSTEM_FILE        = 0x1000,
+    CC_DLL_FILE           = 0x2000,
+    CC_UP_ONLY            = 0x4000,
+    CC_BYTES_REVERSED_HI  = 0x8000,  // Depreciated should be 0
+
+    // 32 bit Characteristics
+    CC_CAN_EXECUTE = 0x20000000
 };
 
 

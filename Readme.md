@@ -33,4 +33,5 @@ BinTools uses CMake to generate its MakeFiles. From the root of the BinTools rep
 mkdir build
 cd build
 cmake ..
+make
 ```

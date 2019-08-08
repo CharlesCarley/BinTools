@@ -26,6 +26,7 @@
 #include "PE/skPortableUtils.h"
 #include "Utils/skString.h"
 
+#define IsBitFlagSet(b, f) ((b & f) != 0)
 
 
 
@@ -65,4 +66,52 @@ void skPortableUtils::getPlatformId(const COFFOptionalHeaderCommon& inf, char de
         sk_strncpy(dest, len, "PE32+", len);
     else
         sk_strncpy(dest, len, "Unknown Header Magic", len);
+}
+
+
+
+void pu_appendStr(skString& dest, const char* str)
+{
+    if (dest.size() > 1)
+        dest += '|';
+    dest += str;
+}
+
+
+
+void skPortableUtils::getCharacteristicsString16(const SKuint16& characteristics, skString& dest) 
+{
+
+    dest.clear();
+
+    if (IsBitFlagSet(characteristics, CC_RELOC_STRIPPED))
+        pu_appendStr(dest, "ReloactionsStripped");
+    if (IsBitFlagSet(characteristics, CC_EXE_IMAGE))
+        pu_appendStr(dest, "ImageTypeExecutable");
+    if (IsBitFlagSet(characteristics, CC_LINENO_STRIPPED))
+        pu_appendStr(dest, "LineNoStripped");
+    if (IsBitFlagSet(characteristics, CC_LOCAL_SYM_STRIPPED))
+        pu_appendStr(dest, "LocalSymbolsStripped");
+    if (IsBitFlagSet(characteristics, CC_TRIM_WS))
+        pu_appendStr(dest, "TrimWorkingSet");
+    if (IsBitFlagSet(characteristics, CC_LARGE_ADDR_AWARE))
+        pu_appendStr(dest, "LargeAddressAware");
+    if (IsBitFlagSet(characteristics, CC_RESERVED))
+        pu_appendStr(dest, "Reserved");
+    if (IsBitFlagSet(characteristics, CC_BYTES_REVERSED_LO))
+        pu_appendStr(dest, "LittleEndian");
+    if (IsBitFlagSet(characteristics, CC_FILE_32BIT))
+        pu_appendStr(dest, "FileIs32Bit");
+    if (IsBitFlagSet(characteristics, CC_DEBUG_STRIPPED))
+        pu_appendStr(dest, "DebugSymbolsStripped");
+    if (IsBitFlagSet(characteristics, CC_FILE_RUN_FROM_SWAP))
+        pu_appendStr(dest, "MediaRunFromSwap");
+    if (IsBitFlagSet(characteristics, CC_NET_RUN_FROM_SWAP))
+        pu_appendStr(dest, "NetworkRunFromSwap");
+    if (IsBitFlagSet(characteristics, CC_SYSTEM_FILE))
+        pu_appendStr(dest, "IsSystemFile");
+    if (IsBitFlagSet(characteristics, CC_DLL_FILE))
+        pu_appendStr(dest, "IsDLL");
+    if (IsBitFlagSet(characteristics, CC_BYTES_REVERSED_HI))
+        pu_appendStr(dest, "BigEndian");
 }
