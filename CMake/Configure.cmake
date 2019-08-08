@@ -35,7 +35,6 @@ set(CAPSTONE_LIB        capstone-static)
 set(BINFILE_LIB         BinaryFile)
 set(UTILS_LIB           Utils)
 
-
 set(UTILS_TestDir      ${BinTools_SOURCE_DIR}/Extern/Utils/CMake)
 if (NOT IS_DIRECTORY ${UTILS_TestDir})
 
@@ -43,12 +42,12 @@ if (NOT IS_DIRECTORY ${UTILS_TestDir})
     execute_process( 
         WORKING_DIRECTORY ${BinTools_SOURCE_DIR} 
         COMMAND git submodule update --init --checkout
-        ERROR_FILE GetSubmoduleUpdate.txt
+        ERROR_FILE ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt
         OUTPUT_QUIET
         ERROR_QUIET
         )
     if (NOT IS_DIRECTORY ${UTILS_TestDir})
-        message("Failed to clone Utils. See GetSubmoduleUpdate.txt for more information.")
+        message("Failed to clone Utils. See ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt for more information.")
     endif()
 
 
@@ -75,13 +74,8 @@ macro(log_config)
     message(STATUS "-----------------------------------------------------------")
 endmacro(log_config)
 
-
-log_config()
-
 if (BinTools_USE_FOLDERS)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON) 
 endif()
-
-
 
 include(StaticRuntime)

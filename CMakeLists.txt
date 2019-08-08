@@ -42,6 +42,9 @@ set(Utils_SOURCE_DIR    "${BinTools_SOURCE_DIR}/Extern/Utils")
 include(Configure)
 include (ConfigureUtils)
 
+log_config()
+
+
 subdirs(Extern/Utils)
 subdirs(Extern/capstone)
 
