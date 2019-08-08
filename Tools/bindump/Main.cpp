@@ -366,7 +366,7 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
 
 void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
 {
-    SKint32 c;
+    SKuint8 c;
     SKsize  j;
 
     if (!cp || offs == SK_NPOS || max == SK_NPOS)
@@ -379,7 +379,7 @@ void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
     {
         if (offs + j < max)
         {
-            c = (SKint32)cp[offs + j];
+            c = (SKuint8)cp[offs + j];
 
 
             b2MarkColor(c, mark);
@@ -464,7 +464,7 @@ void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
 
 
             int fl = flags & ~(PF_ADDRESS | PF_ASCII);
-            b2DumpHex(i.bytes, 0, i.size, fl, -1, false);
+            b2DumpHex(i.bytes, 0, i.size, fl, ctx.m_code, false);
 
             b2WriteColor(CS_WHITE);
             printf("%s\t%s\n", i.mnemonic, i.op_str);
