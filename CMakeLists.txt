@@ -29,14 +29,22 @@ set(CMAKE_MODULE_PATH
     ${BinTools_SOURCE_DIR}/Extern/Utils/CMake
     ${BinTools_SOURCE_DIR}/Tools/Data2Array/CMake
 )
-set(FOLDER_NAME "External")
-set(USE_FOLDERS TRUE)
-subdirs(Extern/Utils)
-
-include(Configure)
 subdirs(CMake)
+
+
+# This is used for controlling the external Utils project without 
+# having to modify the build scripts
+set(FOLDER_NAME         "External")
+set(USE_FOLDERS         TRUE)
+set(Utils_SOURCE_DIR    "${BinTools_SOURCE_DIR}/Extern/Utils")
+
+
+include (ConfigureUtils)
+include(Configure)
+
+subdirs(Extern/Utils)
 subdirs(Extern/capstone)
 
-subdirs(Source Test)
-subdirs(Tools/bindump)
-#subdirs(Tools/apicheck)
+subdirs(Source)
+subdirs(Test)               # Test binaries to load and inspect
+subdirs(Tools/bindump)      # Test output for writing 

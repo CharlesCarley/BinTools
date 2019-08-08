@@ -36,6 +36,24 @@ set(BINFILE_LIB         BinaryFile)
 set(UTILS_LIB           Utils)
 
 
+set(UTILS_TestDir      ${BinTools_SOURCE_DIR}/Extern/Utils/CMake)
+if (NOT IS_DIRECTORY ${UTILS_TestDir})
+
+    message(STATUS "Cloning Utils into ${BinTools_SOURCE_DIR}/Extern/Utils")
+    execute_process( 
+        WORKING_DIRECTORY ${BinTools_SOURCE_DIR} 
+        COMMAND git submodule update --init --checkout
+        ERROR_FILE GetSubmoduleUpdate.txt
+        OUTPUT_QUIET
+        ERROR_QUIET
+        )
+    if (NOT IS_DIRECTORY ${UTILS_TestDir})
+        message("Failed to clone Utils. See GetSubmoduleUpdate.txt for more information.")
+    endif()
+
+
+endif()
+
 
 # -----------------------------------------------------------------------------
 #                            Show config

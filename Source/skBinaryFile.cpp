@@ -134,8 +134,6 @@ void skBinaryFile::load(skStream &fstream)
         return;
     }
 
-
-    // grab the length 
     m_len  = fstream.size();
     loadImpl(fstream);
 }

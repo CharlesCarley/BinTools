@@ -26,8 +26,6 @@ set(TargetName_GRP      "Tools")
 
 
 set(TargetName_SRC 
-    ProgramInfo.h
-    ProgramInfo.cpp
     Main.cpp
     Readme.md
 )
