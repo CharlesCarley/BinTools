@@ -35,6 +35,7 @@ public:
     static void getMachine(const COFFHeader& inf, char dest[], int len);
     static void getPlatformId(const COFFOptionalHeaderCommon& inf, char dest[], int len);
     static void getCharacteristicsString16(const SKuint16& inf, skString& dest);
+    static void getSubsystem(const SKuint16& ss, char dest[], int len);
 };
 
 

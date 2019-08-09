@@ -75,6 +75,26 @@ enum COFFCharacteristics
 };
 
 
+enum ImageSubsystem
+{
+    ISS_NONE,
+    ISS_NATIVE,
+    ISS_WIN_GUI,             // GUI,
+    ISS_WIN_CUI,             // character subsystem
+    ISS_OS2_CUI   = 5,       // OS/2 character subsystem
+    ISS_POSIX_CUI = 7,       // Posix character subsystem
+    ISS_NATIVE_WIN,          // Native Win9x driver
+    ISS_WIN_CE_GUI,          // Windows CE
+    ISS_EFI_APP,             
+    ISS_EFI_BOOT_DRIVER,     
+    ISS_EFI_RUNTIME_DRIVER,  
+    ISS_EFI_ROM,             
+    ISS_XBOX,                
+    ISS_WIN_BOOT_APP = 16,   
+};
+
+
+
 struct COFFHeader
 {
     SKuint16 m_machine;

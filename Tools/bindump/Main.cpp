@@ -510,8 +510,6 @@ void b2PrintSectionNames(void)
     b2WriteColor(CS_GREY);
     printf(" Name                 Offset             Index\n\n");
 
-
-
     b2WriteColor(CS_LIGHT_GREY);
     int i = 0;
     while (it.hasMoreElements())
@@ -672,6 +670,8 @@ void b2PrintDataDir(const char* msg, const COFFDataDirectory& dd)
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 void b2PrintPEVaryingHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
 {
+    char buf[32];
+
     printf("  ImageBase:                  0x%llx\n", (SKuint64)header.m_imageBase);
     printf("  Section Alignment:          %u\n", header.m_sectionAlignment);
     printf("  File Alignment:             %u\n", header.m_fileAlignment);
@@ -681,7 +681,10 @@ void b2PrintPEVaryingHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBa
     printf("  Image Size:                 0x%x,%u\n", header.m_sizeOfImage, header.m_sizeOfImage);
     printf("  Size of Headers:            %u\n", header.m_sizeOfHeaders);
     printf("  Checksum:                   %u\n", header.m_checkSum);
-    printf("  Subsystem:                  %u\n", header.m_subsystem);
+
+
+    skPortableUtils::getSubsystem(header.m_subsystem, buf, 32);
+    printf("  Subsystem:                  %u, %s\n", header.m_subsystem, buf);
     printf("  DLL Characteristics:        0x%llx\n", (SKuint64)header.m_dllCharacteristics);
     printf("  Stack Reserve Size:         %llu\n", (SKuint64)header.m_sizeOfStackReserve);
     printf("  Stack Commit Size:          %llu\n", (SKuint64)header.m_sizeOfStackCommit);

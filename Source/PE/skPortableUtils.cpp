@@ -115,3 +115,56 @@ void skPortableUtils::getCharacteristicsString16(const SKuint16& characteristics
     if (IsBitFlagSet(characteristics, CC_BYTES_REVERSED_HI))
         pu_appendStr(dest, "BigEndian");
 }
+
+
+
+void skPortableUtils::getSubsystem(const SKuint16& ss, char dest[], int len)
+{
+    switch (ss)
+    {
+    case ISS_NATIVE:
+        sk_strncpy(dest, len, "Native", 6);
+        break;
+    case ISS_WIN_GUI:     
+        sk_strncpy(dest, len, "Native", 6);
+        break;
+    case ISS_WIN_CUI:     
+        sk_strncpy(dest, len, "WinCharacterSubsystem", 21);
+        break;
+    case ISS_OS2_CUI:     
+        sk_strncpy(dest, len, "OS2CharacterSubsystem", 21);
+        break;
+    case ISS_POSIX_CUI:   
+        sk_strncpy(dest, len, "PosixCharacterSubsystem", 23);
+        break;
+    case ISS_NATIVE_WIN:     
+        sk_strncpy(dest, len, "NativeWin", 9);
+        break;
+    case ISS_WIN_CE_GUI:     
+        sk_strncpy(dest, len, "WindowsCE", 9);
+        break;
+    case ISS_EFI_APP:
+        sk_strncpy(dest, len, "EFIApp", 7);
+        break;
+    case ISS_EFI_BOOT_DRIVER:
+        sk_strncpy(dest, len, "EFIBootDriver", 13);
+        break;
+    case ISS_EFI_RUNTIME_DRIVER:
+        sk_strncpy(dest, len, "EFIRuntimeDriver", 19);
+        break;
+    case ISS_EFI_ROM:
+        sk_strncpy(dest, len, "EFIROM", 9);
+        break;
+    case ISS_XBOX:
+        sk_strncpy(dest, len, "XBOX", 4);
+        break;
+    case ISS_WIN_BOOT_APP: 
+        sk_strncpy(dest, len, "WinBootApp", 10);
+        break;
+    default:
+    case ISS_NONE:
+        sk_strncpy(dest, len, "None", 4);
+        break;
+    }
+
+}
