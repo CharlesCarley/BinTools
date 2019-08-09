@@ -69,11 +69,49 @@ enum COFFCharacteristics
     CC_DLL_FILE           = 0x2000,
     CC_UP_ONLY            = 0x4000,
     CC_BYTES_REVERSED_HI  = 0x8000,  // Depreciated should be 0
-
-    // 32 bit Characteristics
-    CC_CAN_EXECUTE = 0x20000000
 };
 
+
+
+
+enum COFFSectionCharacteristics
+{
+    // (0x00000000 - 0x00000004) (Reserved)
+    CSEC_NO_PAD               = 0x00000008,
+    CSEC_CONTAINS_CODE        = 0x00000020,
+    CSEC_CONTAINS_INIT_DATA   = 0x00000040,
+    CSEC_CONTAINS_UNINIT_DATA = 0x00000080,
+    CSEC_LNK_OTHER            = 0x00000100,  // (reserved)
+    CSEC_LNK_INFO             = 0x00000200,
+    CSEC_LNK_REMOVE           = 0x00000800,  // (reserved)
+    CSEC_LNK_COMDAT           = 0x00001000,
+    CSEC_GPREL                = 0x00008000,
+    CSEC_MEM_PURGE            = 0x00020000,  // (reserved)
+    CSEC_MEM_LOCKED           = 0x00040000,  // (reserved)
+    CSEC_MEM_PRELOAD          = 0x00080000,  // (reserved)
+    CSEC_ALIGN_1              = 0x00100000,
+    CSEC_ALIGN_2              = 0x00200000,
+    CSEC_ALIGN_4              = 0x00300000,
+    CSEC_ALIGN_8              = 0x00400000,
+    CSEC_ALIGN_16             = 0x00500000,
+    CSEC_ALIGN_32             = 0x00600000,
+    CSEC_ALIGN_64             = 0x00700000,
+    CSEC_ALIGN_128            = 0x00800000,
+    CSEC_ALIGN_256            = 0x00900000,
+    CSEC_ALIGN_512            = 0x00A00000,
+    CSEC_ALIGN_1024           = 0x00B00000,
+    CSEC_ALIGN_2048           = 0x00C00000,
+    CSEC_ALIGN_4096           = 0x00D00000,
+    CSEC_ALIGN_8192           = 0x00E00000,
+    CSEC_EXT_RELOC            = 0x01000000,
+    CSEC_MEM_DISCARD          = 0x02000000,
+    CSEC_MEM_NOT_CACHED       = 0x04000000,
+    CSEC_MEM_NOT_PAGED        = 0x08000000,
+    CSEC_MEM_SHARED           = 0x10000000,
+    CSEC_MEM_CAN_EXEC         = 0x20000000,
+    CSEC_MEM_CAN_READ         = 0x40000000,
+    CSEC_MEM_CAN_WRITE        = 0x80000000,
+};
 
 enum ImageSubsystem
 {

@@ -116,6 +116,79 @@ void skPortableUtils::getCharacteristicsString16(const SKuint16& characteristics
         pu_appendStr(dest, "BigEndian");
 }
 
+void skPortableUtils::getSectionCharacteristics(const SKuint32& inf, skString& dest)
+{
+    dest.clear();
+
+    if (IsBitFlagSet(inf, CSEC_NO_PAD))
+        pu_appendStr(dest, "NoPading");
+    if (IsBitFlagSet(inf, CSEC_CONTAINS_CODE))
+        pu_appendStr(dest, "ContainsCode");
+    if (IsBitFlagSet(inf, CSEC_CONTAINS_INIT_DATA))
+        pu_appendStr(dest, "ContainsInitializedData");
+    if (IsBitFlagSet(inf, CSEC_CONTAINS_UNINIT_DATA))
+        pu_appendStr(dest, "ContainsUninitializedData");
+    if (IsBitFlagSet(inf, CSEC_LNK_OTHER))
+        pu_appendStr(dest, "Reserved");
+    if (IsBitFlagSet(inf, CSEC_LNK_INFO))
+        pu_appendStr(dest, "ContainsExtraInfo");
+    if (IsBitFlagSet(inf, CSEC_LNK_REMOVE))
+        pu_appendStr(dest, "WillBeRemovedWhenLinked");
+    if (IsBitFlagSet(inf, CSEC_LNK_COMDAT))
+        pu_appendStr(dest, "ContainsCOMDAT");
+    if (IsBitFlagSet(inf, CSEC_GPREL))
+        pu_appendStr(dest, "RefrencedThroughGlobPtr");
+    if (IsBitFlagSet(inf, CSEC_MEM_PURGE))
+        pu_appendStr(dest, "Reserved");
+    if (IsBitFlagSet(inf, CSEC_MEM_LOCKED))
+        pu_appendStr(dest, "Reserved");
+    if (IsBitFlagSet(inf, CSEC_MEM_PRELOAD))
+        pu_appendStr(dest, "Reserved");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_1))
+        pu_appendStr(dest, "Align1");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_2))
+        pu_appendStr(dest, "Align2");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_4))
+        pu_appendStr(dest, "Align4");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_8))
+        pu_appendStr(dest, "Align8");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_16))
+        pu_appendStr(dest, "Align16");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_32))
+        pu_appendStr(dest, "Align32");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_64))
+        pu_appendStr(dest, "Align64");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_128))
+        pu_appendStr(dest, "Align128");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_256))
+        pu_appendStr(dest, "Align256");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_512))
+        pu_appendStr(dest, "Align512");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_1024))
+        pu_appendStr(dest, "Align1024");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_2048))
+        pu_appendStr(dest, "Align2048");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_4096))
+        pu_appendStr(dest, "Align4096");
+    if (IsBitFlagSet(inf, CSEC_ALIGN_8192))
+        pu_appendStr(dest, "Align8192");
+    if (IsBitFlagSet(inf, CSEC_EXT_RELOC))
+        pu_appendStr(dest, "ExtendedRelocations");
+    if (IsBitFlagSet(inf, CSEC_MEM_DISCARD))
+        pu_appendStr(dest, "Discardable");
+    if (IsBitFlagSet(inf, CSEC_MEM_NOT_CACHED))
+        pu_appendStr(dest, "CannotCache");
+    if (IsBitFlagSet(inf, CSEC_MEM_NOT_PAGED))
+        pu_appendStr(dest, "NotPageable");
+    if (IsBitFlagSet(inf, CSEC_MEM_SHARED))
+        pu_appendStr(dest, "CanShare");
+    if (IsBitFlagSet(inf, CSEC_MEM_CAN_EXEC))
+        pu_appendStr(dest, "CanExec");
+    if (IsBitFlagSet(inf, CSEC_MEM_CAN_READ))
+        pu_appendStr(dest, "CanRead");
+    if (IsBitFlagSet(inf, CSEC_MEM_CAN_WRITE))
+        pu_appendStr(dest, "CanWrite");
+}
 
 
 void skPortableUtils::getSubsystem(const SKuint16& ss, char dest[], int len)
@@ -141,7 +214,7 @@ void skPortableUtils::getSubsystem(const SKuint16& ss, char dest[], int len)
         sk_strncpy(dest, len, "NativeWin", 9);
         break;
     case ISS_WIN_CE_GUI:     
-        sk_strncpy(dest, len, "WindowsCE", 9);
+        sk_strncpy(dest, len, "WinfowsCE", 9);
         break;
     case ISS_EFI_APP:
         sk_strncpy(dest, len, "EFIApp", 7);

@@ -626,7 +626,7 @@ void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& o
     printf("  Optional Header Size:       %u\n", header.m_optionalHeaderSize);
 
     skPortableUtils::getCharacteristicsString16(header.m_characteristics, str);
-    printf("  Characteristics:            0x%x %s\n", header.m_characteristics, str.c_str());
+    printf("  Characteristics:            0x%x, %s\n", header.m_characteristics, str.c_str());
 
     printf("\n");
 
@@ -646,6 +646,8 @@ void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& o
 
 void b2PrintPESectionHeader(const COFFSectionHeader& header)
 {
+    skString dest;
+
     printf("  Name:                       %s\n", header.m_name);
     printf("  Virtual Size:               %u\n", header.m_virtualSize);
     printf("  Virtual Address:            0x%x\n", header.m_virtualAddress);
@@ -655,7 +657,10 @@ void b2PrintPESectionHeader(const COFFSectionHeader& header)
     printf("  Relocation Count:           %u\n", header.m_numberOfRelocations);
     printf("  Line Number Location:       0x%x\n", header.m_pointerToLineNumbers);
     printf("  Line Number Count:          %u\n", header.m_numberOfLineNumbers);
-    printf("  Characteristics:            0x%x\n", header.m_characteristics);
+
+
+    skPortableUtils::getSectionCharacteristics(header.m_characteristics, dest);
+    printf("  Characteristics:            0x%x, %s\n", header.m_characteristics, dest.c_str());
     printf("  Size of Header:             %u\n", (SKuint32)sizeof(COFFSectionHeader));
 }
 
