@@ -214,7 +214,7 @@ void skPortableUtils::getSubsystem(const SKuint16& ss, char dest[], int len)
         sk_strncpy(dest, len, "NativeWin", 9);
         break;
     case ISS_WIN_CE_GUI:     
-        sk_strncpy(dest, len, "WinfowsCE", 9);
+        sk_strncpy(dest, len, "WindowsCE", 9);
         break;
     case ISS_EFI_APP:
         sk_strncpy(dest, len, "EFIApp", 7);
