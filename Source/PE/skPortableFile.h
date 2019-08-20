@@ -83,17 +83,18 @@ public:
         return (SKuint64)-1;
     }
 
+
 private:
 
 
-    void loadResourceDirectory(skPortableSection* section, skPortableDirectory* directory);
-    void loadImportDirectory(skPortableSection* section, skPortableDirectory* directory);
+    int loadResourceDirectory(skPortableSection* section, skPortableDirectory* directory);
+    int loadImportDirectory(skPortableSection* section, skPortableDirectory* directory);
 
     template <typename COFFOptionalHeaderVaryingBase>
     void sortDataDirectories(void);
 
 
-    virtual void loadImpl(skStream& stream);
+    virtual int loadImpl(skStream& stream);
 };
 
 #endif  //_skPortableFile_h_

@@ -44,14 +44,12 @@ protected:
     skMachineArchitecture m_arch;
     SectionTable          m_sectionLookup;
     SymbolTable           m_symTable;
-
-
-
+    
     // Protected constructor. Load files via the static interface
     // skBinaryFile::load(file).
     skBinaryFile();
 
-    void load(skStream &fstream);
+    int load(skStream &fstream);
 
 public:
     virtual ~skBinaryFile();
@@ -61,7 +59,7 @@ public:
     // Returns skDefaultFile if the file format is not supported, or NULL if the
     // file can not be loaded. Instances created through this function sill must be
     // deleted when no longer needed.
-    static skBinaryFile *load(const char *file);
+    static int load(const char *file, skBinaryFile **fp);
 
 
     // Returns the format of the loaded file.
@@ -139,7 +137,7 @@ public:
 protected:
     // Called from load.
     // loadImpl is responsible for converting the underlying data into this interface.
-    virtual void loadImpl(skStream& stream) = 0;
+    virtual int loadImpl(skStream &stream) = 0;
 };
 
 #endif  //_skBinaryFile_h_

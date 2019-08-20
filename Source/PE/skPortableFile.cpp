@@ -77,7 +77,7 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest)
 
 
 
-void skPortableFile::loadImpl(skStream& stream)
+int skPortableFile::loadImpl(skStream& stream)
 {
 
     SKuint16 optMagic;
@@ -101,8 +101,8 @@ void skPortableFile::loadImpl(skStream& stream)
 
     if (m_arch == IS_NONE)
     {
-        printf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
-        return;
+        // printf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
+        return EC_UNKNOWN_FILE_FORMAT;
     }
 
     // Pick out the magic for testing.
@@ -112,14 +112,12 @@ void skPortableFile::loadImpl(skStream& stream)
 
     if (optMagic == COFF_MAG_PE32)
     {
-        // runtime sanity check
         if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
         {
-            printf("COFFOptionalHeader32 not properly aligned %u-%u\n",
-                     (SKuint32)sizeof(COFFOptionalHeader32),
-                     m_header.m_optionalHeaderSize);
-
-            return;
+            //printf("COFFOptionalHeader32 not properly aligned %u-%u\n",
+            //         (SKuint32)sizeof(COFFOptionalHeader32),
+            //         m_header.m_optionalHeaderSize);
+            return EC_UNEXPECTED;
         }
 
         m_imageHeader = new COFFOptionalHeader32;
@@ -129,13 +127,12 @@ void skPortableFile::loadImpl(skStream& stream)
     }
     else if (optMagic == COFF_MAG_PE64)
     {
-        // Make sure it's valid
         if (sizeof(COFFOptionalHeader64) != m_header.m_optionalHeaderSize)
         {
-            printf("COFFOptionalHeader64 not properly aligned %u-%u\n",
-                     (SKuint32)sizeof(COFFOptionalHeader64),
-                     m_header.m_optionalHeaderSize);
-            return;
+            //printf("COFFOptionalHeader64 not properly aligned %u-%u\n",
+            //         (SKuint32)sizeof(COFFOptionalHeader64),
+            //         m_header.m_optionalHeaderSize);
+            return EC_UNEXPECTED;
         }
 
         m_imageHeader = new COFFOptionalHeader64;
@@ -145,8 +142,8 @@ void skPortableFile::loadImpl(skStream& stream)
     }
     else
     {
-        printf("COFFOptionalHeader: Unknown header type!\n");
-        return;
+        // printf("COFFOptionalHeader: Unknown header type!\n");
+        return EC_UNKNOWN_FILE_FORMAT;
     }
 
     // Set the file format type now that it's known to be one or the other.
@@ -201,13 +198,15 @@ void skPortableFile::loadImpl(skStream& stream)
             }
             else
             {
-                printf("Error - Section size exceeds the amount of memory allocated.\n");
+                //printf("Error - Section size exceeds the amount of memory allocated.\n");
+                return EC_OVERFLOW;
             }
         }
         else
         {
             // this is an error, it shouldn't have duplicate symbols
-            printf("Error - duplicate symbol name!\n");
+            // printf("Error - duplicate symbol name!\n");
+            return EC_UNEXPECTED;
         }
     }
 
@@ -261,17 +260,19 @@ void skPortableFile::loadImpl(skStream& stream)
             }
         }
     }
+    return EC_OK;
 }
 
 
 
-void skPortableFile::loadResourceDirectory(skPortableSection *section, skPortableDirectory *resource)
+int skPortableFile::loadResourceDirectory(skPortableSection *section, skPortableDirectory *resource)
 {
+    return EC_OK;
 }
 
 
 
-void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDirectory *directory)
+int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDirectory *directory)
 {
 
     // resolve the relative virtual address.
@@ -279,7 +280,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
     if (addr == (SKuint32)-1)
     {
         // meaning the directory has no owner.
-        return;
+        return EC_UNEXPECTED;
     }
 
     // Grab the initial pointer with the
@@ -361,6 +362,7 @@ void skPortableFile::loadImportDirectory(skPortableSection *section, skPortableD
         i += ival;
         ++idata;
     }
+    return EC_OK;
 }
 
 
@@ -416,8 +418,8 @@ void skPortableFile::sortDataDirectories(void)
             if (!dd || dd->m_size == 0)
                 continue;
 
-            // Is the virtual address in the section?
-            if (dd->m_virtualAddress >= csh.m_virtualAddress && dd->m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
+            if (dd->m_virtualAddress >= csh.m_virtualAddress &&
+                dd->m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
             {
                 pes->_addDirectory((COFFDirectoryEnum)i, *dd);
                 ddb.use = 1;

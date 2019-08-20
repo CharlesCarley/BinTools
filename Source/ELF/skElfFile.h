@@ -84,16 +84,16 @@ public:
         return m_header.m_sectionOffset + m_header.m_sectionTableEntryCount * m_header.m_sectionTableEntrySize;
     }
 
-    
+
 private:
 
     template <typename skElfSectionHeader>
-    void loadSections(skStream &stream);
+    int loadSections(skStream &stream);
 
     template <typename skElfSymbolHeader>
-    void loadSymbolTable(const char* str, const char* sym);
+    int loadSymbolTable(const char* str, const char* sym);
 
-    virtual void loadImpl(skStream& stream);
+    virtual int loadImpl(skStream& stream);
 };
 
 #endif  //_skElfFileHeader_h_

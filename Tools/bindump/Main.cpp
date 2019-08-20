@@ -189,26 +189,19 @@ void b2Free(void)
 
 bool b2Alloc(const char* prog)
 {
-    skBinaryFile* fp;
-
-
-    // Load the file
-    fp = ctx.m_fp = skBinaryFile::load(prog);
-    if (!ctx.m_fp)
+    int code = skBinaryFile::load(prog, &ctx.m_fp);
+    if (!ctx.m_fp || code != EC_OK)
         return false;
 
-    // used for interactive mode
+    // Only used for interactive mode
     ctx.m_fname = prog;
 
 
-    // initialize the capstone engine
     if (ctx.m_handle != SK_NPOS)
         cs_close(&ctx.m_handle);
 
-
-
     cs_arch arch = CS_ARCH_ALL;
-    switch (fp->getArchitecture())
+    switch (ctx.m_fp->getArchitecture())
     {
     case IS_SPARC:
         arch = CS_ARCH_SPARC;
@@ -233,9 +226,7 @@ bool b2Alloc(const char* prog)
         break;
     }
 
-
-
-    cs_mode mode = fp->getPlatformType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
+    cs_mode mode = ctx.m_fp->getPlatformType() == FFT_32BIT ? CS_MODE_32 : CS_MODE_64;
     cs_err  err  = cs_open(arch, mode, (csh*)&ctx.m_handle);
     if (err != CS_ERR_OK)
     {

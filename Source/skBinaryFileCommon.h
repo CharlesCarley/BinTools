@@ -59,6 +59,18 @@ enum skMachineArchitecture
 };
 
 
+enum skErrorCodes
+{
+    EC_OK=0,
+    EC_INVALID_POINTER,
+    EC_FILE_LOADING_FAILED,
+    EC_UNKNOWN_FILE_FORMAT,
+    EC_OVERFLOW,
+    EC_DUPLICATE,
+    EC_UNEXPECTED,
+};
+
+
 enum skFileFormat
 {
     FF_UNKNOWN,

@@ -49,24 +49,24 @@ skElfFile::~skElfFile()
 }
 
 
-void skElfFile::loadImpl(skStream& stream)
+int skElfFile::loadImpl(skStream& stream)
 {
+    int     errorCode;
     SKuint8 desc;
 
-    // Extract the class out of the header
+
     stream.seek(EMN_CLASS, SEEK_SET);
     stream.read(&desc, 1);
     stream.seek(0, SEEK_SET);
 
-    // Find the file's platform type.
     if (desc == 1)
         m_fileFormatType = FFT_32BIT;
     else if (desc == 2)
         m_fileFormatType = FFT_64BIT;
     else
     {
-        printf("Unknown class descriptor found in the file header.\n");
-        return;
+        // Unknown class descriptor found in the file header
+        return EC_UNKNOWN_FILE_FORMAT;
     }
 
 
@@ -83,7 +83,6 @@ void skElfFile::loadImpl(skStream& stream)
     }
 
 
-    // Handle the machine architecture
     switch (m_header.m_machine)
     {
     case EIA_SPARC:
@@ -124,32 +123,44 @@ void skElfFile::loadImpl(skStream& stream)
 
     if (m_arch == IS_NONE)
     {
-        printf("Unknown machine architecture found in the file header");
-        return;
+        // printf("Unknown machine architecture found in the file header\n");
+        return EC_UNKNOWN_FILE_FORMAT;
     }
 
     if (m_fileFormatType == FFT_32BIT)
     {
-        loadSections<skElfSectionHeader32>(stream);
-        loadSymbolTable<skElfSymbol32>(".dynstr", ".dynsym");
-        loadSymbolTable<skElfSymbol32>(".strtab", ".symtab");
+        errorCode = loadSections<skElfSectionHeader32>(stream);
+        if (errorCode != EC_OK)
+            return errorCode;
+
+        errorCode = loadSymbolTable<skElfSymbol32>(".dynstr", ".dynsym");
+        if (errorCode != EC_OK)
+            return errorCode;
+        errorCode = loadSymbolTable<skElfSymbol32>(".strtab", ".symtab");
+        if (errorCode != EC_OK)
+            return errorCode;
     }
     else
     {
-        loadSections<skElfSectionHeader64>(stream);
-        loadSymbolTable<skElfSymbol64>(".dynstr", ".dynsym");
-        loadSymbolTable<skElfSymbol64>(".strtab", ".symtab");
+        errorCode = loadSections<skElfSectionHeader64>(stream);
+        if (errorCode != EC_OK)
+            return errorCode;
+
+        errorCode = loadSymbolTable<skElfSymbol64>(".dynstr", ".dynsym");
+        if (errorCode != EC_OK)
+            return errorCode;
+        errorCode = loadSymbolTable<skElfSymbol64>(".strtab", ".symtab");
+        if (errorCode != EC_OK)
+            return errorCode;
     }
+    return EC_OK;
 }
 
 
 template <typename skElfSectionHeader>
-void skElfFile::loadSections(skStream &stream)
+int skElfFile::loadSections(skStream &stream)
 {
     elf64 offs, offe, i;
-
-    if (m_len == 0 || m_len == (size_t)-1)
-        return;
 
     // The section headers are packed in m_data[start:end]
     offs = getSectionHeaderStart();
@@ -157,8 +168,8 @@ void skElfFile::loadSections(skStream &stream)
 
     if (offe > m_len)
     {
-        printf("Error - The section header's offset exceeds the amount of allocated memory.\n");
-        return;
+        //printf("Error - The section header's offset exceeds the amount of allocated memory.\n");
+        return EC_OVERFLOW;
     }
 
     // Read the last section for resolving names.
@@ -221,27 +232,27 @@ void skElfFile::loadSections(skStream &stream)
                 }
                 else
                 {
-                    SKuint64 len = sp.m_offset + sp.m_size;
-                    printf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
+                    // SKuint64 len = sp.m_offset + sp.m_size;
+                    // printf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
+                    return EC_OVERFLOW;
                 }
             }
             else
             {
-                // this is an error, it shouldn't have duplicate sections
-                printf("Error - duplicate section name!\n");
+                // printf("Error - duplicate section name!\n");
+                return EC_DUPLICATE;
             }
         }
     }
+
+    return EC_OK;
 }
 
 
 template <typename skElfSymbolHeader>
-void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
+int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
-    if (!strLookup || !symLookup)
-        return;
-
-    // Some symbols are nonexistent in a stripped binary (.strtab, .symtab)
+    SK_ASSERT(strLookup && symLookup); // callers fault 
 
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
@@ -259,14 +270,11 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 
         if (hdr.m_entSize == 0)
         {
-            printf("Error - No entries in the string table.\n");
-            return;
+            ///printf("Error - No entries in the string table.\n");
+            return EC_UNEXPECTED;
         }
 
-
-        // Total number of elements
         SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
-
         i = 0;
         while (i < entryLen)
         {
@@ -275,8 +283,8 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             // Make sure that the index is at least in range.
             if (syml.m_name >= str->getSize())
             {
-                printf("Error - The size of the symbol name exceeds the size of the string table.\n");
-                break;
+                //printf("Error - The size of the symbol name exceeds the size of the string table.\n");
+                return EC_OVERFLOW;
             }
 
             char* cp = (char*)(strPtr + syml.m_name);
@@ -305,4 +313,5 @@ void skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             i++;
         }
     }
+    return EC_OK;
 }

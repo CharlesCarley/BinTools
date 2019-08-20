@@ -33,31 +33,26 @@
 #include "skSymbol.h"
 
 
-skBinaryFile *skBinaryFile::load(const char *file)
+int skBinaryFile::load(const char *file, skBinaryFile **fp)
 {
-    if (!file || !(*file))
-        return 0;
-
     skFileStream fs;
+    char         magic[4];
+
+    if (!file || !(*file) || !fp)
+        return EC_INVALID_POINTER;
+
     fs.open(file, skStream::READ);
 
     if (!fs.isOpen())
-    {
-        printf("failed to open file %s\n", file);
-        return 0;
-    }
-
-
-    char magic[4];
+        return EC_FILE_LOADING_FAILED;
     fs.read(magic, 4);
 
-    skBinaryFile *rval = 0;
 
-    // rewind
+    (*fp) = 0;
     fs.seek(0, SEEK_SET);
 
     if (strncmp("\177ELF", magic, 4) == 0)
-        rval = new skElfFile();
+        (*fp) = new skElfFile();
     else if (strncmp("MZ", magic, 2) == 0)
     {
         // Seek to the 4 byte variable containing the
@@ -71,34 +66,28 @@ skBinaryFile *skBinaryFile::load(const char *file)
         {
             fs.seek(pe_offset, SEEK_SET);
             fs.read(magic, 4);
-
-            // Seek back to the start of the MZ signature
             fs.seek(0, SEEK_SET);
 
             if (strncmp("PE\0\0", magic, 4) == 0)
-                rval = new skPortableFile(pe_offset);
+                (*fp) = new skPortableFile(pe_offset);
             else
             {
-                // defaults to the generic skDefaultFile.
-                printf("skBinaryFile::load: - PE signature was not found.\n");
+                //printf("skBinaryFile::load: - PE signature was not found.\n");
+                return EC_UNEXPECTED;
             }
         }
         else
         {
             // Or perhaps a DOS program was passed in.
             // This is looking for PE only right now.
-            printf("Invalid PE offset\n");
-
-
-            // Seek back to the start of the file and use 
-            // skDefaultFile, so at least something will be print to screen. 
-            fs.seek(0, SEEK_SET);
+            // printf("Invalid PE offset\n");
+            return EC_UNEXPECTED;
         }
     }
 
-    if (rval)
-        rval->load(fs);
-    return rval;
+    if ((*fp))
+        return (*fp)->load(fs);
+    return EC_FILE_LOADING_FAILED;
 }
 
 
@@ -108,7 +97,6 @@ skBinaryFile::skBinaryFile():
     m_fileFormat(FF_UNKNOWN),
     m_fileFormatType(FFT_UNKNOWN),
     m_arch(IS_NONE)
-
 {
 }
 
@@ -126,14 +114,16 @@ skBinaryFile::~skBinaryFile()
 }
 
 
-void skBinaryFile::load(skStream &fstream)
+int skBinaryFile::load(skStream &fstream)
 {
     if (!fstream.isOpen())
     {
-        printf("load called on a closed file\n");
-        return;
+        // printf("load called on a closed file\n");
+        return EC_FILE_LOADING_FAILED;
     }
 
     m_len  = fstream.size();
-    loadImpl(fstream);
+    if (m_len == 0 || m_len == SK_NPOS)
+        return EC_FILE_LOADING_FAILED;
+    return loadImpl(fstream);
 }
