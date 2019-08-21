@@ -43,7 +43,7 @@ set(TargetName_HDR
     # PE
     PE/skPortableDirectory.h
     PE/skPortableTypes.h
-    PE/skPortableFIle.h
+    PE/skPortableFile.h
     PE/skPortableSection.h
     PE/skPortableSymbol.h
     PE/skPortableUtils.h
