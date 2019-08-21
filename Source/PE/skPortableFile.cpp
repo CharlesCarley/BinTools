@@ -298,6 +298,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
              ubound = maxl - addr,
              ival   = sizeof(COFFImportDirectoryTable);
 
+
     while (i < len)
     {
         const COFFImportDirectoryTable &cidt = (*idata);
@@ -374,33 +375,6 @@ void skPortableFile::sortDataDirectories(void)
     // Find the locations of the data directories
     COFFOptionalHeaderVaryingBase *hdr = reinterpret_cast<COFFOptionalHeaderVaryingBase *>(m_imageHeader);
     
-    COFFDataDirectories &fd = hdr->m_directories;
-
-    struct DataDir
-    {
-        COFFDataDirectory *ptr;
-        SKubyte            use;
-    };
-
-
-    DataDir directories[16] = {
-        {&fd.m_exportTable, 0},
-        {&fd.m_importTable, 0},
-        {&fd.m_resourceTable, 0},
-        {&fd.m_exceptionTable, 0},
-        {&fd.m_certificateTable, 0},
-        {&fd.m_baseRelocationTable, 0},
-        {&fd.m_debug, 0},
-        {&fd.m_globPtrReg, 0},
-        {&fd.m_threadLocalStorage, 0},
-        {&fd.m_loadConfigTable, 0},
-        {&fd.m_boundImport, 0},
-        {&fd.m_importAddressTable, 0},
-        {&fd.m_delayImportDescriptor, 0},
-        {&fd.m_crtRuntimeHeader, 0},
-        {&fd.m_reserved, 0},
-    };
-
     int i;
     SectionTable::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
@@ -410,19 +384,12 @@ void skPortableFile::sortDataDirectories(void)
 
         for (i = 0; i < CDE_MAX; ++i)
         {
-            DataDir &ddb = directories[i];
-            if (ddb.use == 1)
-                continue;
-
-            COFFDataDirectory *dd = ddb.ptr;
-            if (!dd || dd->m_size == 0)
-                continue;
-
-            if (dd->m_virtualAddress >= csh.m_virtualAddress &&
-                dd->m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
+            COFFDataDirectory &dd = hdr->m_directories[i];
+            
+            if (dd.m_virtualAddress >= csh.m_virtualAddress &&
+                dd.m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
             {
-                pes->_addDirectory((COFFDirectoryEnum)i, *dd);
-                ddb.use = 1;
+                pes->_addDirectory((COFFDirectoryEnum)i, dd);
             }
         }
     }

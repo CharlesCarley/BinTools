@@ -42,12 +42,10 @@ int skBinaryFile::load(const char *file, skBinaryFile **fp)
         return EC_INVALID_POINTER;
 
     fs.open(file, skStream::READ);
-
     if (!fs.isOpen())
         return EC_FILE_LOADING_FAILED;
+
     fs.read(magic, 4);
-
-
     (*fp) = 0;
     fs.seek(0, SEEK_SET);
 
@@ -55,7 +53,7 @@ int skBinaryFile::load(const char *file, skBinaryFile **fp)
         (*fp) = new skElfFile();
     else if (strncmp("MZ", magic, 2) == 0)
     {
-        // Seek to the 4 byte variable containing the
+        // Seeks to the 4 byte variable containing the
         // offset to the PE signature
         fs.seek(0x3C, SEEK_SET);
 
@@ -84,6 +82,8 @@ int skBinaryFile::load(const char *file, skBinaryFile **fp)
             return EC_UNEXPECTED;
         }
     }
+    else
+        return EC_FILE_LOADING_FAILED;
 
     if ((*fp))
         return (*fp)->load(fs);
@@ -92,7 +92,7 @@ int skBinaryFile::load(const char *file, skBinaryFile **fp)
 
 
 
-skBinaryFile::skBinaryFile():
+skBinaryFile::skBinaryFile() :
     m_len(0),
     m_fileFormat(FF_UNKNOWN),
     m_fileFormatType(FFT_UNKNOWN),
@@ -102,7 +102,6 @@ skBinaryFile::skBinaryFile():
 
 skBinaryFile::~skBinaryFile()
 {
-    
     SectionTable::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
         delete it.getNext().second;
@@ -110,7 +109,6 @@ skBinaryFile::~skBinaryFile()
     SymbolTable::Iterator sym_it = m_symTable.iterator();
     while (sym_it.hasMoreElements())
         delete sym_it.getNext().second;
-
 }
 
 
@@ -122,7 +120,7 @@ int skBinaryFile::load(skStream &fstream)
         return EC_FILE_LOADING_FAILED;
     }
 
-    m_len  = fstream.size();
+    m_len = fstream.size();
     if (m_len == 0 || m_len == SK_NPOS)
         return EC_FILE_LOADING_FAILED;
     return loadImpl(fstream);

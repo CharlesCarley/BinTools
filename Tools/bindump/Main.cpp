@@ -75,39 +75,39 @@ struct b2ProgramInfo
 };
 
 
-int  b2ParseCommandLine(int argc, char** argv);
+int  b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv);
 void b2Usage(void);
-void b2Interactive(void);
+void b2Interactive(b2ProgramInfo& ctx);
 
 
-void b2Free(void);
-bool b2Alloc(const char* prog);
+void b2Free(b2ProgramInfo& ctx);
+bool b2Alloc(b2ProgramInfo& ctx, const char* prog);
 
 void b2WriteColor(skConsoleColorSpace cs);
 void b2WriteAddress(SKuint64 addr);
 
 void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
-void b2Dissemble(void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
+void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
 
 void b2MarkColor(int c, int mark);
 void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
 void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
 
-void b2PrintAll(void);
-void b2PrintSectionNames(void);
-void b2PrintSections(void);
-void b2PrintSymbols(void);
+void b2PrintAll(b2ProgramInfo& ctx);
+void b2PrintSectionNames(b2ProgramInfo& ctx);
+void b2PrintSections(b2ProgramInfo& ctx);
+void b2PrintSymbols(b2ProgramInfo& ctx);
 
-
-b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1, SK_NPOS};
 
 
 int main(int argc, char** argv)
 {
-    if (b2ParseCommandLine(argc, argv) == -1)
+    b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1, SK_NPOS};
+
+    if (b2ParseCommandLine(ctx, argc, argv) == -1)
     {
         b2Usage();
-        b2Free();
+        b2Free(ctx);
         return -1;
     }
 
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
         // enter into interactive mode
         skConsoleClear();
         while (ctx.m_state == MS_MAIN)
-            b2Interactive();
+            b2Interactive(ctx);
     }
     else
     {
@@ -125,23 +125,23 @@ int main(int argc, char** argv)
             switch (ctx.m_opt)
             {
             case 2:
-                b2PrintSections();
+                b2PrintSections(ctx);
                 break;
             case 3:
-                b2PrintSectionNames();
+                b2PrintSectionNames(ctx);
                 break;
             case 4:
-                b2PrintSymbols();
+                b2PrintSymbols(ctx);
                 break;
             default:
-                b2PrintAll();
+                b2PrintAll(ctx);
                 break;
             }
         }
     }
 
 
-    b2Free();
+    b2Free(ctx);
     b2WriteColor(CS_WHITE);
     return 0;
 }
@@ -171,9 +171,8 @@ void b2Usage(void)
 
 
 
-void b2Free(void)
+void b2Free(b2ProgramInfo &ctx)
 {
-    // Cleanup capstone
     if (ctx.m_handle != SK_NPOS)
     {
         cs_close(&ctx.m_handle);
@@ -187,7 +186,7 @@ void b2Free(void)
     }
 }
 
-bool b2Alloc(const char* prog)
+bool b2Alloc(b2ProgramInfo& ctx, const char* prog)
 {
     int code = skBinaryFile::load(prog, &ctx.m_fp);
     if (!ctx.m_fp || code != EC_OK)
@@ -239,7 +238,7 @@ bool b2Alloc(const char* prog)
 
 
 
-int b2ParseCommandLine(int argc, char** argv)
+int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
 {
     if (argc <= 1)
         return -1;
@@ -304,7 +303,7 @@ int b2ParseCommandLine(int argc, char** argv)
 
     if (argc >= 2)
     {
-        if (!b2Alloc(argv[argc - 1]))
+        if (!b2Alloc(ctx, argv[argc - 1]))
             err = true;
     }
     else
@@ -433,7 +432,7 @@ void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, int mark, bo
 
 
 
-void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
+void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags)
 {
     // filter out invalid input
     if (!ptr || ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
@@ -466,7 +465,7 @@ void b2Dissemble(void* ptr, size_t offset, size_t len, int flags)
 }
 
 
-void b2PrintAll(void)
+void b2PrintAll(b2ProgramInfo& ctx)
 {
     if (!ctx.m_fp)
         return;
@@ -487,7 +486,7 @@ void b2PrintAll(void)
 }
 
 
-void b2PrintSectionNames(void)
+void b2PrintSectionNames(b2ProgramInfo& ctx)
 {
     if (!ctx.m_fp)
         return;
@@ -694,26 +693,21 @@ void b2PrintPEVaryingHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBa
     printf("Data Directories\n\n");
     b2WriteColor(CS_LIGHT_GREY);
 
-
-    const COFFDataDirectories& dir = header.m_directories;
-
-
-
-    b2PrintDataDir("  Export Table:               ", dir.m_exportTable);
-    b2PrintDataDir("  Import Table:               ", dir.m_importTable);
-    b2PrintDataDir("  Resource Table:             ", dir.m_resourceTable);
-    b2PrintDataDir("  Exception Table:            ", dir.m_exceptionTable);
-    b2PrintDataDir("  Certificate Table:          ", dir.m_certificateTable);
-    b2PrintDataDir("  Base Relocation Table:      ", dir.m_baseRelocationTable);
-    b2PrintDataDir("  Debug Table:                ", dir.m_debug);
-    b2PrintDataDir("  Architecture (Reserved):    ", dir.m_architecture);
-    b2PrintDataDir("  Global Pointer Register:    ", dir.m_globPtrReg);
-    b2PrintDataDir("  Thread Local Storage:       ", dir.m_threadLocalStorage);
-    b2PrintDataDir("  Loader Config Table:        ", dir.m_loadConfigTable);
-    b2PrintDataDir("  Bound Import Table:         ", dir.m_boundImport);
-    b2PrintDataDir("  Import Address Table:       ", dir.m_importAddressTable);
-    b2PrintDataDir("  Delay Import Descriptor:    ", dir.m_delayImportDescriptor);
-    b2PrintDataDir("  CRT Runtime Header:         ", dir.m_crtRuntimeHeader);
+    b2PrintDataDir("  Export Table:               ", header.m_directories[CDE_EXPORT]);
+    b2PrintDataDir("  Import Table:               ", header.m_directories[CDE_IMPORT]);
+    b2PrintDataDir("  Resource Table:             ", header.m_directories[CDE_RESOURCE]);
+    b2PrintDataDir("  Exception Table:            ", header.m_directories[CDE_EXCEPTION]);
+    b2PrintDataDir("  Certificate Table:          ", header.m_directories[CDE_CERTIFICATE]);
+    b2PrintDataDir("  Base Relocation Table:      ", header.m_directories[CDE_BASE_RELOCATION]);
+    b2PrintDataDir("  Debug Table:                ", header.m_directories[CDE_DEBUG]);
+    b2PrintDataDir("  Architecture (Reserved):    ", header.m_directories[CDE_ARCHITECTURE]);
+    b2PrintDataDir("  Global Pointer Register:    ", header.m_directories[CDE_GLOBAL_PTR]);
+    b2PrintDataDir("  Thread Local Storage:       ", header.m_directories[CDE_THREAD_LOCAL_STORAGE]);
+    b2PrintDataDir("  Loader Config Table:        ", header.m_directories[CDE_LOAD_CONFIG]);
+    b2PrintDataDir("  Bound Import Table:         ", header.m_directories[CDE_BOUND_IMPORT]);
+    b2PrintDataDir("  Import Address Table:       ", header.m_directories[CDE_IMPORT_ADDRESS_TABLE]);
+    b2PrintDataDir("  Delay Import Descriptor:    ", header.m_directories[CDE_DELAY_IMPORT_DESC]);
+    b2PrintDataDir("  CRT Runtime Header:         ", header.m_directories[CDE_CRT_RUNTIME_HEADER]);
 }
 
 
@@ -750,7 +744,7 @@ void b2PrintSectionHeader(skBinaryFile* fp, skSection* section)
 
 
 
-void b2PrintSectionCommon(skSection* section)
+void b2PrintSectionCommon(b2ProgramInfo& ctx, skSection* section)
 {
     if (!section || !ctx.m_fp)
         return;
@@ -764,19 +758,19 @@ void b2PrintSectionCommon(skSection* section)
 }
 
 
-void b2PrintSection(skSection* section)
+void b2PrintSection(b2ProgramInfo& ctx, skSection* section)
 {
     if (!section || !ctx.m_fp)
         return;
 
-    b2PrintSectionCommon(section);
+    b2PrintSectionCommon(ctx, section);
     printf("\n");
 
 
     b2WriteColor(CS_WHITE);
     if (ctx.m_flags & PF_DISASEMBLE && section->isExectuable())
     {
-        b2Dissemble(section->getPointer(),
+        b2Dissemble(ctx, section->getPointer(),
                     section->getStartAddress(),
                     section->getSize(),
                     ctx.m_flags);
@@ -791,7 +785,7 @@ void b2PrintSection(skSection* section)
     }
 }
 
-void b2PrintHeadersCommon(void)
+void b2PrintHeadersCommon(b2ProgramInfo& ctx)
 {
     if (!ctx.m_fp)
         return;
@@ -841,33 +835,33 @@ void b2PrintHeadersCommon(void)
 }
 
 
-void b2PrintSections(void)
+void b2PrintSections(b2ProgramInfo& ctx)
 {
     if (!ctx.m_fp)
         return;
 
-    b2PrintHeadersCommon();
+    b2PrintHeadersCommon(ctx);
 
     skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
     while (it.hasMoreElements())
-        b2PrintSection(it.getNext().second);
+        b2PrintSection(ctx, it.getNext().second);
 }
 
 
 
-void b2PrintSection(const std::string& name)
+void b2PrintSection(b2ProgramInfo& ctx, const std::string& name)
 {
     if (!ctx.m_fp)
         return;
 
     skSection* sec = ctx.m_fp->getSection(name.c_str());
     if (sec != 0)
-        b2PrintSection(sec);
+        b2PrintSection(ctx, sec);
 }
 
 
 
-void b2PrintSymbols(void)
+void b2PrintSymbols(b2ProgramInfo& ctx)
 {
     if (!ctx.m_fp)
         return;
@@ -909,21 +903,21 @@ void b2PrintSymbols(void)
 }
 
 
-void b2PrintAllHeaders(void)
+void b2PrintAllHeaders(b2ProgramInfo& ctx)
 {
     if (!ctx.m_fp)
         return;
 
-    b2PrintHeadersCommon();
+    b2PrintHeadersCommon(ctx);
 
     skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
     while (it.hasMoreElements())
-        b2PrintSectionCommon(it.getNext().second);
+        b2PrintSectionCommon(ctx, it.getNext().second);
 }
 
 
 
-void b2Interactive(void)
+void b2Interactive(b2ProgramInfo& ctx)
 {
     std::cout << "Please Select From The Following Menu:                \n";
     std::cout << "                                                      \n";
@@ -960,33 +954,33 @@ void b2Interactive(void)
         cout << "Path to file: ";
         string path;
         cin >> path;
-        b2Free();
-        b2Alloc(path.c_str());
+        b2Free(ctx);
+        b2Alloc(ctx, path.c_str());
     }
     break;
     case '1':
     {
-        b2PrintAll();
+        b2PrintAll(ctx);
 
         skPause();
     }
     break;
     case '2':
     {
-        b2PrintSections();
+        b2PrintSections(ctx);
         skPause();
     }
     break;
     case '3':
-        b2PrintSectionNames();
+        b2PrintSectionNames(ctx);
         skPause();
         break;
     case '4':
-        b2PrintSymbols();
+        b2PrintSymbols(ctx);
         skPause();
         break;
     case '5':
-        b2PrintAllHeaders();
+        b2PrintAllHeaders(ctx);
         skPause();
         break;
     case '6':
@@ -996,7 +990,7 @@ void b2Interactive(void)
         cin >> sn;
         cout << "\n";
 
-        b2PrintSection(sn);
+        b2PrintSection(ctx, sn);
         skPause();
         break;
     }

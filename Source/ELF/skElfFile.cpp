@@ -199,6 +199,7 @@ int skElfFile::loadSections(skStream &stream)
             stream.seek(loc, SEEK_SET);
 
             char* name = (char*)tempBuf;
+
             // Skip the null entry
             if (name != 0 && (*name) == '\0')
                 continue;
@@ -212,7 +213,6 @@ int skElfFile::loadSections(skStream &stream)
 
                     loc  = stream.position();
                     stream.seek(sp.m_offset, SEEK_SET);
-
 
                     SKuint8* data = new SKuint8[(size_t)sp.m_size + 1];
                     stream.read(data, (size_t)sp.m_size);

@@ -201,27 +201,6 @@ enum COFFDirectoryEnum
 };
 
 
-struct COFFDataDirectories 
-{
-    COFFDataDirectory m_exportTable;
-    COFFDataDirectory m_importTable;
-    COFFDataDirectory m_resourceTable;
-    COFFDataDirectory m_exceptionTable;
-    COFFDataDirectory m_certificateTable;
-    COFFDataDirectory m_baseRelocationTable;
-    COFFDataDirectory m_debug;
-    COFFDataDirectory m_architecture;
-    COFFDataDirectory m_globPtrReg;
-    COFFDataDirectory m_threadLocalStorage;
-    COFFDataDirectory m_loadConfigTable;
-    COFFDataDirectory m_boundImport;
-    COFFDataDirectory m_importAddressTable;
-    COFFDataDirectory m_delayImportDescriptor;
-    COFFDataDirectory m_crtRuntimeHeader;
-    COFFDataDirectory m_reserved;
-};
-
-
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
 {
@@ -246,12 +225,8 @@ struct COFFOptionalHeader : COFFOptionalHeaderVaryingBase
     SKuintV  m_sizeOfHeapCommit;
     SKuint32 m_loaderFlags;
     SKuint32 m_numberOfRvaAndSizes;
-
-
-    // Header Data Directories
-    COFFDataDirectories m_directories;
+    COFFDataDirectory m_directories[CDE_MAX];
 };
-
 
 typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE32, SKuint32> COFFOptionalHeader32;
 typedef COFFOptionalHeader<COFFOptionalHeaderCommonPE64, SKuint64> COFFOptionalHeader64;
