@@ -34,6 +34,10 @@
 
 
 
+const COFFOptionalHeaderCommon pfDefaultValue = { 0, 0, 0, 0, 0, 0, 0, 0};
+
+
+
 skPortableFile::skPortableFile(SKint16 dos_offset) :
     m_imageHeader(0),
     m_headerOffs(dos_offset),
@@ -47,6 +51,14 @@ skPortableFile::skPortableFile(SKint16 dos_offset) :
 skPortableFile ::~skPortableFile()
 {
     delete m_imageHeader;
+}
+
+
+const COFFOptionalHeaderCommon& skPortableFile::getCommonHeader(void)
+{
+    if (m_imageHeader)
+        return (*m_imageHeader);
+    return pfDefaultValue;
 }
 
 

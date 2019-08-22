@@ -53,15 +53,8 @@ public:
     }
 
     // Returns the header that is common amongst both object files and image files.
-    COFFOptionalHeaderCommon getCommonHeader(void)
-    {
-        // This needs to create a copy since it is stored 
-        // in a pointer that may or may not be valid.
-        COFFOptionalHeaderCommon res = {};
-        if (m_imageHeader)
-            res = (*m_imageHeader);
-        return res;
-    }
+    // If the header internal header is invalid the returned structure will be zeroed.
+    const COFFOptionalHeaderCommon& getCommonHeader(void);
 
 
     // Returns access to the 32Bit optional header
