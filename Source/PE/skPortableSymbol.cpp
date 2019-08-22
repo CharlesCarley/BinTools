@@ -31,8 +31,8 @@ skPortableSymbol::skPortableSymbol(skBinaryFile*   owner,
                                    const skString& location,
                                    const SKuint64& rva) :
     skSymbol(owner, name),
-    m_dll(location),
-    m_rva(rva)
+    m_rva(rva),
+    m_dll(location)
 {
 }
 

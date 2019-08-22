@@ -729,8 +729,6 @@ void b2PrintSectionHeader(skBinaryFile* fp, skSection* section)
     if (!section || !fp)
         return;
 
-    skFileFormat format = fp->getFormat();
-
     switch (fp->getFormat())
     {
     case FF_ELF:
@@ -738,6 +736,9 @@ void b2PrintSectionHeader(skBinaryFile* fp, skSection* section)
         break;
     case FF_PE:
         b2PrintPESectionHeader(static_cast<skPortableSection*>(section)->getHeader());
+        break;
+    case FF_UNKNOWN:
+    default:
         break;
     }
 }

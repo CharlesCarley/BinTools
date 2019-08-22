@@ -74,7 +74,6 @@ enum skErrorCodes
 enum skFileFormat
 {
     FF_UNKNOWN,
-    FF_ANY,  /// instance skDefaultFile
     FF_ELF,  /// instance skElfFile 
     FF_PE   /// instance skPortableExecutable
 };

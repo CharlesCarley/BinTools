@@ -248,12 +248,6 @@ public:
             case EST_HIPROC:
                 sk_strncpy(dest, len, "EST_HIPROC", 32);
                 break;
-            case EST_LOUSR:
-                sk_strncpy(dest, len, "EST_LOUSR", 32);
-                break;
-            case EST_HIUSR:
-                sk_strncpy(dest, len, "EST_HIUSR", 32);
-                break;
             default:
                 sk_strncpy(dest, len, "Unknown", 32);
                 break;

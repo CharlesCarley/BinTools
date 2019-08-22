@@ -35,9 +35,9 @@
 
 
 skPortableFile::skPortableFile(SKint16 dos_offset) :
-    m_sectionStart(0),
     m_imageHeader(0),
-    m_headerOffs(dos_offset)
+    m_headerOffs(dos_offset),
+    m_sectionStart(0)
 {
     m_fileFormat = FF_PE;
 
