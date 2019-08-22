@@ -37,9 +37,6 @@ skElfSection::skElfSection(skBinaryFile*         owner,
     skSection(owner, name, data, size, offset),
     m_header(hdr)
 {
-
-    if (m_header.m_flags & ESHT_EXEC_INST)
-        m_isExecutable = true;
 }
 
 

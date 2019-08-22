@@ -31,16 +31,12 @@
 
 
 skSection::skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset) :
-    m_name(name),
-    m_data(0),
-    m_size(0),
+    m_data((SKuint8 *)data),
+    m_size(size),
     m_owner(owner),
     m_startAddress(offset),
-    m_isExecutable(false)
+    m_name(name)
 {
-    // passes ownership!
-    m_data = (SKuint8 *)data;
-    m_size = size;
 }
 
 skSection::~skSection()

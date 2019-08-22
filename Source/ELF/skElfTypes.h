@@ -116,11 +116,11 @@ enum ElfSectionHeaderFlags
 {
     ESHF_NONE          = 0x00,
     ESHF_WRITE         = 0x1,  // can write at runtime
-    ESHT_ALLOC         = 0x2,  // virtual memory
-    ESHT_EXEC_INST     = 0x4,  // is executable
-    ESHT_LIVE_PATCH    = 0x00100000,
-    ESHT_RO_AFTER_INIT = 0x00200000,
-    ESHT_MASK_PROC     = 0xF0000000,
+    ESHF_ALLOC         = 0x2,  // virtual memory
+    ESHF_EXEC_INST     = 0x4,  // is executable
+    ESHF_LIVE_PATCH    = 0x00100000,
+    ESHF_RO_AFTER_INIT = 0x00200000,
+    ESHF_MASK_PROC     = 0xF0000000,
 };
 
 

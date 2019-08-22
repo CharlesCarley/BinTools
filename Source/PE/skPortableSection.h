@@ -51,6 +51,22 @@ public:
 
     virtual ~skPortableSection();
 
+
+    bool isExectuable(void)
+    {
+        return (m_header.m_characteristics & CSEC_MEM_CAN_EXEC) != 0;
+    }
+
+    bool isReadable(void)
+    {
+        return (m_header.m_characteristics & CSEC_MEM_CAN_READ) != 0;
+    }
+
+    bool isWritable(void)
+    {
+        return (m_header.m_characteristics & CSEC_MEM_CAN_WRITE) != 0;
+    }
+
     inline const COFFSectionHeader &getHeader(void)
     {
         return m_header;

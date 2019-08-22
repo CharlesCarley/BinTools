@@ -35,23 +35,18 @@ class skSection
 protected:
     SKuint8 *     m_data;
     size_t        m_size;
-    skString      m_name;
     skBinaryFile *m_owner;
     size_t        m_startAddress;
-    bool          m_isExecutable;
-
-
+    skString      m_name;
 
 public:
     skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset);
     virtual ~skSection();
 
 
-    // Returns true if this section contains executable code.
-    inline bool isExectuable(void)
-    {
-        return m_isExecutable;
-    }
+    virtual bool isExectuable(void) = 0;
+    virtual bool isReadable(void)   = 0;
+    virtual bool isWritable(void)   = 0;
 
 
     // Returns a pointer to the file that owns this section.
@@ -69,7 +64,7 @@ public:
 
 
     // Returns direct access to the allocated memory for this section.
-    inline SKuint8* getPointer(void)
+    inline SKuint8 *getPointer(void)
     {
         return m_data;
     }

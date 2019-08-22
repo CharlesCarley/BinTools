@@ -36,8 +36,6 @@ skPortableSection::skPortableSection(skBinaryFile*      owner,
     skSection(owner, name, data, size, offset),
     m_header(hdr)
 {
-    if (m_header.m_characteristics & CSEC_MEM_CAN_EXEC)
-        m_isExecutable = true;
 }
 
 skPortableSection::~skPortableSection()

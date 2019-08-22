@@ -36,18 +36,33 @@ private:
     skElfSectionHeader64 m_header;
 
 public:
-    skElfSection(skBinaryFile*         owner,
-                 const skString&       name,
-                 void*                 data,
-                 size_t                size,
-                 size_t                offset,
+    skElfSection(skBinaryFile*               owner,
+                 const skString&             name,
+                 void*                       data,
+                 size_t                      size,
+                 size_t                      offset,
                  const skElfSectionHeader64& hdr);
 
     virtual ~skElfSection();
 
+    bool isExectuable(void)
+    {
+        return (m_header.m_flags & ESHF_EXEC_INST) != 0;
+    }
+    
+    bool isReadable(void)
+    {
+        return (m_header.m_flags & ESHF_ALLOC) != 0;
+    }
+
+    bool isWritable(void)
+    {
+        return (m_header.m_flags & ESHF_WRITE) != 0;
+    }
+
 
     // Returns the ELF section header structure for this section.
-    inline const skElfSectionHeader64& getHeader(void) 
+    inline const skElfSectionHeader64& getHeader(void)
     {
         return m_header;
     }

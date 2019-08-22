@@ -34,7 +34,7 @@
 enum skRuntimePointerLen
 {
     RPL_LEN_IS_8 = sizeof(void*) == 8,
-    RPL_LEN_IS_4 = sizeof(void*) == 4,
+    RPL_LEN_IS_4 = sizeof(void*) == 4
 };
 
 
@@ -67,7 +67,7 @@ enum skErrorCodes
     EC_UNKNOWN_FILE_FORMAT,
     EC_OVERFLOW,
     EC_DUPLICATE,
-    EC_UNEXPECTED,
+    EC_UNEXPECTED
 };
 
 
@@ -76,7 +76,7 @@ enum skFileFormat
     FF_UNKNOWN,
     FF_ANY,  /// instance skDefaultFile
     FF_ELF,  /// instance skElfFile 
-    FF_PE,   /// instance skPortableExecutable
+    FF_PE   /// instance skPortableExecutable
 };
 
 
