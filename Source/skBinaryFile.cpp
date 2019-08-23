@@ -114,12 +114,6 @@ skBinaryFile::~skBinaryFile()
 
 int skBinaryFile::load(skStream &fstream)
 {
-    if (!fstream.isOpen())
-    {
-        // printf("load called on a closed file\n");
-        return EC_FILE_LOADING_FAILED;
-    }
-
     m_len = fstream.size();
     if (m_len == 0 || m_len == SK_NPOS)
         return EC_FILE_LOADING_FAILED;

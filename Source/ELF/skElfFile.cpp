@@ -158,7 +158,7 @@ int skElfFile::loadImpl(skStream& stream)
 
 
 template <typename skElfSectionHeader>
-int skElfFile::loadSections(skStream &stream)
+int skElfFile::loadSections(skStream& stream)
 {
     elf64 offs, offe, i;
 
@@ -181,8 +181,6 @@ int skElfFile::loadSections(skStream &stream)
 
 
     stream.seek(offs, SEEK_SET);
-    
-    // Store each section one by one.
     for (i = 0; i < m_header.m_sectionTableEntryCount; ++i)
     {
         skElfSectionHeader sp;
@@ -211,7 +209,7 @@ int skElfFile::loadSections(skStream &stream)
                     skElfSectionHeader64 header;
                     skElfUtils::copyHeader(header, sp);
 
-                    loc  = stream.position();
+                    loc = stream.position();
                     stream.seek(sp.m_offset, SEEK_SET);
 
                     SKuint8* data = new SKuint8[(size_t)sp.m_size + 1];
@@ -243,8 +241,9 @@ int skElfFile::loadSections(skStream &stream)
                 return EC_DUPLICATE;
             }
         }
+        else
+            return EC_OVERFLOW;
     }
-
     return EC_OK;
 }
 
@@ -252,7 +251,7 @@ int skElfFile::loadSections(skStream &stream)
 template <typename skElfSymbolHeader>
 int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
-    SK_ASSERT(strLookup && symLookup); // callers fault 
+    SK_ASSERT(strLookup && symLookup);  // callers fault
 
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
@@ -275,7 +274,7 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
         }
 
         SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
-        i = 0;
+        i                 = 0;
         while (i < entryLen)
         {
             const skElfSymbolHeader& syml = (*symPtr);
@@ -291,9 +290,8 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             if (*cp == '\0')
                 ++cp;
 
-            const skString& strl = cp;
+            skString strl = cp;
 
-            // Ensure that the parsed name at least has some info.
             if (!strl.empty())
             {
                 SKsize idx = m_symTable.find(strl);
@@ -308,6 +306,11 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                     skSymbol* elfSym = new skElfSymbol(this, strl, sdp);
                     m_symTable.insert(strl, elfSym);
                 }
+            }
+            else
+            {
+                // printf("Empty symbol name found while parsing symbol table\n");
+                return EC_UNEXPECTED;
             }
             ++symPtr;
             i++;

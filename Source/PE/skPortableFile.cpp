@@ -92,7 +92,7 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest)
 int skPortableFile::loadImpl(skStream& stream)
 {
 
-    SKuint16 optMagic;
+    SKuint16 optMagic, code;
 
     // Skip past the DOS stub program, and the PE signature 
     // since it is not part of the defined structure (+4)
@@ -239,8 +239,6 @@ int skPortableFile::loadImpl(skStream& stream)
     {
         skPortableSection *pes = reinterpret_cast<skPortableSection *>(it.getNext().second);
 
-        // break apart directories
-
         skPortableSection::Directories::Iterator dit = pes->getDirectoryIterator();
         while (dit.hasMoreElements())
         {
@@ -249,10 +247,10 @@ int skPortableFile::loadImpl(skStream& stream)
             switch (dir->getType())
             {
             case CDE_RESOURCE:
-                loadResourceDirectory(pes, dir);
+                code = loadResourceDirectory(pes, dir);
                 break;
             case CDE_IMPORT:
-                loadImportDirectory(pes, dir);
+                code = loadImportDirectory(pes, dir);
                 break;
             case CDE_IMPORT_ADDRESS_TABLE:
             case CDE_EXPORT:
@@ -270,6 +268,11 @@ int skPortableFile::loadImpl(skStream& stream)
             default:
                 break;
             }
+
+            // Stop execution immediately if 
+            // there is an error
+            if (code != EC_OK) 
+                return code;
         }
     }
     return EC_OK;

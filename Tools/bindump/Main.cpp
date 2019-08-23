@@ -113,7 +113,6 @@ int main(int argc, char** argv)
 
     if (ctx.m_state == MS_MAIN)
     {
-        // enter into interactive mode
         skConsoleClear();
         while (ctx.m_state == MS_MAIN)
             b2Interactive(ctx);
