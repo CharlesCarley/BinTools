@@ -26,8 +26,8 @@ set(TargetName_GRP      "Tools")
 
 
 set(TargetName_SRC 
-    hp.h
-    hp.cpp
+    bpcommon.h
+    bpcommon.cpp
     Readme.md
 )
 

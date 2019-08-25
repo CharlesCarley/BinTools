@@ -23,51 +23,32 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include <iostream>
-#include <string>
-using namespace std;
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-void b2Usage(void);
-int  b2ParseCommandLine(int argc, char** argv);
-void b2LoadFile(void);
-void b2PrintFile(void);
+#ifndef _bpCommon_h_
+#define _bpCommon_h_
 
 
-int main(int argc, char** argv)
+#include "Utils/skDebugger.h"
+
+enum b2PrintFlags
 {
-    if (b2ParseCommandLine(argc, argv) == -1)
-    {
-        b2Usage();
-        return -1;
-    }
-
-    return 0;
-}
-
-
-void b2Usage(void)
-{
-    printf("Usage\n");
-}
-
-int b2ParseCommandLine(int argc, char** argv)
-{
-    printf("ParseComandLine\n");
-    return 1;
-}
-
-void b2LoadFile(void)
-{
-    printf("LoadFile\n");
-}
+    PF_NONE       = 0,
+    PF_COLORIZE   = (1 << 0),
+    PF_HEX        = (1 << 1),
+    PF_ASCII      = (1 << 2),
+    PF_ADDRESS    = (1 << 3),
+    PF_DISASEMBLE = (1 << 4),  // ignores hex in place of disassembly
+    PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
+    PF_HEXDIS     = PF_COLORIZE | PF_HEX,
+};
 
 
-void b2PrintFile(void)
-{
-    printf("PrintFile\n");
-}
+extern void b2WriteColor(skConsoleColorSpace cs);
+extern void b2WriteAddress(SKuint64 addr);
 
+extern void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
+extern void b2MarkColor(int c, int mark);
+extern void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
+extern void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
+
+
+#endif  //_bpCommon_h_

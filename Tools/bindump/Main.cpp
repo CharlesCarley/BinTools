@@ -43,6 +43,8 @@ using namespace std;
 #include "Utils/skTimer.h"
 #include "capstone/capstone.h"
 #include "skBinaryFile.h"
+#include "bpCommon.h"
+
 
 enum b2MenuState
 {
@@ -83,15 +85,15 @@ void b2Interactive(b2ProgramInfo& ctx);
 void b2Free(b2ProgramInfo& ctx);
 bool b2Alloc(b2ProgramInfo& ctx, const char* prog);
 
-void b2WriteColor(skConsoleColorSpace cs);
-void b2WriteAddress(SKuint64 addr);
-
-void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
-void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
-
-void b2MarkColor(int c, int mark);
-void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
-void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
+//void b2WriteColor(skConsoleColorSpace cs);
+//void b2WriteAddress(SKuint64 addr);
+//
+//void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
+//void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
+//
+//void b2MarkColor(int c, int mark);
+//void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
+//void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
 
 void b2PrintAll(b2ProgramInfo& ctx);
 void b2PrintSectionNames(b2ProgramInfo& ctx);
@@ -317,117 +319,6 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
     return 0;
 }
 
-
-
-void b2WriteColor(skConsoleColorSpace cs)
-{
-    skDebugger::writeColor(cs);
-}
-
-
-
-void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
-{
-    SKuint8 c;
-    SKsize  j;
-
-    if (!cp || offs == SK_NPOS || max == SK_NPOS)
-        return;
-
-    for (j = 0; j < 16; ++j)
-    {
-        if (j % 8 == 0)
-            printf(" ");
-
-        if (offs + j < max)
-        {
-            c = (SKint32)cp[offs + j];
-
-            b2MarkColor(c, mark);
-            printf("%02X ", c);
-        }
-        else
-            printf("   ");
-    }
-}
-
-
-
-void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
-{
-    SKuint8 c;
-    SKsize  j;
-
-    if (!cp || offs == SK_NPOS || max == SK_NPOS)
-        return;
-
-
-    b2WriteColor(CS_WHITE);
-    printf(" |");
-    for (j = 0; j < 16; ++j)
-    {
-        if (offs + j < max)
-        {
-            c = (SKuint8)cp[offs + j];
-
-
-            b2MarkColor(c, mark);
-            if (c >= 0x20 && c < 0x7F)
-                printf("%c", c);
-            else
-                printf(".");
-        }
-        else
-            printf(" ");
-    }
-
-    b2WriteColor(CS_WHITE);
-    printf("|");
-}
-
-
-
-void b2MarkColor(int c, int mark)
-{
-    if (c == mark)
-        b2WriteColor(CS_RED);
-    else if (c == 0x00 || c == 0xCC)
-        b2WriteColor(CS_GREY);
-    else
-        b2WriteColor(CS_WHITE);
-}
-
-
-
-void b2WriteAddress(SKuint64 addr)
-{
-    b2WriteColor(CS_GREY);
-    printf("%16llx  ", addr);
-}
-
-
-void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, int mark, bool nl)
-{
-    if (!ptr || offset == SK_NPOS || len == SK_NPOS)
-        return;
-
-
-    SKsize i;
-    char*  cp = (char*)ptr;
-
-
-    for (i = 0; i < len; i += 16)
-    {
-        if (flags & PF_ADDRESS)
-            b2WriteAddress((size_t)(i + offset));
-        if (flags & PF_HEX)
-            b2WriteHex(cp, i, len, flags, mark);
-        if (flags & PF_ASCII)
-            b2WriteAscii(cp, i, len, flags, mark);
-        if (nl)
-            printf("\n");
-    }
-}
 
 
 
