@@ -33,8 +33,8 @@ using namespace std;
 
 void b2Usage(void);
 int  b2ParseCommandLine(int argc, char** argv);
-void b2LoadFile(void);
-void b2PrintFile(void);
+void b2LoadData(void);
+void b2PrintData(void);
 
 
 int main(int argc, char** argv)
@@ -44,6 +44,9 @@ int main(int argc, char** argv)
         b2Usage();
         return -1;
     }
+
+    b2LoadData();
+    b2PrintData();
 
     return 0;
 }
@@ -60,13 +63,12 @@ int b2ParseCommandLine(int argc, char** argv)
     return 1;
 }
 
-void b2LoadFile(void)
+void b2LoadData(void)
 {
     printf("LoadFile\n");
 }
 
-
-void b2PrintFile(void)
+void b2PrintData(void)
 {
     printf("PrintFile\n");
 }

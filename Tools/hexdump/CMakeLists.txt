@@ -31,9 +31,9 @@ set(TargetName_SRC
 )
 
 include_directories(
-    ${CAPSTONE_INCLUDE}
     ${BINARYFILE_INCLUDE}
     ${UTILS_INCLUDE}
+    ${TOOLS_COMMON_INCLUDE}
 )
 
 add_executable(${TargetName} ${TargetName_SRC})
@@ -42,8 +42,7 @@ target_link_libraries(
     ${TargetName} 
     ${BINFILE_LIB}
     ${UTILS_LIB}
-    ${CAPSTONE_LIB}
-
+    hexprint
 )
 
 if (BinTools_USE_FOLDERS)

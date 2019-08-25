@@ -52,18 +52,6 @@ enum b2MenuState
     MS_EXIT,
 };
 
-enum b2PrintFlags
-{
-    PF_NONE       = 0,
-    PF_COLORIZE   = (1 << 0),
-    PF_HEX        = (1 << 1),
-    PF_ASCII      = (1 << 2),
-    PF_ADDRESS    = (1 << 3),
-    PF_DISASEMBLE = (1 << 4),  // ignores hex in place of disassembly
-    PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
-    PF_HEXDIS     = PF_COLORIZE | PF_HEX,
-};
-
 
 struct b2ProgramInfo
 {
@@ -84,17 +72,6 @@ void b2Interactive(b2ProgramInfo& ctx);
 
 void b2Free(b2ProgramInfo& ctx);
 bool b2Alloc(b2ProgramInfo& ctx, const char* prog);
-
-//void b2WriteColor(skConsoleColorSpace cs);
-//void b2WriteAddress(SKuint64 addr);
-//
-//void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
-//void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags = PF_DEFAULT);
-//
-//void b2MarkColor(int c, int mark);
-//void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
-//void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
-
 void b2PrintAll(b2ProgramInfo& ctx);
 void b2PrintSectionNames(b2ProgramInfo& ctx);
 void b2PrintSections(b2ProgramInfo& ctx);
