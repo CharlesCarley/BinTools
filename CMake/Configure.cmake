@@ -27,9 +27,11 @@ option(BinTools_USE_FOLDERS "Organize into folders" ON)
 # -----------------------------------------------------------------------------
 #                            Source Configuration
 # -----------------------------------------------------------------------------
-set(BINARYFILE_INCLUDE  ${BinTools_SOURCE_DIR}/Source)
-set(UTILS_INCLUDE       ${BinTools_SOURCE_DIR}/Extern)
-set(CAPSTONE_INCLUDE    ${BinTools_SOURCE_DIR}/Extern/capstone/include)
+set(BINARYFILE_INCLUDE   ${BinTools_SOURCE_DIR}/Source)
+set(UTILS_INCLUDE        ${BinTools_SOURCE_DIR}/Extern)
+set(CAPSTONE_INCLUDE     ${BinTools_SOURCE_DIR}/Extern/capstone/include)
+set(TOOLS_COMMON_INCLUDE ${BinTools_SOURCE_DIR}/Tools/common)
+
 
 set(CAPSTONE_LIB        capstone-static)
 set(BINFILE_LIB         BinaryFile)

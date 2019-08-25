@@ -36,14 +36,15 @@ enum b2PrintFlags
     PF_HEX        = (1 << 1),
     PF_ASCII      = (1 << 2),
     PF_ADDRESS    = (1 << 3),
-    PF_DISASEMBLE = (1 << 4),  // ignores hex in place of disassembly
+    PF_FULLADDR   = (1 << 4),
+    PF_DISASEMBLE = (1 << 5),  // ignores hex in place of disassembly
     PF_DEFAULT    = PF_COLORIZE | PF_ADDRESS | PF_HEX | PF_ASCII,
     PF_HEXDIS     = PF_COLORIZE | PF_HEX,
 };
 
 
 extern void b2WriteColor(skConsoleColorSpace cs);
-extern void b2WriteAddress(SKuint64 addr);
+extern void b2WriteAddress(SKuint64 addr, int flags=0);
 
 extern void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
 extern void b2MarkColor(int c, int mark);

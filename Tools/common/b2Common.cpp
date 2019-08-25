@@ -23,7 +23,7 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "bpCommon.h"
+#include "b2Common.h"
 
 
 
@@ -109,10 +109,13 @@ void b2MarkColor(int c, int mark)
 
 
 
-void b2WriteAddress(SKuint64 addr)
+void b2WriteAddress(SKuint64 addr, int flags)
 {
-    b2WriteColor(CS_GREY);
-    printf("%16llx  ", addr);
+    b2WriteColor(CS_LIGHT_GREY);
+    if (flags & PF_FULLADDR)
+        printf("%016llx  ", addr);
+    else
+        printf("%16llx  ", addr);
 }
 
 
@@ -127,7 +130,7 @@ void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, int mark, bo
     for (i = 0; i < len; i += 16)
     {
         if (flags & PF_ADDRESS)
-            b2WriteAddress((size_t)(i + offset));
+            b2WriteAddress((size_t)(i + offset), flags);
         if (flags & PF_HEX)
             b2WriteHex(cp, i, len, flags, mark);
         if (flags & PF_ASCII)

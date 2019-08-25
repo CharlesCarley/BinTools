@@ -49,5 +49,5 @@ subdirs(Extern/Utils)
 subdirs(Extern/capstone)
 
 subdirs(Source)
-subdirs(Test)               # Test binaries to load and inspect
-subdirs(Tools/bindump)      # Test output for writing 
+subdirs(Test)               
+subdirs(Tools)     

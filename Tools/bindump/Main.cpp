@@ -43,7 +43,7 @@ using namespace std;
 #include "Utils/skTimer.h"
 #include "capstone/capstone.h"
 #include "skBinaryFile.h"
-#include "bpCommon.h"
+#include "b2Common.h"
 
 
 enum b2MenuState
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 {
     b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1, SK_NPOS};
 
-    if (b2ParseCommandLine(ctx, argc, argv) == -1)
+    if (b2ParseCommandLine(ctx, argc, argv) < 0)
     {
         b2Usage();
         b2Free(ctx);
@@ -301,7 +301,6 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
 
 void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags)
 {
-    // filter out invalid input
     if (!ptr || ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
         return;
 
@@ -684,8 +683,6 @@ void b2PrintHeadersCommon(b2ProgramInfo& ctx)
         b2WriteColor(CS_LIGHT_GREY);
         b2PrintPEHeader(pe->getHeader(), pe->getCommonHeader());
 
-
-        // Print the varying header.
         skFileFormatType fpt = pe->getPlatformType();
         if (fpt == FFT_32BIT)
         {
