@@ -38,8 +38,8 @@ using namespace std;
 struct b2ProgramInfo
 {
     skFileStream  m_stream;
-    int           m_code;
-    int           m_flags;
+    SKuint32      m_code;
+    SKuint32      m_flags;
 };
 
 
@@ -100,7 +100,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp((int)std::strtol(argv[i], 0, 16), 0, 255);
+                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_NPOS);
             }
             break;
             case 'h':
@@ -168,6 +168,7 @@ void b2Print(b2ProgramInfo &ctx)
         }
     }
 }
+
 
 void b2Free(b2ProgramInfo &ctx)
 {

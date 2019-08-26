@@ -57,9 +57,9 @@ struct b2ProgramInfo
 {
     int           m_state;
     skBinaryFile* m_fp;
-    int           m_flags;
-    int           m_code;
-    int           m_opt;
+    SKuint32      m_flags;
+    SKint64       m_code;
+    SKint32       m_opt;
     size_t        m_handle;
     string        m_fname;
 };
@@ -244,14 +244,14 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp((int)std::strtol(argv[i], 0, 16), 0, 255);
+                    ctx.m_code = skClamp<SKuint64>(std::strtol(argv[i], 0, 16), 0, SK_NPOS);
             }
             break;
             case 'o':
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_opt = skClamp((int)std::strtol(argv[i], 0, 10), 1, 5);
+                    ctx.m_opt = skClamp<SKint32>(std::strtol(argv[i], 0, 10), 1, 5);
             }
             break;
             case 'd':

@@ -27,8 +27,6 @@
 
 
 
-
-
 void b2WriteColor(skConsoleColorSpace cs)
 {
     skDebugger::writeColor(cs);
@@ -38,11 +36,18 @@ void b2WriteColor(skConsoleColorSpace cs)
 
 void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
 {
-    SKuint8 c;
-    SKsize  j;
+    SKuint8 c1, c2, c3, c4;
+    SKsize  j, n =0;
+
+    union {
+        SKuint8 b[4];
+        SKuint32 i;
+    } cmp;
+    cmp.i = mark;
 
     if (!cp || offs == SK_NPOS || max == SK_NPOS)
         return;
+
 
     for (j = 0; j < 16; ++j)
     {
@@ -51,10 +56,59 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
 
         if (offs + j < max)
         {
-            c = (SKint32)cp[offs + j];
+            c1 = (SKuint32)cp[offs + j];
 
-            b2MarkColor(c, mark);
-            printf("%02X ", c);
+            if (n)
+            {
+                n--;
+                b2MarkColor(1, 1);
+            }
+            else
+            {
+                if (mark < 256)
+                    b2MarkColor(c1, cmp.i);
+                else if (mark < 65536)
+                {
+                    if (n == 0)
+                    {
+                        c2 = (SKuint32)cp[offs + ((j + 1) % 16)];
+
+                        if (c1 == cmp.b[1] && c2 == cmp.b[0] ||
+                            c1 == cmp.b[0] && c2 == cmp.b[1])
+                        {
+                            n = 1;  // bleed through x times
+                            b2MarkColor(1, 1);
+                        }
+                        else
+                        {
+                            b2MarkColor(c1, cmp.i);
+                            n = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    if (n == 0)
+                    {
+                        c2 = (SKuint32)cp[offs + j + 1 % max];
+                        c3 = (SKuint32)cp[offs + j + 2 % max];
+                        c4 = (SKuint32)cp[offs + j + 3 % max];
+
+                        if (c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0] ||
+                            c1 == cmp.b[0] && c2 == cmp.b[1] && c3 == cmp.b[2] && c4 == cmp.b[3])
+                        {
+                            n = 3;  // bleed through x times
+                            b2MarkColor(1, 1);
+                        }
+                        else
+                        {
+                            b2MarkColor(c1, cmp.i);
+                            n = 0;
+                        }
+                    }
+                }
+            }
+            printf("%02X ", c1);
         }
         else
             printf("   ");
@@ -97,7 +151,7 @@ void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
 
 
 
-void b2MarkColor(int c, int mark)
+void b2MarkColor(SKuint32 c, SKuint32 mark)
 {
     if (c == mark)
         b2WriteColor(CS_RED);

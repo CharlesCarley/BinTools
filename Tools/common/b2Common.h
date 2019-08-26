@@ -47,7 +47,7 @@ extern void b2WriteColor(skConsoleColorSpace cs);
 extern void b2WriteAddress(SKuint64 addr, int flags=0);
 
 extern void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags = PF_DEFAULT, int mark = -1, bool nl = true);
-extern void b2MarkColor(int c, int mark);
+extern void b2MarkColor(SKuint32 c, SKuint32 mark);
 extern void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark);
 extern void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark);
 
