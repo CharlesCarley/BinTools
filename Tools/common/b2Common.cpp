@@ -73,8 +73,8 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
                     {
                         c2 = (SKuint32)cp[offs + ((j + 1) % 16)];
 
-                        if (c1 == cmp.b[1] && c2 == cmp.b[0] ||
-                            c1 == cmp.b[0] && c2 == cmp.b[1])
+                        if ((c1 == cmp.b[1] && c2 == cmp.b[0]) ||
+                            (c1 == cmp.b[0] && c2 == cmp.b[1]))
                         {
                             n = 1;  // bleed through x times
                             b2MarkColor(1, 1);
@@ -94,8 +94,8 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
                         c3 = (SKuint32)cp[offs + ((j + 2) % 16)];
                         c4 = (SKuint32)cp[offs + ((j + 3) % 16)];
 
-                        if (c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0]  ||
-                            c1 == cmp.b[0] && c2 == cmp.b[1] && c3 == cmp.b[2] && c4 == cmp.b[3])
+                        if ((c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0])  ||
+                            (c1 == cmp.b[0] && c2 == cmp.b[1] && c3 == cmp.b[2] && c4 == cmp.b[3]))
                         {
                             n = 3;  // bleed through x times
                             b2MarkColor(1, 1);
