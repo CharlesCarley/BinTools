@@ -38,7 +38,7 @@ using namespace std;
 struct b2ProgramInfo
 {
     skFileStream  m_stream;
-    SKint64       m_code;
+    SKint32       m_code;
     SKuint32      m_flags;
 };
 
@@ -69,7 +69,18 @@ int main(int argc, char** argv)
 
 void b2Usage(void)
 {
-    printf("b2Usage\n");
+    std::cout << "hexdump <options> <path to file>                                  \n";
+    std::cout << "                                                                  \n";
+    std::cout << "  Options:                                                        \n";
+    std::cout << "      -h          Display this help message.                      \n";
+    std::cout << "      -m          Mark a specific hexadecimal sequence.           \n";
+    std::cout << "                                                                  \n";
+    std::cout << "                  1 byte sequence [0, 255]                        \n";
+    std::cout << "                  2 byte sequence [0, 65535]                      \n";
+    std::cout << "                  4 byte sequence [0, 4294967295]                 \n";
+    std::cout << "                                                                  \n";
+    std::cout << "      -xc         Remove color output.                            \n";
+    std::cout << "      -xa         Remove the ASCII table in the hex dump output.  \n";
 }
 
 int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv)
@@ -100,7 +111,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp<SKint64>(std::strtol(argv[i], 0, 16), 0, SK_NPOS);
+                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_MAX);
             }
             break;
             case 'h':
@@ -163,7 +174,7 @@ void b2Print(b2ProgramInfo &ctx)
         if (br != SK_NPOS && br > 0)
         {
             buffer[br] = 0;
-            b2DumpHex(buffer, tr, br, ctx.m_flags, (SKuint32)ctx.m_code);
+            b2DumpHex(buffer, tr, br, ctx.m_flags, ctx.m_code);
             tr += br;
         }
     }

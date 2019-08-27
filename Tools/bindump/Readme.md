@@ -1,5 +1,5 @@
 # bindump
-Bin dump is a tool that prints structured information about the  ELF and PE executable file formats.
+Is a tool that prints information about the  ELF and PE executable file formats.
 
 #### bindump Usage
 
@@ -10,7 +10,12 @@ bindump <options> <path to file>
 
   Options:
       -h          Display this help message.
-      -m [0-255]  Mark specific code.
+      -m          Mark a specific hexadecimal sequence.
+
+                  1 byte sequence [0, 255]
+                  2 byte sequence [0, 65535]
+                  4 byte sequence [0, 4294967296]
+
       -d          Display disassembly in code sections.
       -xc         Remove color output.
       -xa         Remove the ASCII table in the hex dump output.

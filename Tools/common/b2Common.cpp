@@ -34,7 +34,7 @@ void b2WriteColor(skConsoleColorSpace cs)
 
 
 
-void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
+void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
 {
     SKuint8 c1, c2, c3, c4;
     SKsize  j, n =0;
@@ -94,7 +94,7 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
                         c3 = (SKuint32)cp[offs + ((j + 2) % 16)];
                         c4 = (SKuint32)cp[offs + ((j + 3) % 16)];
 
-                        if (c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0] ||
+                        if (c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0]  ||
                             c1 == cmp.b[0] && c2 == cmp.b[1] && c3 == cmp.b[2] && c4 == cmp.b[3])
                         {
                             n = 3;  // bleed through x times
@@ -173,7 +173,7 @@ void b2WriteAddress(SKuint64 addr, int flags)
 }
 
 
-void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, int mark, bool nl)
+void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, SKuint32 mark, bool nl)
 {
     if (!ptr || offset == SK_NPOS || len == SK_NPOS)
         return;

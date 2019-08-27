@@ -58,7 +58,7 @@ struct b2ProgramInfo
     int           m_state;
     skBinaryFile* m_fp;
     SKuint32      m_flags;
-    SKint64       m_code;
+    SKint32       m_code;
     SKint32       m_opt;
     size_t        m_handle;
     string        m_fname;
@@ -132,7 +132,12 @@ void b2Usage(void)
     std::cout << "                                                                  \n";
     std::cout << "  Options:                                                        \n";
     std::cout << "      -h          Display this help message.                      \n";
-    std::cout << "      -m [0-255]  Mark specific code.                             \n";
+    std::cout << "      -m          Mark a specific hexadecimal sequence.           \n";
+    std::cout << "                                                                  \n";
+    std::cout << "                  1 byte sequence [0, 255]                        \n";
+    std::cout << "                  2 byte sequence [0, 65535]                      \n";
+    std::cout << "                  4 byte sequence [0, 4294967296]                 \n";
+    std::cout << "                                                                  \n";
     std::cout << "      -d          Display disassembly in code sections.           \n";
     std::cout << "      -xc         Remove color output.                            \n";
     std::cout << "      -xa         Remove the ASCII table in the hex dump output.  \n";
@@ -244,7 +249,7 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp<SKuint64>(std::strtol(argv[i], 0, 16), 0, SK_NPOS);
+                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_MAX);
             }
             break;
             case 'o':
@@ -906,7 +911,7 @@ void b2Interactive(b2ProgramInfo& ctx)
         string sn;
         cin >> sn;
 
-        ctx.m_code = (int)std::strtol(sn.c_str(), 0, 16);
+        ctx.m_code = skClamp<SKuint32>(std::strtol(sn.c_str(), 0, 16), 0, SK_MAX);
     }
     break;
         break;
