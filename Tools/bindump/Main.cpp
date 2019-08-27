@@ -136,7 +136,7 @@ void b2Usage(void)
     std::cout << "                                                                  \n";
     std::cout << "                  1 byte sequence [0, 255]                        \n";
     std::cout << "                  2 byte sequence [0, 65535]                      \n";
-    std::cout << "                  4 byte sequence [0, 4294967296]                 \n";
+    std::cout << "                  4 byte sequence [0, 4294967294]                 \n";
     std::cout << "                                                                  \n";
     std::cout << "      -d          Display disassembly in code sections.           \n";
     std::cout << "      -xc         Remove color output.                            \n";

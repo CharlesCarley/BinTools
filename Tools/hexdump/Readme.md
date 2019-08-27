@@ -12,7 +12,7 @@ hexdump <options> <path to file>
 
                   1 byte sequence [0, 255]
                   2 byte sequence [0, 65535]
-                  4 byte sequence [0, 4294967295]
+                  4 byte sequence [0, 4294967294]
 
       -xc         Remove color output.
       -xa         Remove the ASCII table in the hex dump output.
