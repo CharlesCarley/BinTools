@@ -90,9 +90,9 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, int mark)
                 {
                     if (n == 0)
                     {
-                        c2 = (SKuint32)cp[offs + j + 1 % max];
-                        c3 = (SKuint32)cp[offs + j + 2 % max];
-                        c4 = (SKuint32)cp[offs + j + 3 % max];
+                        c2 = (SKuint32)cp[offs + ((j + 1) % 16)];
+                        c3 = (SKuint32)cp[offs + ((j + 2) % 16)];
+                        c4 = (SKuint32)cp[offs + ((j + 3) % 16)];
 
                         if (c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0] ||
                             c1 == cmp.b[0] && c2 == cmp.b[1] && c3 == cmp.b[2] && c4 == cmp.b[3])
