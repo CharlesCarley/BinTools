@@ -164,10 +164,9 @@ bool b2Alloc(b2ProgramInfo &ctx, const char *fname)
 void b2Print(b2ProgramInfo &ctx)
 {
     skFileStream &fp = ctx.m_stream;
-
     SKuint8 buffer[1025];
 
-    SKsize len = fp.size(), br, tr=0;
+    SKsize br, tr=0;
     while (!fp.eof())
     {
         br = fp.read(buffer, 1024);
