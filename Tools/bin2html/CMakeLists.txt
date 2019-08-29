@@ -21,8 +21,44 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-set(ToolsDirectory ${CMAKE_SOURCE_DIR}/Tools)
+set(TargetName          bin2html)
+set(TargetName_GRP      "Tools")
 
-subdirs(common bindump hexdump bin2html)
+#include (Data2Array)
+#add_templates_text(Templates.h Footer.html Header.html)
 
+set(TargetName_SRC 
+    Main.cpp
+    Templates.h 
+    Header.html
+    Readme.md
+    Footer.html
+)
+
+include_directories(
+    ${BINARYFILE_INCLUDE}
+    ${UTILS_INCLUDE}
+    ${CAPSTONE_INCLUDE}
+
+)
+
+add_executable(${TargetName} ${TargetName_SRC})
+
+target_link_libraries(
+    ${TargetName} 
+    ${BINFILE_LIB}
+    ${UTILS_LIB}
+    ${CAPSTONE_LIB}
+)
+
+if (BinTools_USE_FOLDERS)
+    set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
+endif()
+
+
+if (NOT WIN32)
+    add_custom_command(TARGET ${TargetName} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${TargetName} "${CMAKE_BINARY_DIR}/${TargetName}"
+    )
+endif()
 
