@@ -662,16 +662,13 @@ void b2PrintHeadersCommon(b2ProgramInfo& ctx)
     if (!ctx.m_fp)
         return;
 
-
     skFileFormat fileFormat = ctx.m_fp->getFormat();
 
     if (fileFormat == FF_ELF)
     {
         skElfFile* elf = static_cast<skElfFile*>(ctx.m_fp);
-
         b2WriteColor(CS_DARKYELLOW);
         printf("File Header:\n\n");
-
 
         b2WriteColor(CS_LIGHT_GREY);
         b2PrintElfHeader(elf->getHeader());
@@ -680,10 +677,8 @@ void b2PrintHeadersCommon(b2ProgramInfo& ctx)
     {
         skPortableFile* pe = static_cast<skPortableFile*>(ctx.m_fp);
 
-
         b2WriteColor(CS_DARKYELLOW);
         printf("File Header:\n\n");
-
 
         b2WriteColor(CS_LIGHT_GREY);
         b2PrintPEHeader(pe->getHeader(), pe->getCommonHeader());

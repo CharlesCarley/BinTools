@@ -21,29 +21,20 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-set(TargetName          helloworld)
 set(TargetName_GRP      "TestFiles")
 
-set(TargetName_SRC
-    test.c
-)
 
-set(TargetNameSH_SRC
-    sharedlib.c
-)
+add_executable(helloworld test.c)
+add_library(helloworld_shared SHARED sharedlib.c)
 
 
-include_directories(. 
-    ${CMAKE_SOURCE_DIR}/Extern
-    ${CAPSTONE_INCLUDE}
-)
-
-add_executable(${TargetName} ${TargetName_SRC})
-add_library(${TargetName}_shared SHARED ${TargetNameSH_SRC})
-
-
-if (BinTools_USE_FOLDERS)
-    set_target_properties(${TargetName} PROPERTIES FOLDER "${TargetName_GRP}")
-    set_target_properties(${TargetName}_shared PROPERTIES FOLDER "${TargetName_GRP}")
+if (MSVC)
+    add_executable(buffer_overflow buffer_overflow.c)
+    set_target_properties(buffer_overflow PROPERTIES COMPILE_FLAGS "/GS-")
 endif()
 
+if (BinTools_USE_FOLDERS)
+    set_target_properties(helloworld        PROPERTIES FOLDER "${TargetName_GRP}")
+    set_target_properties(helloworld_shared PROPERTIES FOLDER "${TargetName_GRP}")
+    set_target_properties(buffer_overflow   PROPERTIES FOLDER "${TargetName_GRP}")
+endif()

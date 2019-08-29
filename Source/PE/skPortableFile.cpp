@@ -244,6 +244,7 @@ int skPortableFile::loadImpl(skStream& stream)
         {
             skPortableDirectory *dir = dit.getNext();
 
+            code = EC_OK;
             switch (dir->getType())
             {
             case CDE_RESOURCE:
