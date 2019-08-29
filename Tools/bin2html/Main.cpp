@@ -36,12 +36,14 @@ using namespace std;
 #include <stdlib.h>
 #include <string.h>
 #include "ELF/skElfFile.h"
+#include "ELF/skElfPrintUtils.h"
 #include "ELF/skElfSection.h"
 #include "ELF/skElfUtils.h"
 #include "PE/skPortableDirectory.h"
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
+#include "Utils/skTimer.h"
 #include "Templates.h"
 #include "capstone/capstone.h"
 #include "skBinaryFile.h"
@@ -258,6 +260,11 @@ void b2HeaderRow(const string& name, const string& dt)
     Stream << "<tr><td class=\"l\">" << name << "</td><td class=\"r\">" << dt << "</td></tr>";
 }
 
+void b2HeaderRowB(const string& name, const char *cp)
+{
+    Stream << "<tr><td class=\"l\">" << name << "</td><td class=\"r\">" << cp << "</td></tr>";
+}
+
 template <typename T>
 void b2HeaderRowX(const string& name, const T& val, int w)
 {
@@ -293,7 +300,7 @@ void b2SpanAddress(SKuint64 addr)
 {
     SKuint64 iv = addr;
     b2OpenSpan("address");
-    Stream <<  nouppercase  << right << std::setw(8) << std::setfill('0') <<  hex  << iv;
+    Stream << nouppercase << right << std::setw(8) << std::setfill('0') << hex << iv;
     b2CloseSpan();
 }
 
@@ -301,7 +308,6 @@ void b2TableOpen(const string& name)
 {
     b2hHeader(name);
     Stream << "<table class=\"section_header\" cellpadding=\"0\" cellspacing=\"0\">\n";
-    //Stream << "<tr>\n";
 }
 
 void b2TableClose(void)
@@ -312,6 +318,7 @@ void b2TableClose(void)
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 void b2PEHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
 {
+    char buf[32];
     b2HeaderRowX("ImageBase:", (SKuint64)header.m_imageBase);
     b2HeaderRow("Section Alignment:", header.m_sectionAlignment);
     b2HeaderRow("File Alignment:", header.m_fileAlignment);
@@ -321,7 +328,11 @@ void b2PEHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>
     b2HeaderRow("Image Size: ", header.m_sizeOfImage);
     b2HeaderRow("Size of Headers:", header.m_sizeOfHeaders);
     b2HeaderRow("Checksum:", header.m_checkSum);
-    b2HeaderRow("Subsystem:", header.m_subsystem);
+    
+    skPortableUtils::getSubsystem(header.m_subsystem, buf, 32);
+    b2HeaderRowB("Subsystem:", buf);
+
+    
     b2HeaderRowX("DLL Characteristics:", (SKuint64)header.m_dllCharacteristics);
     b2HeaderRow("Stack Reserve Size: ", (SKuint64)header.m_sizeOfStackReserve);
     b2HeaderRow("Stack Commit Size: ", (SKuint64)header.m_sizeOfStackCommit);
@@ -350,18 +361,18 @@ void b2FileHeader(void)
             const skElfHeaderInfo64& header = elf->getHeader();
 
             char tmpBuf[32] = {'@', 0};
-            //skElfUtils::getPlatformId(header, tmpBuf, 32);
-            b2HeaderRow("Class", tmpBuf);
-            //skElfUtils::getByteOrder(header, tmpBuf, 32);
-            b2HeaderRow("Data", tmpBuf);
-            //skElfUtils::getVersion(header, tmpBuf, 32);
-            b2HeaderRow("Version", tmpBuf);
-            //skElfUtils::getABI(header, tmpBuf, 32);
-            b2HeaderRow("OS/ABI", tmpBuf);
-            //skElfUtils::getType(header, tmpBuf, 32);
-            b2HeaderRow("Type", tmpBuf);
-            //skElfUtils::getArch(header, tmpBuf, 32);
-            b2HeaderRow("Architecture", tmpBuf);
+            skElfPrintUtils::getPlatformId(header, tmpBuf, 32);
+            b2HeaderRowB("Class", tmpBuf);
+            skElfPrintUtils::getByteOrder(header, tmpBuf, 32);
+            b2HeaderRowB("Data", tmpBuf);
+            skElfPrintUtils::getVersion(header, tmpBuf, 32);
+            b2HeaderRowB("Version", tmpBuf);
+            skElfPrintUtils::getABI(header, tmpBuf, 32);
+            b2HeaderRowB("OS/ABI", tmpBuf);
+            skElfPrintUtils::getType(header, tmpBuf, 32);
+            b2HeaderRowB("Type", tmpBuf);
+            skElfPrintUtils::getArch(header, tmpBuf, 32);
+            b2HeaderRowB("Architecture", tmpBuf);
             b2HeaderRow("Entry", header.m_entry);
             b2HeaderRow("Program Offset", header.m_programOffset);
             b2HeaderRow("Section Offset", header.m_sectionOffset);
@@ -377,17 +388,28 @@ void b2FileHeader(void)
         {
             skPortableFile* pe = static_cast<skPortableFile*>(bin);
 
+            skString tstr;
+            SKint32  bw;
 
             const COFFHeader& header = pe->getHeader();
 
-            b2HeaderRow("Machine:", header.m_machine);
+            char tmpBuf[32] = {'@', 0};
+            skPortableUtils::getMachine(header, tmpBuf, 16);
+            b2HeaderRow("Machine:", tmpBuf);
             b2HeaderRow("Section Count:", header.m_sectionCount);
-            b2HeaderRowT("Timestamp:", header.m_timeDateStamp);
+
+            bw = skGetTimeString(tmpBuf, 32, "%D %r", header.m_timeDateStamp);
+            if (bw != SK_NPOS)
+                b2HeaderRow("Timestamp:", tmpBuf);
+            else
+                b2HeaderRowT("Timestamp:", header.m_timeDateStamp);
 
             b2HeaderRowX("SymbolTableOffset:", header.m_symbolTableOffset);
             b2HeaderRowX("NumberOfSymbols:", header.m_symbolCount);
             b2HeaderRowX("OptionalHeaderSize:", header.m_optionalHeaderSize);
-            b2HeaderRowX("Characteristics:", header.m_characteristics);
+
+            skPortableUtils::getCharacteristicsString16(header.m_characteristics, tstr);
+            b2HeaderRow("Characteristics:", tstr.c_str());
 
             // Print the varying header.
             skFileFormatType fpt = pe->getPlatformType();
@@ -493,7 +515,6 @@ void b2WriteAsciiLine(SKuint8* ptr, SKuint64 i, SKuint64 size, SKuint64 perline)
                     lch    = ch;
                     isOpen = true;
                 }
-
             }
             else
             {
@@ -667,6 +688,9 @@ void b2Sections(void)
             {
                 skPortableSection* pes = reinterpret_cast<skPortableSection*>(pair.second);
 
+                skString tstr;
+
+                
                 const COFFSectionHeader& csh = pes->getHeader();
                 b2TableOpen(string("Section: ") + pair.first.c_str());
 
@@ -678,7 +702,10 @@ void b2Sections(void)
                 b2HeaderRow("Relocation Count", csh.m_numberOfRelocations);
                 b2HeaderRowX("Line Number Location", csh.m_pointerToLineNumbers);
                 b2HeaderRow("Line Number Count", csh.m_numberOfLineNumbers);
-                b2HeaderRowX("Characteristics", csh.m_characteristics);
+
+
+                skPortableUtils::getSectionCharacteristics(csh.m_characteristics, tstr);
+                b2HeaderRow("Characteristics:", tstr.c_str());
                 b2HeaderRow("Size of Header", (SKuint32)sizeof(COFFSectionHeader));
                 b2TableClose();
 
@@ -720,8 +747,8 @@ void b2Sections(void)
                 char tmpBuf[32] = {'@', 0};
                 b2HeaderRow("Name", esh.m_name);
 
-                //skElfUtils::getSectionType(esh, tmpBuf, 32);
-                b2HeaderRow("Type", string(tmpBuf));
+                skElfPrintUtils::getSectionType(esh, tmpBuf, 32);
+                b2HeaderRow("Type", tmpBuf);
 
                 b2HeaderRow("Flags", esh.m_flags);
                 b2HeaderRowX("Virtual Address", esh.m_addr);
