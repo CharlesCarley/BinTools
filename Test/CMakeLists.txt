@@ -28,8 +28,8 @@ add_executable(helloworld test.c)
 add_library(helloworld_shared SHARED sharedlib.c)
 
 
+add_executable(buffer_overflow buffer_overflow.c)
 if (MSVC)
-    add_executable(buffer_overflow buffer_overflow.c)
     set_target_properties(buffer_overflow PROPERTIES COMPILE_FLAGS "/GS-")
 endif()
 
