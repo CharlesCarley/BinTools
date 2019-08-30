@@ -318,7 +318,7 @@ void b2TableClose(void)
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 void b2PEHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
 {
-    char buf[32];
+    char buf[32] = {};
     b2HeaderRowX("ImageBase:", (SKuint64)header.m_imageBase);
     b2HeaderRow("Section Alignment:", header.m_sectionAlignment);
     b2HeaderRow("File Alignment:", header.m_fileAlignment);

@@ -468,7 +468,7 @@ void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& o
     skString str;
   
     SKuint32 bw;
-    char         buf[32];
+    char         buf[32] = {};
 
 
     skPortableUtils::getMachine(header, buf, 16);
@@ -535,8 +535,7 @@ void b2PrintDataDir(const char* msg, const COFFDataDirectory& dd)
 template <typename COFFOptionalHeaderVaryingBase, typename SKuintV>
 void b2PrintPEVaryingHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBase, SKuintV>& header)
 {
-    char buf[32];
-
+    char buf[32]={};
     printf("  ImageBase:                  0x%llx\n", (SKuint64)header.m_imageBase);
     printf("  Section Alignment:          %u\n", header.m_sectionAlignment);
     printf("  File Alignment:             %u\n", header.m_fileAlignment);
