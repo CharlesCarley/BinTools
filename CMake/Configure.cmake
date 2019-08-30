@@ -21,7 +21,7 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-option(BinTools_USE_FOLDERS "Organize into folders" ON)
+option(BinTools_USE_FOLDERS     "Organize into folders" ON)
 
 
 # -----------------------------------------------------------------------------
@@ -51,9 +51,9 @@ if (NOT IS_DIRECTORY ${UTILS_TestDir})
     if (NOT IS_DIRECTORY ${UTILS_TestDir})
         message("Failed to clone Utils. See ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt for more information.")
     endif()
-
-
 endif()
+
+
 
 
 # -----------------------------------------------------------------------------

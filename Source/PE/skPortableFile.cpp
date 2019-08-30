@@ -32,20 +32,18 @@
 #include "Utils/skFileStream.h"
 #include "skSection.h"
 
-
-
 const COFFOptionalHeaderCommon pfDefaultValue = { 0, 0, 0, 0, 0, 0, 0, 0};
+const COFFHeader               cHeader        = {0, 0, 0, 0, 0, 0, 0};
 
 
 
 skPortableFile::skPortableFile(SKint16 dos_offset) :
+    m_header(cHeader),
     m_imageHeader(0),
     m_headerOffs(dos_offset),
     m_sectionStart(0)
 {
     m_fileFormat = FF_PE;
-
-    skMemset(&m_header, 0, sizeof(COFFHeader));
 }
 
 skPortableFile ::~skPortableFile()
@@ -61,9 +59,7 @@ const COFFOptionalHeaderCommon& skPortableFile::getCommonHeader(void)
     return pfDefaultValue;
 }
 
-
-
-void skPortableFile::getOptionalHeader(COFFOptionalHeader32 &dest)
+void skPortableFile::getOptionalHeader(COFFOptionalHeader32 &dest) const
 {
     // The file format type is the only indicator for determining
     // how m_imageHeader can be cast to the correct value.
@@ -73,26 +69,31 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader32 &dest)
 
         skMemcpy(&dest, h32, sizeof(COFFOptionalHeader32));
     }
+    else
+    {
+        skMemset(&dest, 0, sizeof(COFFOptionalHeader32));
+    }
 }
 
-void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest)
+void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest) const
 {
     // The file format type is the only indicator for determining
     // how m_imageHeader can be cast to the correct value.
     if (m_imageHeader && m_fileFormatType == FFT_64BIT)
     {
         COFFOptionalHeader64 *h64 = (COFFOptionalHeader64 *)m_imageHeader;
-
         skMemcpy(&dest, h64, sizeof(COFFOptionalHeader64));
     }
+    else
+    {
+        skMemset(&dest, 0, sizeof(COFFOptionalHeader64));
+    }
 }
-
-
 
 int skPortableFile::loadImpl(skStream& stream)
 {
 
-    SKuint16 optMagic, code;
+    SKuint16 optMagic, code = EC_OK;
 
     // Skip past the DOS stub program, and the PE signature 
     // since it is not part of the defined structure (+4)
@@ -149,7 +150,6 @@ int skPortableFile::loadImpl(skStream& stream)
 
         m_imageHeader = new COFFOptionalHeader64;
         stream.read(m_imageHeader, sizeof(COFFOptionalHeader64));
-
         m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
     }
     else
@@ -167,10 +167,10 @@ int skPortableFile::loadImpl(skStream& stream)
     SKuint16 i16;
     for (i16 = 0; i16 < m_header.m_sectionCount; ++i16)
     {
-        COFFSectionHeader sh;
+        COFFSectionHeader sh = {};
         stream.read(&sh, sizeof(COFFSectionHeader));
 
-        char *name = (char *)sh.m_name;
+        char *name = reinterpret_cast<char*>(sh.m_name);
         if ((*name) == '\0' || name[7] != '\0')
             continue;
 

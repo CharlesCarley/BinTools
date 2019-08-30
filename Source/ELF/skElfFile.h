@@ -23,7 +23,6 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-
 #ifndef _skElfFileHeader_h_
 #define _skElfFileHeader_h_
 

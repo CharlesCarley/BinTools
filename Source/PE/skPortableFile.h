@@ -47,7 +47,7 @@ public:
 
     
     // Returns the file header
-    inline const COFFHeader& getHeader(void)
+    inline const COFFHeader& getHeader(void) const
     {
         return m_header;
     }
@@ -59,17 +59,17 @@ public:
 
     // Returns access to the 32Bit optional header
     // Note that it is only valid when getPlatformType() == FFT_32BIT
-    void getOptionalHeader(COFFOptionalHeader32& dest);
+    void getOptionalHeader(COFFOptionalHeader32& dest) const;
 
 
     // Returns access to the 32Bit optional header
     // Note that it is only valid when getPlatformType() == FFT_64BIT
-    void getOptionalHeader(COFFOptionalHeader64& dest);
+    void getOptionalHeader(COFFOptionalHeader64& dest) const;
 
 
 
 
-    SKuint64 getEntryPoint(void)
+    virtual SKuint64 getEntryPoint(void)
     {
         if (m_imageHeader != 0)
             return m_imageHeader->m_entryPoint;
