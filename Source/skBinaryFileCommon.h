@@ -26,11 +26,6 @@
 #ifndef _skBinaryFileCommon_h_
 #define _skBinaryFileCommon_h_
 
-#include "Utils/Config/skConfig.h"
-
-
-
-
 enum skRuntimePointerLen
 {
     RPL_LEN_IS_8 = sizeof(void*) == 8,

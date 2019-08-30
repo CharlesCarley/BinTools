@@ -913,7 +913,6 @@ void b2Interactive(b2ProgramInfo& ctx)
         ctx.m_code = skClamp<SKuint32>(std::strtol(sn.c_str(), 0, 16), 0, SK_MAX);
     }
     break;
-        break;
     case 'Q':
     case 'q':
         ctx.m_state = MS_EXIT;

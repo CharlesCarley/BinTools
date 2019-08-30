@@ -251,13 +251,13 @@ template <typename skElfSymbolHeader>
 int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
     SK_ASSERT(strLookup && symLookup);  // callers fault
+    SKuint64 i;
 
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
 
     if (sym && str)
     {
-        SKuint64           i = 0;
         const skElfSectionHeader64& hdr = sym->getHeader();
 
         skElfSymbolHeader* symPtr = (skElfSymbolHeader*)sym->getPointer();

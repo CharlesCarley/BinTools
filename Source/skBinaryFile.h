@@ -26,7 +26,6 @@
 #ifndef _skBinaryFile_h_
 #define _skBinaryFile_h_
 
-#include "Utils/skArray.h"
 #include "Utils/skString.h"
 #include "skBinaryFileCommon.h"
 

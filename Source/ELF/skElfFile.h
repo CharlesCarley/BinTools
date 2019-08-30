@@ -28,7 +28,6 @@
 
 #include "ELF/skElfTypes.h"
 #include "Utils/skArray.h"
-#include "Utils/skMap.h"
 #include "skBinaryFile.h"
 
 class skElfFile : public skBinaryFile
@@ -45,7 +44,7 @@ public:
     virtual ~skElfFile();
 
     // Return access to the ELF file header 
-    inline const skElfHeaderInfo64& getHeader(void)
+    inline const skElfHeaderInfo64& getHeader(void) const
     {
         return m_header;
     }
@@ -55,12 +54,12 @@ public:
         return m_header.m_id[EMN_CLASS] == 0x02;
     }
 
-    inline ElfInstructionArch getInstructionArchitecture(void)
+    inline ElfInstructionArch getInstructionArchitecture(void) const
     {
         return (ElfInstructionArch)m_header.m_machine;
     }
 
-    inline ElfType getElfType(void)
+    inline ElfType getElfType(void) const
     {
         return (ElfType)m_header.m_type;
     }
@@ -72,13 +71,13 @@ public:
 
 
     /// Returns the starting offset to the section header
-    inline elf64 getSectionHeaderStart(void)
+    inline elf64 getSectionHeaderStart(void) const
     {
         return m_header.m_sectionOffset;
     }
 
     /// Returns the starting offset to the section header
-    inline elf64 getSectionHeaderEnd(void)
+    inline elf64 getSectionHeaderEnd(void) const
     {
         return m_header.m_sectionOffset + m_header.m_sectionTableEntryCount * m_header.m_sectionTableEntrySize;
     }
