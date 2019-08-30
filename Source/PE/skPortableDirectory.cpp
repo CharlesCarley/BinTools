@@ -35,25 +35,24 @@ skPortableDirectory::skPortableDirectory() :
 }
 
 
-skPortableDirectory::skPortableDirectory(skPortableSection *owner, COFFDirectoryEnum en, const COFFDataDirectory &dd) :
+skPortableDirectory::skPortableDirectory(skPortableSection *      owner,
+                                         COFFDirectoryEnum        en,
+                                         const COFFDataDirectory &dd) :
     m_owner(owner),
     m_enum(en),
     m_dir(dd)
 {
 }
 
+
 SKuint32 skPortableDirectory::getAddress(void)
 {
     if (m_owner)
     {
         const COFFSectionHeader &hdr = m_owner->getHeader();
-
-        // USE: 
-        //   hdr.m_pointerToRawData + (m_dir.m_virtualAddress - hdr.m_virtualAddress)
-        //   If its relative to the start of the file data
-        //  otherwise:
+        // USE:  hdr.m_pointerToRawData + (m_dir.m_virtualAddress - hdr.m_virtualAddress)
+        // If its relative to the start of the file data otherwise:
         return skClamp<SKuint32>(m_dir.m_virtualAddress - hdr.m_virtualAddress, 0, hdr.m_sizeOfRawData);
     }
     return -1;
 }
-

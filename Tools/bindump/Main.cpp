@@ -34,7 +34,6 @@ using namespace std;
 #include "ELF/skElfPrintUtils.h"
 #include "ELF/skElfSection.h"
 #include "ELF/skElfSymbol.h"
-#include "ELF/skElfUtils.h"
 #include "PE/skPortableDirectory.h"
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
@@ -509,7 +508,7 @@ void b2PrintPESectionHeader(const COFFSectionHeader& header)
 {
     skString dest;
 
-    printf("  Name:                       %s\n", header.m_name);
+    printf("  Name:                       %s\n", (const char*)header.m_name);
     printf("  Virtual Size:               %u\n", header.m_virtualSize);
     printf("  Virtual Address:            0x%x\n", header.m_virtualAddress);
     printf("  Size of Raw Data:           %u\n", header.m_sizeOfRawData);
@@ -909,7 +908,6 @@ void b2Interactive(b2ProgramInfo& ctx)
         ctx.m_code = skClamp<SKuint32>(std::strtol(sn.c_str(), 0, 16), 0, SK_MAX);
     }
     break;
-        break;
     case 'Q':
     case 'q':
         ctx.m_state = MS_EXIT;

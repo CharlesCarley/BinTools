@@ -26,7 +26,6 @@
 #ifndef _skPortableSymbol_h_
 #define _skPortableSymbol_h_
 
-#include "PE/skPortableTypes.h"
 #include "skSymbol.h"
 
 
@@ -44,18 +43,18 @@ public:
     virtual ~skPortableSymbol();
 
 
-    inline const skString& getName(void)
+    inline const skString& getSymbolName(void) const
     {
         return m_name;
     }
 
-    inline const skString& getDLL(void)
+    inline const skString& getDLL(void) const
     {
         return m_dll;
     }
 
 
-    inline SKuint64 getAddress(void)
+    virtual inline SKuint64 getAddress(void)
     {
         return m_rva;
     }

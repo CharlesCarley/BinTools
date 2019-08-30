@@ -24,7 +24,6 @@
 -------------------------------------------------------------------------------
 */
 #include "ELF/skElfFile.h"
-#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 #include "ELF/skElfSection.h"
@@ -252,20 +251,17 @@ template <typename skElfSymbolHeader>
 int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 {
     SK_ASSERT(strLookup && symLookup);  // callers fault
+    SKuint64 i;
 
     skElfSection* str = reinterpret_cast<skElfSection*>(getSection(strLookup));
     skElfSection* sym = reinterpret_cast<skElfSection*>(getSection(symLookup));
 
     if (sym && str)
     {
-        SKuint64           i = 0;
-        skElfSymbolHeader* symPtr;
-        SKint8*            strPtr;
-
         const skElfSectionHeader64& hdr = sym->getHeader();
 
-        symPtr = (skElfSymbolHeader*)sym->getPointer();
-        strPtr = (SKint8*)str->getPointer();
+        skElfSymbolHeader* symPtr = (skElfSymbolHeader*)sym->getPointer();
+        SKint8*            strPtr = (SKint8*)str->getPointer();
 
         if (hdr.m_entSize == 0)
         {
@@ -273,8 +269,9 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             return EC_UNEXPECTED;
         }
 
-        SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
-        i                 = 0;
+        const SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
+
+        i = 0;
         while (i < entryLen)
         {
             const skElfSymbolHeader& syml = (*symPtr);

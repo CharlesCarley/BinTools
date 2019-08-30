@@ -23,6 +23,7 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
+#include <memory.h>
 #include "ELF/skElfUtils.h"
 #include "Utils/skMemoryUtils.h"
 

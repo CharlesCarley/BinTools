@@ -25,13 +25,12 @@
 */
 #include "skSection.h"
 #include "Utils/skDebugger.h"
-#include "Utils/skMemoryUtils.h"
 #include "skBinaryFile.h"
 
 
 
 skSection::skSection(skBinaryFile *owner, const skString &name, void *data, size_t size, size_t offset) :
-    m_data((SKuint8 *)data),
+    m_data(static_cast<SKuint8 *>(data)),
     m_size(size),
     m_owner(owner),
     m_startAddress(offset),

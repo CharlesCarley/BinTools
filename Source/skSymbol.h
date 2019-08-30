@@ -43,14 +43,14 @@ public:
 
 
     // Returns a pointer to the file that owns this section.
-    inline skBinaryFile *getOwner(void)
+    inline skBinaryFile *getOwner(void) const
     {
         return m_owner;
     }
 
 
     // Returns the symbol name
-    inline const skString &getName(void)
+    virtual inline const skString &getName(void)
     {
         return m_name;
     }
