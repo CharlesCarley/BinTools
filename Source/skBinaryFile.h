@@ -62,34 +62,34 @@ public:
 
 
     // Returns the format of the loaded file.
-    inline skFileFormat getFormat(void)
+    inline skFileFormat getFormat(void) const
     {
         return m_fileFormat;
     }
 
     // Returns the files platform type
-    inline skFileFormatType getPlatformType(void)
+    inline skFileFormatType getPlatformType(void) const
     {
         return m_fileFormatType;
     }
 
     // Returns an abstract enumeration representing
     // the underlying files architecture.
-    inline skMachineArchitecture getArchitecture(void)
+    inline skMachineArchitecture getArchitecture(void) const
     {
         return m_arch;
     }
 
 
     // Returns the number of loaded sections.
-    inline SKsize getSectionCount(void)
+    inline SKsize getSectionCount(void) const
     {
         return m_sectionLookup.size();
     }
 
 
     // Returns the section at the specified index or NULL if the supplied index is out of bounds. 
-    skSection* getSection(SKsize idx)
+    skSection* getSection(const SKsize idx)
     {
         if (idx < m_sectionLookup.size())
             return m_sectionLookup.at(idx);
@@ -117,7 +117,7 @@ public:
     {
         if (sinf)
         {
-            SKsize idx = m_sectionLookup.find(const_cast<char *>(sinf));
+            const SKsize idx = m_sectionLookup.find(const_cast<char *>(sinf));
             if (idx != SK_NPOS)
                 return m_sectionLookup[idx];
         }
@@ -126,7 +126,7 @@ public:
 
 
     // Returns the size in bytes for the loaded file.
-    inline SKsize getLength(void)
+    inline SKsize getLength(void) const
     {
         return m_len;
     }

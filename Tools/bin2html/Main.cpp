@@ -33,13 +33,10 @@
 using namespace std;
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "ELF/skElfFile.h"
 #include "ELF/skElfPrintUtils.h"
 #include "ELF/skElfSection.h"
-#include "ELF/skElfUtils.h"
-#include "PE/skPortableDirectory.h"
 #include "PE/skPortableFile.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableUtils.h"
@@ -114,20 +111,14 @@ int b2ParseCommandLine(int argc, char** argv)
     if (argc <= 1)
         return -1;
 
-    size_t alen, offs = 0;
-    int    i;
-    char*  ch = 0;
-    char   sw;
-    bool   err = false;
-
-    for (i = 1; i < argc - 1; i++)
+    for (int i = 1; i < argc - 1; i++)
     {
-        ch = argv[i];
+        char* ch = argv[i];
         if (ch && *ch == '-')
         {
-            offs = 1;
-            alen = ::strlen(ch);
-            sw   = 0x00;
+            size_t offs = 1;
+            const size_t alen = ::strlen(ch);
+            char sw = 0x00;
             if (offs < alen)
                 sw = ch[offs++];
 
@@ -161,9 +152,6 @@ int b2ParseCommandLine(int argc, char** argv)
             }
             case 'd':
                 gs_ctx.m_opt = 1;
-                break;
-            case 'x':
-                gs_ctx.m_opt = 2;
                 break;
             case 'h':
                 return -1;
@@ -415,15 +403,15 @@ void b2FileHeader(void)
             skFileFormatType fpt = pe->getPlatformType();
             if (fpt == FFT_32BIT)
             {
-                COFFOptionalHeader32 header;
-                pe->getOptionalHeader(header);
-                b2PEHeader<COFFOptionalHeaderCommonPE32, SKuint32>(header);
+                COFFOptionalHeader32 local_header;
+                pe->getOptionalHeader(local_header);
+                b2PEHeader<COFFOptionalHeaderCommonPE32, SKuint32>(local_header);
             }
             else if (fpt == FFT_64BIT)
             {
-                COFFOptionalHeader64 header;
-                pe->getOptionalHeader(header);
-                b2PEHeader<COFFOptionalHeaderCommonPE64, SKuint64>(header);
+                COFFOptionalHeader64 local_header;
+                pe->getOptionalHeader(local_header);
+                b2PEHeader<COFFOptionalHeaderCommonPE64, SKuint64>(local_header);
             }
         }
 
@@ -672,7 +660,7 @@ void b2Sections(void)
     skBinaryFile* bin = gs_ctx.m_fp;
     if (bin)
     {
-        skFileFormat fmt = bin->getFormat();
+        const skFileFormat fmt = bin->getFormat();
 
         b2Clear();
         skBinaryFile::SectionTable::Iterator it = bin->getSectionIterator();

@@ -50,33 +50,33 @@ public:
 
 
     // Returns a pointer to the file that owns this section.
-    inline skBinaryFile *getOwner(void)
+    inline skBinaryFile *getOwner(void) const
     {
         return m_owner;
     }
 
 
     // Returns the section name. (.init, .text, etc...)
-    inline const skString &getName(void)
+    inline const skString &getName(void) const
     {
         return m_name;
     }
 
 
     // Returns direct access to the allocated memory for this section.
-    inline SKuint8 *getPointer(void)
+    inline SKuint8 *getPointer(void) const
     {
         return m_data;
     }
 
     // Returns the amount of allocated memory in bytes.
-    inline size_t getSize(void)
+    inline size_t getSize(void) const
     {
         return m_size;
     }
 
     // Returns the starting location of this section in the file.
-    inline size_t getStartAddress(void)
+    inline size_t getStartAddress(void) const
     {
         return m_startAddress;
     }

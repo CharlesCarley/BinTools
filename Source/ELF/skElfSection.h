@@ -62,7 +62,7 @@ public:
 
 
     // Returns the ELF section header structure for this section.
-    inline const skElfSectionHeader64& getHeader(void)
+    inline const skElfSectionHeader64& getHeader(void) const
     {
         return m_header;
     }

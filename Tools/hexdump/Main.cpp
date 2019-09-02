@@ -88,9 +88,9 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv)
     if (argc <= 1)
         return -1;
 
-    size_t alen, offs = 0;
+    size_t alen, offs;
     int    i;
-    char * ch = 0;
+    char * ch;
     char   sw;
     bool   err = false;
 

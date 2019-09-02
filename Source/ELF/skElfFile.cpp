@@ -186,7 +186,7 @@ int skElfFile::loadSections(skStream& stream)
         stream.read(&sp, sizeof(skElfSectionHeader));
 
 
-        SKsize sn = (SKsize)m_strtab + sp.m_name;
+        const SKsize sn = (SKsize)m_strtab + sp.m_name;
         if (sn < m_len)
         {
             SKsize loc = stream.position();
@@ -265,7 +265,7 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 
         if (hdr.m_entSize == 0)
         {
-            ///printf("Error - No entries in the string table.\n");
+            // printf("Error - No entries in the string table.\n");
             return EC_UNEXPECTED;
         }
 
@@ -291,7 +291,7 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 
             if (!strl.empty())
             {
-                SKsize idx = m_symTable.find(strl);
+                const SKsize idx = m_symTable.find(strl);
                 if (idx == SK_NPOS)
                 {
                     skElfSymbol64 sdp;

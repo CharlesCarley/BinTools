@@ -38,37 +38,37 @@ public:
     skPortableDirectory(skPortableSection *owner, COFFDirectoryEnum en, const COFFDataDirectory &dd);
     
     // Returns the start address relative to the owning section.
-    SKuint32 getAddress(void);
+    SKuint32 getAddress(void) const;
     
 
     // Returns the type of directory associated with the extracted structure
-    inline COFFDirectoryEnum getType(void)
+    inline COFFDirectoryEnum getType(void) const
     {
         return m_enum;
     }
 
 
     // Returns the type of directory associated with the extracted structure
-    inline const COFFDataDirectory &getDirectory(void)
+    inline const COFFDataDirectory &getDirectory(void) const
     {
         return m_dir;
     }
 
     // Returns the relative virtual address
-    inline SKuint32 getRVA(void)
+    inline SKuint32 getRVA(void) const
     {
         return m_dir.m_virtualAddress;
     }
 
     // Returns the relative virtual address
-    inline SKuint32 getSize(void)
+    inline SKuint32 getSize(void) const
     {
         return m_dir.m_size;
     }
 
 
 
-    inline skPortableSection *getOwner(void)
+    inline skPortableSection *getOwner(void) const
     {
         return m_owner;
     }

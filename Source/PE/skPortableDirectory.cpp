@@ -45,7 +45,7 @@ skPortableDirectory::skPortableDirectory(skPortableSection *      owner,
 }
 
 
-SKuint32 skPortableDirectory::getAddress(void)
+SKuint32 skPortableDirectory::getAddress(void) const
 {
     if (m_owner)
     {

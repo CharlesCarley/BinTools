@@ -225,20 +225,17 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
     if (argc <= 1)
         return -1;
 
-    size_t alen, offs = 0;
-    int    i;
     char*  ch = 0;
-    char   sw;
     bool   err = false;
 
-    for (i = 1; i < argc - 1; i++)
+    for (int i = 1; i < argc - 1; i++)
     {
         ch = argv[i];
         if (ch && *ch == '-')
         {
-            offs = 1;
-            alen = ::strlen(ch);
-            sw   = 0x00;
+            size_t offs = 1;
+            const size_t alen = ::strlen(ch);
+            char sw = 0x00;
             if (offs < alen)
                 sw = ch[offs++];
 

@@ -67,7 +67,7 @@ public:
         return (m_header.m_characteristics & CSEC_MEM_CAN_WRITE) != 0;
     }
 
-    inline const COFFSectionHeader &getHeader(void)
+    inline const COFFSectionHeader &getHeader(void) const
     {
         return m_header;
     }

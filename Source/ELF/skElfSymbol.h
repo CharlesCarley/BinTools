@@ -41,7 +41,7 @@ public:
     virtual ~skElfSymbol();
 
 
-    inline const skElfSymbol64& getSymbol(void)
+    inline const skElfSymbol64& getSymbol(void) const
     {
         return m_symbol;
     }

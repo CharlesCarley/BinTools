@@ -53,7 +53,7 @@ skPortableFile ::~skPortableFile()
 }
 
 
-const COFFOptionalHeaderCommon& skPortableFile::getCommonHeader(void)
+const COFFOptionalHeaderCommon& skPortableFile::getCommonHeader(void) const
 {
     if (m_imageHeader)
         return (*m_imageHeader);
@@ -94,7 +94,7 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest) const
 int skPortableFile::loadImpl(skStream& stream)
 {
 
-    SKuint16 optMagic, code = EC_OK;
+    SKuint16 optMagic, code;
 
     // Skip past the DOS stub program, and the PE signature 
     // since it is not part of the defined structure (+4)
@@ -190,7 +190,7 @@ int skPortableFile::loadImpl(skStream& stream)
                 // Read the section data
 
                 // save the location
-                SKsize pos = stream.position();
+                const SKsize pos = stream.position();
                 stream.seek(sh.m_pointerToRawData, SEEK_SET);
 
 
@@ -293,7 +293,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
 {
 
     // resolve the relative virtual address.
-    SKuint32 addr = directory->getAddress();
+    const SKuint32 addr = directory->getAddress();
     if (addr == (SKuint32)-1)
     {
         // meaning the directory has no owner.
@@ -309,13 +309,12 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
     // Cast the pointer to the import directory structure.
     COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
 
-    SKuint32 i      = 0,
-             len    = directory->getSize(),
-             maxl   = section->getSize(),
-             ubound = maxl - addr,
-             ival   = sizeof(COFFImportDirectoryTable);
+    const SKuint32 ival = sizeof(COFFImportDirectoryTable);
+    const SKuint32 maxl = section->getSize();
+    const SKuint32 len  = directory->getSize();
+    const SKuint32 ubound = maxl - addr;
 
-
+    SKuint32 i = 0;
     while (i < len)
     {
         const COFFImportDirectoryTable &cidt = (*idata);
@@ -323,7 +322,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
             break;
 
         char *dllName = 0;
-        SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
+        const SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
         if (addrOfDLL < maxl)
             dllName = (char *)ptr + addrOfDLL;
 
@@ -337,7 +336,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
                 break;
 
             // TODO: this needs to be SKuint64 for PE32+
-            SKuint32 ilt = *(SKuint32 *)(ptr + va);
+            const SKuint32 ilt = *(SKuint32 *)(ptr + va);
             if (ilt == 0)
                 break;
 
@@ -351,19 +350,19 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
             }
             else  // look up by name
             {
-                SKuint32 hint = ilt - directory->getRVA();
+                const SKuint32 hint = ilt - directory->getRVA();
                 if (hint == SK_NPOS)
                     continue;
 
                 SKuint16 *sp   = (SKuint16 *)(ptr + hint);
 
-                SKuint16 exnt = *(sp++);
+                const SKuint16 exnt = *(sp++);
                 SKbyte * cp   = (SKbyte *)(sp); 
 
                 skString name = cp;
                 if (!name.empty())
                 {
-                    SKsize idx = m_symTable.find(name);
+                    const SKsize idx = m_symTable.find(name);
                     if (idx == SK_NPOS)
                     {
                         skSymbol *sym = new skPortableSymbol(
