@@ -30,29 +30,30 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "Utils/skFileStream.h"
 #include "Utils/skArray.h"
+#include "Utils/skFileStream.h"
 #include "b2Common.h"
 
 
 struct b2ProgramInfo
 {
-    skFileStream  m_stream;
-    SKint32       m_code;
-    SKuint32      m_flags;
+    skFileStream m_stream;
+    SKint32      m_code;
+    SKuint32     m_addressRange[2];
+    SKuint32     m_flags;
 };
 
 
 void b2Usage(void);
-int  b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv);
+int  b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv);
 bool b2Alloc(b2ProgramInfo &ctx, const char *fname);
 void b2Print(b2ProgramInfo &ctx);
 void b2Free(b2ProgramInfo &ctx);
 
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    b2ProgramInfo ctx = {skFileStream(), -1, PF_DEFAULT | PF_FULLADDR};
+    b2ProgramInfo ctx = {skFileStream(), -1, {SK_NPOS, SK_NPOS}, PF_DEFAULT | PF_FULLADDR};
 
     if (b2ParseCommandLine(ctx, argc, argv) == -1)
     {
@@ -74,16 +75,24 @@ void b2Usage(void)
     std::cout << "  Options:                                                        \n";
     std::cout << "      -h          Display this help message.                      \n";
     std::cout << "      -m          Mark a specific hexadecimal sequence.           \n";
+    std::cout << "                      Input is in base 16.                        \n";
     std::cout << "                                                                  \n";
-    std::cout << "                  1 byte sequence [0, 255]                        \n";
-    std::cout << "                  2 byte sequence [0, 65535]                      \n";
-    std::cout << "                  4 byte sequence [0, 4294967294]                 \n";
+    std::cout << "                      1 byte sequence [0, FF]                     \n";
+    std::cout << "                      2 byte sequence [0, FFFF]                   \n";
+    std::cout << "                      4 byte sequence [0, FFFFFFFF]               \n";
+    std::cout << "                                                                  \n";
+    std::cout << "      -ar         Specify a start address and a range.            \n";
+    std::cout << "                      Input is in base 10 [0, file-length].       \n";
+    std::cout << "                                                                  \n";
+    std::cout << "                      [offset, offset + range]                    \n";
+    std::cout << "                      start = pointer + offset                    \n";
+    std::cout << "                      end   = pointer + (offset + range)          \n";
     std::cout << "                                                                  \n";
     std::cout << "      -xc         Remove color output.                            \n";
     std::cout << "      -xa         Remove the ASCII table in the hex dump output.  \n";
 }
 
-int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv)
+int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
 {
     if (argc <= 1)
         return -1;
@@ -114,6 +123,27 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv)
                     ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_MAX);
             }
             break;
+            case 'a':
+            {
+                if (offs < alen)
+                    sw = ch[offs++];
+
+                if (sw == 'r')
+                {
+                    if (i + 2 < argc)
+                    {
+                        ctx.m_addressRange[0] = std::strtol(argv[++i], 0, 10);
+                        ctx.m_addressRange[1] = std::strtol(argv[++i], 0, 10);
+                    }
+                    else
+                    {
+                        printf("Missing arguments to -ar\n");
+                        return -1;
+                    }
+                }
+
+                break;
+            }
             case 'h':
                 return -1;
             case 'x':
@@ -164,16 +194,31 @@ bool b2Alloc(b2ProgramInfo &ctx, const char *fname)
 void b2Print(b2ProgramInfo &ctx)
 {
     skFileStream &fp = ctx.m_stream;
-    SKuint8 buffer[1025];
+    SKuint8       buffer[1025];
 
-    SKsize br, tr=0;
-    while (!fp.eof())
+
+    SKuint32 a, r,n;
+    n = fp.size();
+    a = skClamp<SKuint32>(ctx.m_addressRange[0], 0, n);
+    r = skClamp<SKuint32>(ctx.m_addressRange[1], 0, n);
+
+    if (ctx.m_addressRange[0] != SK_NPOS)
+        fp.seek(a, SEEK_SET);
+    else
     {
-        br = fp.read(buffer, 1024);
+        a = 0;
+        r = n;
+    }
+
+    SKsize br,
+    tr = 0;
+    while (!fp.eof() && tr < r)
+    {
+        br = fp.read(buffer, skMin<SKuint32>(1024, r));
         if (br != SK_NPOS && br > 0)
         {
             buffer[br] = 0;
-            b2DumpHex(buffer, tr, br, ctx.m_flags, ctx.m_code);
+            b2DumpHex(buffer, tr+a, br, ctx.m_flags, ctx.m_code);
             tr += br;
         }
     }
