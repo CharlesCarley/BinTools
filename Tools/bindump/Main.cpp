@@ -245,7 +245,7 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_MAX);
+                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_NPOS32);
             }
             break;
             case 'o':

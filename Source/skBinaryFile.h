@@ -89,7 +89,7 @@ public:
 
 
     // Returns the section at the specified index or NULL if the supplied index is out of bounds. 
-    skSection* getSection(const SKsize idx)
+    skSection* getSection(const SKuint32 idx)
     {
         if (idx < m_sectionLookup.size())
             return m_sectionLookup.at(idx);
@@ -117,7 +117,7 @@ public:
     {
         if (sinf)
         {
-            const SKsize idx = m_sectionLookup.find(const_cast<char *>(sinf));
+            const SKuint32 idx = m_sectionLookup.find(const_cast<char *>(sinf));
             if (idx != SK_NPOS)
                 return m_sectionLookup[idx];
         }

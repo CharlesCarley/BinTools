@@ -310,9 +310,9 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
     COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
 
     const SKuint32 ival = sizeof(COFFImportDirectoryTable);
-    const SKuint32 maxl = section->getSize();
+    const SKsize maxl = section->getSize();
     const SKuint32 len  = directory->getSize();
-    const SKuint32 ubound = maxl - addr;
+    const SKsize   ubound = maxl - addr;
 
     SKuint32 i = 0;
     while (i < len)

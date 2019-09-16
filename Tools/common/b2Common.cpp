@@ -163,7 +163,7 @@ void b2MarkColor(SKuint32 c, SKuint32 mark)
 
 
 
-void b2WriteAddress(SKuint64 addr, int flags)
+void b2WriteAddress(SKsize addr, int flags)
 {
     b2WriteColor(CS_LIGHT_GREY);
     if (flags & PF_FULLADDR)
@@ -173,7 +173,7 @@ void b2WriteAddress(SKuint64 addr, int flags)
 }
 
 
-void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, SKuint32 mark, bool nl)
+void b2DumpHex(void* ptr, SKsize offset, SKsize len, int flags, SKuint32 mark, bool nl)
 {
     if (!ptr || offset == SK_NPOS || len == SK_NPOS)
         return;
@@ -184,7 +184,7 @@ void b2DumpHex(void* ptr, SKuint32 offset, SKuint32 len, int flags, SKuint32 mar
     for (i = 0; i < len; i += 16)
     {
         if (flags & PF_ADDRESS)
-            b2WriteAddress((size_t)(i + offset), flags);
+            b2WriteAddress((SKsize)(i + offset), flags);
         if (flags & PF_HEX)
             b2WriteHex(cp, i, len, flags, mark);
         if (flags & PF_ASCII)

@@ -53,7 +53,8 @@ void b2Free(b2ProgramInfo &ctx);
 
 int main(int argc, char **argv)
 {
-    b2ProgramInfo ctx = {skFileStream(), -1, {SK_NPOS, SK_NPOS}, PF_DEFAULT | PF_FULLADDR};
+
+	b2ProgramInfo ctx = {skFileStream(), -1, {(SKuint32)-1, (SKuint32)-1}, PF_DEFAULT | PF_FULLADDR};
 
     if (b2ParseCommandLine(ctx, argc, argv) == -1)
     {
@@ -120,7 +121,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, SK_MAX);
+                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, ((SKuint32)-1)-1);
             }
             break;
             case 'a':
@@ -197,10 +198,11 @@ void b2Print(b2ProgramInfo &ctx)
     SKuint8       buffer[1025];
 
 
-    SKuint32 a, r,n;
+	SKsize   n;
+    SKsize a, r;
     n = fp.size();
-    a = skClamp<SKuint32>(ctx.m_addressRange[0], 0, n);
-    r = skClamp<SKuint32>(ctx.m_addressRange[1], 0, n);
+    a = skClamp<SKsize>(ctx.m_addressRange[0], 0, n);
+    r = skClamp<SKsize>(ctx.m_addressRange[1], 0, n);
 
     if (ctx.m_addressRange[0] != SK_NPOS)
         fp.seek(a, SEEK_SET);
@@ -214,7 +216,7 @@ void b2Print(b2ProgramInfo &ctx)
     tr = 0;
     while (!fp.eof() && tr < r)
     {
-        br = fp.read(buffer, skMin<SKuint32>(1024, r));
+        br = fp.read(buffer, skMin<SKsize>(1024, r));
         if (br != SK_NPOS && br > 0)
         {
             buffer[br] = 0;

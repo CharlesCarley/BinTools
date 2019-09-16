@@ -79,7 +79,7 @@ public:
     /// Returns the starting offset to the section header
     inline elf64 getSectionHeaderEnd(void) const
     {
-        return m_header.m_sectionOffset + m_header.m_sectionTableEntryCount * m_header.m_sectionTableEntrySize;
+        return m_header.m_sectionOffset + (elf64)m_header.m_sectionTableEntryCount * (elf64)m_header.m_sectionTableEntrySize;
     }
 
 

@@ -36,7 +36,7 @@
 int skBinaryFile::load(const char *file, skBinaryFile **fp)
 {
     skFileStream fs;
-    char         magic[4];
+    char         magic[5];
 
     if (!file || !(*file) || !fp)
         return EC_INVALID_POINTER;
@@ -47,6 +47,8 @@ int skBinaryFile::load(const char *file, skBinaryFile **fp)
 
     fs.read(magic, 4);
     (*fp) = 0;
+    magic[4] = 0;
+
     fs.seek(0, SEEK_SET);
 
     if (strncmp("\177ELF", magic, 4) == 0)
