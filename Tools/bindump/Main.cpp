@@ -473,7 +473,7 @@ void b2PrintPEHeader(const COFFHeader& header, const COFFOptionalHeaderCommon& o
     printf("  Section Count:              %u\n", header.m_sectionCount);
 
     bw = skGetTimeString(buf, 32, "%D %r", header.m_timeDateStamp);
-    if (bw != SK_NPOS)
+    if (bw != SK_NPOS32)
         printf("  Timestamp:                  %s\n", buf);
     else
         printf("  Timestamp:                  %u\n", header.m_timeDateStamp);

@@ -201,7 +201,7 @@ int skElfFile::loadSections(skStream& stream)
             if (name != 0 && (*name) == '\0')
                 continue;
 
-            if (m_sectionLookup.find(name) == SK_NPOS)
+            if (m_sectionLookup.find(name) == SK_NPOS32)
             {
                 if (sp.m_size < m_len)
                 {
@@ -292,7 +292,7 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
             if (!strl.empty())
             {
                 const SKsize idx = m_symTable.find(strl);
-                if (idx == SK_NPOS)
+                if (idx == SK_NPOS32)
                 {
                     skElfSymbol64 sdp;
                     if (m_fileFormatType == FFT_32BIT)

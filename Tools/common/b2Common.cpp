@@ -45,7 +45,7 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
     } cmp;
     cmp.i = mark;
 
-    if (!cp || offs == SK_NPOS || max == SK_NPOS)
+    if (!cp || offs == SK_NPOS32 || max == SK_NPOS)
         return;
 
 

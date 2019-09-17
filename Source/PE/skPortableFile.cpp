@@ -175,7 +175,7 @@ int skPortableFile::loadImpl(skStream& stream)
         if ((*name) == '\0' || name[7] != '\0')
             continue;
 
-        if (m_sectionLookup.find(name) == SK_NPOS)
+        if (m_sectionLookup.find(name) == SK_NPOS32)
         {
             size_t size = sh.m_virtualSize;
             if (sh.m_virtualSize > sh.m_sizeOfRawData)
@@ -351,7 +351,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
             else  // look up by name
             {
                 const SKuint32 hint = ilt - directory->getRVA();
-                if (hint == SK_NPOS)
+                if (hint == SK_NPOS32)
                     continue;
 
                 SKuint16 *sp   = (SKuint16 *)(ptr + hint);
@@ -363,7 +363,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
                 if (!name.empty())
                 {
                     const SKsize idx = m_symTable.find(name);
-                    if (idx == SK_NPOS)
+                    if (idx == SK_NPOS32)
                     {
                         skSymbol *sym = new skPortableSymbol(
                             this, 

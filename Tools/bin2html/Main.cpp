@@ -387,7 +387,7 @@ void b2FileHeader(void)
             b2HeaderRow("Section Count:", header.m_sectionCount);
 
             bw = skGetTimeString(tmpBuf, 32, "%D %r", header.m_timeDateStamp);
-            if (bw != SK_NPOS)
+            if (bw != SK_NPOS32)
                 b2HeaderRow("Timestamp:", tmpBuf);
             else
                 b2HeaderRowT("Timestamp:", header.m_timeDateStamp);
