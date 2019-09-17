@@ -901,7 +901,7 @@ void b2Interactive(b2ProgramInfo& ctx)
         string sn;
         cin >> sn;
 
-        ctx.m_code = skClamp<SKuint32>(std::strtol(sn.c_str(), 0, 16), 0, SK_MAX);
+        ctx.m_code = skClamp<SKuint32>(std::strtol(sn.c_str(), 0, 16), 0, SK_MAX32);
     }
     break;
     case 'Q':
