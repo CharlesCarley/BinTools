@@ -34,7 +34,6 @@ using namespace std;
 #include "Utils/skFileStream.h"
 #include "Utils/skHexPrint.h"
 
-
 struct b2ProgramInfo
 {
     skFileStream m_stream;
