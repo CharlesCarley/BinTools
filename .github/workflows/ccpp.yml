@@ -1,0 +1,14 @@
+name: Build With CMake
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+     - uses: actions/checkout@v1
+     - name: Configure
+       run: cmake .
+     - name: Make
+       run: make
