@@ -40,9 +40,9 @@ using namespace std;
 #include "PE/skPortableUtils.h"
 #include "Utils/skDebugger.h"
 #include "Utils/skTimer.h"
+#include "Utils/skHexPrint.h"
 #include "capstone/capstone.h"
 #include "skBinaryFile.h"
-#include "b2Common.h"
 
 enum b2MenuState
 {
@@ -61,6 +61,8 @@ struct b2ProgramInfo
     size_t        m_handle;
     string        m_fname;
 };
+
+using namespace skHexPrint;
 
 
 int  b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char** argv);
@@ -118,7 +120,7 @@ int main(int argc, char** argv)
 
 
     b2Free(ctx);
-    b2WriteColor(CS_WHITE);
+    skHexPrint::writeColor(CS_WHITE);
     return 0;
 }
 
@@ -314,15 +316,15 @@ void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int f
         {
             cs_insn& i = insn[j];
 
-            b2WriteColor(CS_LIGHT_GREY);
-            b2WriteAddress((SKsize)i.address);
+            skHexPrint::writeColor(CS_LIGHT_GREY);
+            skHexPrint::writeAddress((SKsize)i.address);
 
 
 
             int fl = flags & ~(PF_ADDRESS | PF_ASCII);
-            b2DumpHex(i.bytes, 0, i.size, fl, ctx.m_code, false);
+            skHexPrint::dumpHex(i.bytes, 0, i.size, fl, ctx.m_code, false);
 
-            b2WriteColor(CS_WHITE);
+            skHexPrint::writeColor(CS_WHITE);
             printf("%s\t%s\n", i.mnemonic, i.op_str);
         }
 
@@ -341,7 +343,7 @@ void b2PrintAll(b2ProgramInfo& ctx)
     {
         skSection* sec = it.getNext().second;
 
-        b2DumpHex(sec->getPointer(),
+        skHexPrint::dumpHex(sec->getPointer(),
                   sec->getStartAddress(),
                   sec->getSize(),
                   ctx.m_flags,
@@ -359,14 +361,14 @@ void b2PrintSectionNames(b2ProgramInfo& ctx)
 
     skBinaryFile::SectionTable::Iterator it = ctx.m_fp->getSectionIterator();
 
-    b2WriteColor(CS_DARKYELLOW);
+    skHexPrint::writeColor(CS_DARKYELLOW);
     printf("\nSections:\n\n");
 
 
-    b2WriteColor(CS_GREY);
+    skHexPrint::writeColor(CS_GREY);
     printf(" Name                 Offset             Index\n\n");
 
-    b2WriteColor(CS_LIGHT_GREY);
+    skHexPrint::writeColor(CS_LIGHT_GREY);
     int i = 0;
     while (it.hasMoreElements())
     {
@@ -381,16 +383,16 @@ void b2PrintSectionNames(b2ProgramInfo& ctx)
 
     if (ctx.m_fp->getFormat() == FF_PE)
     {
-        b2WriteColor(CS_DARKYELLOW);
+        skHexPrint::writeColor(CS_DARKYELLOW);
         printf("\nData Directories:\n\n");
 
 
-        b2WriteColor(CS_GREY);
+        skHexPrint::writeColor(CS_GREY);
         it = ctx.m_fp->getSectionIterator();
         printf(" Type                 RVA                Size\n\n");
 
 
-        b2WriteColor(CS_LIGHT_GREY);
+        skHexPrint::writeColor(CS_LIGHT_GREY);
         while (it.hasMoreElements())
         {
             skPortableSection* sec = reinterpret_cast<skPortableSection*>(it.getNext().second);
@@ -554,9 +556,9 @@ void b2PrintPEVaryingHeader(const COFFOptionalHeader<COFFOptionalHeaderVaryingBa
     printf("  RVA and Size Count:         %u\n\n", header.m_numberOfRvaAndSizes);
 
 
-    b2WriteColor(CS_DARKYELLOW);
+    skHexPrint::writeColor(CS_DARKYELLOW);
     printf("Data Directories\n\n");
-    b2WriteColor(CS_LIGHT_GREY);
+    skHexPrint::writeColor(CS_LIGHT_GREY);
 
     b2PrintDataDir("  Export Table:               ", header.m_directories[CDE_EXPORT]);
     b2PrintDataDir("  Import Table:               ", header.m_directories[CDE_IMPORT]);
@@ -615,11 +617,11 @@ void b2PrintSectionCommon(b2ProgramInfo& ctx, skSection* section)
     if (!section || !ctx.m_fp)
         return;
 
-    b2WriteColor(CS_DARKYELLOW);
+    skHexPrint::writeColor(CS_DARKYELLOW);
     printf("\nSection Header: %s\n\n", section->getName().c_str());
 
 
-    b2WriteColor(CS_LIGHT_GREY);
+    skHexPrint::writeColor(CS_LIGHT_GREY);
     b2PrintSectionHeader(ctx.m_fp, section);
 }
 
@@ -633,7 +635,7 @@ void b2PrintSection(b2ProgramInfo& ctx, skSection* section)
     printf("\n");
 
 
-    b2WriteColor(CS_WHITE);
+    skHexPrint::writeColor(CS_WHITE);
     if (ctx.m_flags & PF_DISASEMBLE && section->isExectuable())
     {
         b2Dissemble(ctx, section->getPointer(),
@@ -643,11 +645,11 @@ void b2PrintSection(b2ProgramInfo& ctx, skSection* section)
     }
     else
     {
-        b2DumpHex(section->getPointer(),
-                  section->getStartAddress(),
-                  section->getSize(),
-                  ctx.m_flags,
-                  ctx.m_code);
+        dumpHex(section->getPointer(),
+                section->getStartAddress(),
+                section->getSize(),
+                ctx.m_flags,
+                ctx.m_code);
     }
 }
 
@@ -661,20 +663,20 @@ void b2PrintHeadersCommon(b2ProgramInfo& ctx)
     if (fileFormat == FF_ELF)
     {
         skElfFile* elf = static_cast<skElfFile*>(ctx.m_fp);
-        b2WriteColor(CS_DARKYELLOW);
+        skHexPrint::writeColor(CS_DARKYELLOW);
         printf("File Header:\n\n");
 
-        b2WriteColor(CS_LIGHT_GREY);
+        skHexPrint::writeColor(CS_LIGHT_GREY);
         b2PrintElfHeader(elf->getHeader());
     }
     else if (fileFormat == FF_PE)
     {
         skPortableFile* pe = static_cast<skPortableFile*>(ctx.m_fp);
 
-        b2WriteColor(CS_DARKYELLOW);
+        skHexPrint::writeColor(CS_DARKYELLOW);
         printf("File Header:\n\n");
 
-        b2WriteColor(CS_LIGHT_GREY);
+        skHexPrint::writeColor(CS_LIGHT_GREY);
         b2PrintPEHeader(pe->getHeader(), pe->getCommonHeader());
 
         skFileFormatType fpt = pe->getPlatformType();
@@ -727,11 +729,11 @@ void b2PrintSymbols(b2ProgramInfo& ctx)
 
     skBinaryFile::SymbolTable::Iterator it = ctx.m_fp->getSymbolIterator();
 
-    b2WriteColor(CS_DARKYELLOW);
+    skHexPrint::writeColor(CS_DARKYELLOW);
     printf("\nSymbols:\n\n");
 
 
-    b2WriteColor(CS_GREY);
+    skHexPrint::writeColor(CS_GREY);
     if (!it.hasMoreElements())
         printf("No symbols.\n");
     else
@@ -740,7 +742,7 @@ void b2PrintSymbols(b2ProgramInfo& ctx)
         {
             skSymbol* sym = it.getNext().second;
 
-            b2WriteColor(ctx.m_fp->getFormat() == FF_ELF ? CS_DARKYELLOW : CS_LIGHT_GREY);
+            skHexPrint::writeColor(ctx.m_fp->getFormat() == FF_ELF ? CS_DARKYELLOW : CS_LIGHT_GREY);
             printf("\t0x%-16llx %s\n", sym->getAddress(), sym->getName().c_str());
 
             if (ctx.m_fp->getFormat() == FF_ELF)
@@ -749,7 +751,7 @@ void b2PrintSymbols(b2ProgramInfo& ctx)
 
                 const skElfSymbol64& esym = est->getSymbol();
 
-                b2WriteColor(CS_LIGHT_GREY);
+                skHexPrint::writeColor(CS_LIGHT_GREY);
                 printf("\t  name   %u\n\t  info   %u\n\t  other  %u\n\t  index  %u\n\t  size   %llu\n",
                        esym.m_name,
                        esym.m_info & 0xF,

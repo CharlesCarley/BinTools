@@ -42,7 +42,6 @@ target_link_libraries(
     ${TargetName} 
     ${BINFILE_LIB}
     ${UTILS_LIB}
-    hexprint
 )
 
 if (BinTools_USE_FOLDERS)

@@ -27,14 +27,7 @@ set(TargetName_GRP      "TestFiles")
 add_executable(helloworld test.c)
 add_library(helloworld_shared SHARED sharedlib.c)
 
-
-add_executable(buffer_overflow buffer_overflow.c)
-if (MSVC)
-    set_target_properties(buffer_overflow PROPERTIES COMPILE_FLAGS "/GS-")
-endif()
-
 if (BinTools_USE_FOLDERS)
     set_target_properties(helloworld        PROPERTIES FOLDER "${TargetName_GRP}")
     set_target_properties(helloworld_shared PROPERTIES FOLDER "${TargetName_GRP}")
-    set_target_properties(buffer_overflow   PROPERTIES FOLDER "${TargetName_GRP}")
 endif()

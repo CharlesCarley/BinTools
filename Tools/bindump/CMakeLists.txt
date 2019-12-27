@@ -44,8 +44,6 @@ target_link_libraries(
     ${BINFILE_LIB}
     ${UTILS_LIB}
     ${CAPSTONE_LIB}
-    hexprint
-
 )
 
 if (BinTools_USE_FOLDERS)

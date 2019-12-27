@@ -32,7 +32,7 @@ using namespace std;
 #include <string.h>
 #include "Utils/skArray.h"
 #include "Utils/skFileStream.h"
-#include "b2Common.h"
+#include "Utils/skHexPrint.h"
 
 
 struct b2ProgramInfo
@@ -42,6 +42,8 @@ struct b2ProgramInfo
     SKuint32     m_addressRange[2];
     SKuint32     m_flags;
 };
+
+using namespace skHexPrint;
 
 
 void b2Usage(void);
@@ -222,7 +224,7 @@ void b2Print(b2ProgramInfo &ctx)
         if (br != -1 && br > 0)
         {
             buffer[br] = 0;
-            b2DumpHex(buffer, tr + a, br, ctx.m_flags, ctx.m_code);
+            dumpHex(buffer, tr + a, br, ctx.m_flags, ctx.m_code);
             tr += br;
         }
     }
