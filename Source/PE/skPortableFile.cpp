@@ -175,7 +175,7 @@ int skPortableFile::loadImpl(skStream& stream)
         if ((*name) == '\0' || name[7] != '\0')
             continue;
 
-        if (m_sectionLookup.find(name) == SK_NPOS32)
+        if (m_sectionLookup.find(name) == m_sectionLookup.npos)
         {
             size_t size = sh.m_virtualSize;
             if (sh.m_virtualSize > sh.m_sizeOfRawData)

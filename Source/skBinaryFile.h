@@ -117,8 +117,8 @@ public:
     {
         if (sinf)
         {
-            const SKuint32 idx = m_sectionLookup.find(const_cast<char *>(sinf));
-            if (idx != SK_NPOS32)
+            const SKsize idx = m_sectionLookup.find(const_cast<char *>(sinf));
+            if (idx != m_sectionLookup.npos)
                 return m_sectionLookup[idx];
         }
         return 0;

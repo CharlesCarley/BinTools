@@ -44,7 +44,6 @@ using namespace std;
 #include "skBinaryFile.h"
 #include "b2Common.h"
 
-
 enum b2MenuState
 {
     MS_MAIN = 0,
@@ -80,7 +79,7 @@ void b2PrintSymbols(b2ProgramInfo& ctx);
 
 int main(int argc, char** argv)
 {
-    b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1, SK_NPOS};
+    b2ProgramInfo ctx = {MS_EXIT, 0, PF_DEFAULT, -1, -1, (size_t)-1};
 
     if (b2ParseCommandLine(ctx, argc, argv) < 0)
     {
@@ -155,10 +154,10 @@ void b2Usage(void)
 
 void b2Free(b2ProgramInfo &ctx)
 {
-    if (ctx.m_handle != SK_NPOS)
+    if (ctx.m_handle != -1)
     {
         cs_close(&ctx.m_handle);
-        ctx.m_handle = SK_NPOS;
+        ctx.m_handle = -1;
     }
 
     if (ctx.m_fp)
@@ -178,7 +177,7 @@ bool b2Alloc(b2ProgramInfo& ctx, const char* prog)
     ctx.m_fname = prog;
 
 
-    if (ctx.m_handle != SK_NPOS)
+    if (ctx.m_handle != -1)
         cs_close(&ctx.m_handle);
 
     cs_arch arch = CS_ARCH_ALL;
@@ -302,7 +301,7 @@ int b2ParseCommandLine(b2ProgramInfo& ctx, int argc, char** argv)
 
 void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int flags)
 {
-    if (!ptr || ctx.m_handle == SK_NPOS || offset == SK_NPOS || len == 0 || len == SK_NPOS)
+    if (!ptr || ctx.m_handle == -1 || offset == -1 || len == 0 || len == -1)
         return;
 
 
@@ -316,7 +315,7 @@ void b2Dissemble(b2ProgramInfo& ctx, void* ptr, size_t offset, size_t len, int f
             cs_insn& i = insn[j];
 
             b2WriteColor(CS_LIGHT_GREY);
-            b2WriteAddress(i.address);
+            b2WriteAddress((SKsize)i.address);
 
 
 

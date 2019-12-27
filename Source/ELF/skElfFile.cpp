@@ -201,7 +201,7 @@ int skElfFile::loadSections(skStream& stream)
             if (name != 0 && (*name) == '\0')
                 continue;
 
-            if (m_sectionLookup.find(name) == SK_NPOS32)
+            if (m_sectionLookup.find(name) == m_sectionLookup.npos)
             {
                 if (sp.m_size < m_len)
                 {

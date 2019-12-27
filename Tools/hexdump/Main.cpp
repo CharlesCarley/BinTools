@@ -38,7 +38,7 @@ using namespace std;
 struct b2ProgramInfo
 {
     skFileStream m_stream;
-    SKint32      m_code;
+    SKint64      m_code;
     SKuint32     m_addressRange[2];
     SKuint32     m_flags;
 };
@@ -53,8 +53,7 @@ void b2Free(b2ProgramInfo &ctx);
 
 int main(int argc, char **argv)
 {
-
-	b2ProgramInfo ctx = {skFileStream(), -1, {(SKuint32)-1, (SKuint32)-1}, PF_DEFAULT | PF_FULLADDR};
+    b2ProgramInfo ctx = {skFileStream(), -2, {(SKuint32)-1, (SKuint32)-1}, PF_DEFAULT | PF_FULLADDR};
 
     if (b2ParseCommandLine(ctx, argc, argv) == -1)
     {
@@ -102,7 +101,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
     int    i;
     char * ch;
     char   sw;
-    bool   err = false;
+    bool   err = false, use_addr = false;
 
     for (i = 1; i < argc - 1; i++)
     {
@@ -121,7 +120,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
             {
                 ++i;
                 if (i < argc)
-                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, ((SKuint32)-1)-1);
+                    ctx.m_code = skClamp<SKuint32>(std::strtol(argv[i], 0, 16), 0, ((SKuint32)-1) - 1);
             }
             break;
             case 'a':
@@ -135,6 +134,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
                     {
                         ctx.m_addressRange[0] = std::strtol(argv[++i], 0, 10);
                         ctx.m_addressRange[1] = std::strtol(argv[++i], 0, 10);
+                        use_addr              = true;
                     }
                     else
                     {
@@ -166,6 +166,9 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
 
     if (argc >= 2)
     {
+        if (!use_addr)
+            ctx.m_addressRange[0] = 0;
+
         if (!b2Alloc(ctx, argv[argc - 1]))
             err = true;
     }
@@ -197,14 +200,13 @@ void b2Print(b2ProgramInfo &ctx)
     skFileStream &fp = ctx.m_stream;
     SKuint8       buffer[1025];
 
-
-	SKsize   n;
+    SKsize n;
     SKsize a, r;
     n = fp.size();
     a = skClamp<SKsize>(ctx.m_addressRange[0], 0, n);
     r = skClamp<SKsize>(ctx.m_addressRange[1], 0, n);
 
-    if (ctx.m_addressRange[0] != SK_NPOS)
+    if (ctx.m_addressRange[0] != -1)
         fp.seek(a, SEEK_SET);
     else
     {
@@ -213,14 +215,14 @@ void b2Print(b2ProgramInfo &ctx)
     }
 
     SKsize br,
-    tr = 0;
+        tr = 0;
     while (!fp.eof() && tr < r)
     {
         br = fp.read(buffer, skMin<SKsize>(1024, r));
-        if (br != SK_NPOS && br > 0)
+        if (br != -1 && br > 0)
         {
             buffer[br] = 0;
-            b2DumpHex(buffer, tr+a, br, ctx.m_flags, ctx.m_code);
+            b2DumpHex(buffer, tr + a, br, ctx.m_flags, ctx.m_code);
             tr += br;
         }
     }

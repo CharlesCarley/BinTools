@@ -26,6 +26,12 @@
 #include "b2Common.h"
 
 
+enum PointerStackSize
+{
+    PL8 = sizeof(void*) == 8,
+    PL4 = sizeof(void*) == 4,
+
+};
 
 void b2WriteColor(skConsoleColorSpace cs)
 {
@@ -34,18 +40,18 @@ void b2WriteColor(skConsoleColorSpace cs)
 
 
 
-void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
+void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint64 mark)
 {
     SKuint8 c1, c2, c3, c4;
-    SKsize  j, n =0;
+    SKsize  j, n = 0;
 
     union {
-        SKuint8 b[4];
-        SKuint32 i;
+        SKuint8  b[4];
+        SKuint64 i;
     } cmp;
     cmp.i = mark;
 
-    if (!cp || offs == SK_NPOS32 || max == SK_NPOS)
+    if (!cp || offs == SK_NPOS32 || max == -1)
         return;
 
 
@@ -94,7 +100,7 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
                         c3 = (SKuint32)cp[offs + ((j + 2) % 16)];
                         c4 = (SKuint32)cp[offs + ((j + 3) % 16)];
 
-                        if ((c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0])  ||
+                        if ((c1 == cmp.b[3] && c2 == cmp.b[2] && c3 == cmp.b[1] && c4 == cmp.b[0]) ||
                             (c1 == cmp.b[0] && c2 == cmp.b[1] && c3 == cmp.b[2] && c4 == cmp.b[3]))
                         {
                             n = 3;  // bleed through x times
@@ -117,12 +123,12 @@ void b2WriteHex(char* cp, SKsize offs, SKsize max, int flags, SKuint32 mark)
 
 
 
-void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
+void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, SKuint64 mark)
 {
     SKuint8 c;
     SKsize  j;
 
-    if (!cp || offs == SK_NPOS || max == SK_NPOS)
+    if (!cp || offs == -1 || max == -1)
         return;
 
 
@@ -151,7 +157,7 @@ void b2WriteAscii(char* cp, SKsize offs, SKsize max, int flags, int mark)
 
 
 
-void b2MarkColor(SKuint32 c, SKuint32 mark)
+void b2MarkColor(SKuint32 c, SKuint64 mark)
 {
     if (c == mark)
         b2WriteColor(CS_RED);
@@ -166,16 +172,26 @@ void b2MarkColor(SKuint32 c, SKuint32 mark)
 void b2WriteAddress(SKsize addr, int flags)
 {
     b2WriteColor(CS_LIGHT_GREY);
-    if (flags & PF_FULLADDR)
-        printf("%016llx  ", addr);
+    if (PL8)
+    {
+        if (flags & PF_FULLADDR)
+            printf("%016llx  ", (SKuint64)addr);
+        else
+            printf("%16llx  ", (SKuint64)addr);
+    }
     else
-        printf("%16llx  ", addr);
+    {
+        if (flags & PF_FULLADDR)
+            printf("%08x  ", (SKuint32)addr);
+        else
+            printf("%8x  ", (SKuint32)addr);
+    }
 }
 
 
-void b2DumpHex(void* ptr, SKsize offset, SKsize len, int flags, SKuint32 mark, bool nl)
+void b2DumpHex(void* ptr, SKsize offset, SKsize len, int flags, SKuint64 mark, bool nl)
 {
-    if (!ptr || offset == SK_NPOS || len == SK_NPOS)
+    if (!ptr || offset == -1 || len == -1)
         return;
 
     SKsize i;
