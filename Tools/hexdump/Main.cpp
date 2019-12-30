@@ -153,7 +153,7 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
                 if (offs < alen)
                     sw = ch[offs++];
                 if (sw == 'c')
-                    skDebugger::setPrintFlag(skDebugger::PF_DISABLE_COLOR);
+                    skDebugger::setPrintFlag(skDebugger::DISABLE_COLOR);
                 else if (sw == 'a')
                     ctx.m_flags &= ~PF_ASCII;
                 break;
