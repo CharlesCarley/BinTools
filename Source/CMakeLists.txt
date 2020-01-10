@@ -73,7 +73,7 @@ set(TargetName_SRC
 
 
 include_directories(. 
-    ${BinTools_SOURCE_DIR}/Extern
+    ${BinTools_Utils_INCLUDE}
 )
 
 

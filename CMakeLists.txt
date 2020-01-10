@@ -21,7 +21,7 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 project(BinTools)
 
 set(CMAKE_MODULE_PATH 
@@ -30,22 +30,23 @@ set(CMAKE_MODULE_PATH
     ${BinTools_SOURCE_DIR}/Tools/Data2Array/CMake
 )
 subdirs(CMake)
+include(Configure)
 
 
 # This is used for controlling the external Utils project without 
 # having to modify the build scripts
-set(FOLDER_NAME         "External")
-set(USE_FOLDERS         TRUE)
-set(Utils_SOURCE_DIR    "${BinTools_SOURCE_DIR}/Extern/Utils")
-
-
-include(Configure)
-include (ConfigureUtils)
 
 log_config()
 
+if (NOT BinTools_Utils_EXTERNAL)
+    set(FOLDER_NAME         "External")
+    set(USE_FOLDERS         ${BinTools_USE_FOLDERS})
+    set(Utils_SOURCE_DIR    "${BinTools_SOURCE_DIR}/Extern/Utils")
+    include (ConfigureUtils)
 
-subdirs(Extern/Utils)
+    subdirs(Extern/Utils)
+endif()
+
 subdirs(Extern/capstone)
 
 subdirs(Source)

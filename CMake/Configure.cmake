@@ -21,38 +21,30 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-option(BinTools_USE_FOLDERS     "Organize into folders" ON)
+option(BinTools_USE_FOLDERS     "Organize into folders" OFF)
+
+
 
 
 # -----------------------------------------------------------------------------
 #                            Source Configuration
 # -----------------------------------------------------------------------------
-set(BINARYFILE_INCLUDE   ${BinTools_SOURCE_DIR}/Source)
-set(UTILS_INCLUDE        ${BinTools_SOURCE_DIR}/Extern)
-set(CAPSTONE_INCLUDE     ${BinTools_SOURCE_DIR}/Extern/capstone/include)
-set(TOOLS_COMMON_INCLUDE ${BinTools_SOURCE_DIR}/Tools/common)
 
+if (BinTools_Utils_EXTERNAL)
+   set(BinTools_Utils_INCLUDE ${Utils_INCLUDE})
+   set(BinTools_Utils_LIBRARY ${Utils_LIBRARY})
+else()
+   set(BinTools_Utils_EXTERNAL FALSE)
+   set(BinTools_Utils_INCLUDE  ${BinTools_SOURCE_DIR}/Extern)
+   set(BinTools_Utils_LIBRARY  Utils)
+endif()
+
+
+set(BINARYFILE_INCLUDE   ${BinTools_SOURCE_DIR}/Source)
+set(CAPSTONE_INCLUDE     ${BinTools_SOURCE_DIR}/Extern/capstone/include)
 
 set(CAPSTONE_LIB        capstone-static)
 set(BINFILE_LIB         BinaryFile)
-set(UTILS_LIB           Utils)
-
-set(UTILS_TestDir      ${BinTools_SOURCE_DIR}/Extern/Utils/CMake)
-if (NOT IS_DIRECTORY ${UTILS_TestDir})
-
-    message(STATUS "Cloning Utils into ${BinTools_SOURCE_DIR}/Extern/Utils")
-    execute_process( 
-        WORKING_DIRECTORY ${BinTools_SOURCE_DIR} 
-        COMMAND git submodule update --init --checkout
-        ERROR_FILE ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt
-        OUTPUT_QUIET
-        ERROR_QUIET
-        )
-    if (NOT IS_DIRECTORY ${UTILS_TestDir})
-        message("Failed to clone Utils. See ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt for more information.")
-    endif()
-endif()
-
 
 
 
@@ -63,9 +55,10 @@ macro(log_config)
     message(STATUS "-----------------------------------------------------------")
     message(STATUS " ")
     message(STATUS "---------- Utils --------")
+    message(STATUS "Is external                             : ${BinTools_Utils_EXTERNAL}")
+    message(STATUS "Include                                 : ${BinTools_Utils_INCLUDE}")
+    message(STATUS "Library                                 : ${BinTools_Utils_LIBRARY}")
     message(STATUS "Print using printf                      : ${Utils_NO_DEBUGGER}")
-    message(STATUS "Using Memory allocator                  : ${Utils_USE_MEMORY_ALLOCATOR}")
-    message(STATUS "Using int size_t                        : ${Utils_USE_SIGNED_SIZE_T}")
     message(STATUS "Using standard strings                  : ${Utils_USE_STD_STRING_FUNCS}")
     message(STATUS "Using assert in debug                   : ${Utils_USE_DEBUG_ASSERT}")
     message(STATUS "Using assert in iterators               : ${Utils_USE_ITERATOR_DEBUG}")

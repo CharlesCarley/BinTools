@@ -197,7 +197,6 @@ int skPortableFile::loadImpl(skStream &stream)
                 const SKsize pos = stream.position();
                 stream.seek(sh.m_pointerToRawData, SEEK_SET);
 
-
                 SKuint8 *data = new SKuint8[size + 1];
                 stream.read(data, size);
                 stream.seek(pos, SEEK_SET);
