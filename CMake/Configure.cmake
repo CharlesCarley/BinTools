@@ -37,6 +37,24 @@ else()
    set(BinTools_Utils_EXTERNAL FALSE)
    set(BinTools_Utils_INCLUDE  ${BinTools_SOURCE_DIR}/Extern)
    set(BinTools_Utils_LIBRARY  Utils)
+
+    set(UTILS_TestDir      ${BinTools_SOURCE_DIR}/Extern/Utils/CMake)
+    if (NOT IS_DIRECTORY ${UTILS_TestDir})
+
+        message(STATUS "Cloning Utils into ${BinTools_SOURCE_DIR}/Extern/Utils")
+        execute_process( 
+            WORKING_DIRECTORY ${BinTools_SOURCE_DIR} 
+            COMMAND git submodule update --init --checkout
+            ERROR_FILE ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt
+            OUTPUT_QUIET
+            ERROR_QUIET
+            )
+        if (NOT IS_DIRECTORY ${UTILS_TestDir})
+            message("Failed to clone Utils. See ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt for more information.")
+        endif()
+    endif()
+
+
 endif()
 
 
