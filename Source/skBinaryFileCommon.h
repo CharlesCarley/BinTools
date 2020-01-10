@@ -65,6 +65,12 @@ enum skErrorCodes
     EC_UNEXPECTED
 };
 
+enum skLogFlag
+{
+    LF_NONE,
+    LF_ONLY_ERROR,
+};
+
 
 enum skFileFormat
 {

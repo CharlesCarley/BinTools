@@ -43,10 +43,11 @@ protected:
     skMachineArchitecture m_arch;
     SectionTable          m_sectionLookup;
     SymbolTable           m_symTable;
-    
+    int                   m_logFlags;
+
     // Protected constructor. Load files via the static interface
     // skBinaryFile::load(file).
-    skBinaryFile();
+    skBinaryFile(int flags);
 
     int load(skStream &fstream);
 
@@ -58,7 +59,7 @@ public:
     // Returns skDefaultFile if the file format is not supported, or NULL if the
     // file can not be loaded. Instances created through this function sill must be
     // deleted when no longer needed.
-    static int load(const char *file, skBinaryFile **fp);
+    static int load(const char *file, skBinaryFile **fp, int flags=LF_ONLY_ERROR);
 
 
     // Returns the format of the loaded file.
@@ -113,11 +114,11 @@ public:
 
     // Search for a named section.
     // returns NULL if the requested section name is not found.
-    skSection *getSection(const char *sinf)
+    skSection *getSection(const char *sectionName)
     {
-        if (sinf)
+        if (sectionName)
         {
-            const SKsize idx = m_sectionLookup.find(const_cast<char *>(sinf));
+            const SKsize idx = m_sectionLookup.find(const_cast<char *>(sectionName));
             if (idx != m_sectionLookup.npos)
                 return m_sectionLookup[idx];
         }

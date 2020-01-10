@@ -23,22 +23,23 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include <memory.h>
 #include "PE/skPortableFile.h"
+#include <memory.h>
 #include "PE/skPortableDirectory.h"
 #include "PE/skPortableSection.h"
 #include "PE/skPortableSymbol.h"
 #include "Utils/skDebugger.h"
-#include "Utils/skMemoryUtils.h"
 #include "Utils/skFileStream.h"
+#include "Utils/skMemoryUtils.h"
 #include "skSection.h"
 
-const COFFOptionalHeaderCommon pfDefaultValue = { 0, 0, 0, 0, 0, 0, 0, 0};
+const COFFOptionalHeaderCommon pfDefaultValue = {0, 0, 0, 0, 0, 0, 0, 0};
 const COFFHeader               cHeader        = {0, 0, 0, 0, 0, 0, 0};
 
 
 
-skPortableFile::skPortableFile(SKint16 dos_offset) :
+skPortableFile::skPortableFile(int flags, SKint16 dos_offset) :
+    skBinaryFile(flags),
     m_header(cHeader),
     m_imageHeader(0),
     m_headerOffs(dos_offset),
@@ -53,7 +54,7 @@ skPortableFile ::~skPortableFile()
 }
 
 
-const COFFOptionalHeaderCommon& skPortableFile::getCommonHeader(void) const
+const COFFOptionalHeaderCommon &skPortableFile::getCommonHeader(void) const
 {
     if (m_imageHeader)
         return (*m_imageHeader);
@@ -91,14 +92,13 @@ void skPortableFile::getOptionalHeader(COFFOptionalHeader64 &dest) const
     }
 }
 
-int skPortableFile::loadImpl(skStream& stream)
+int skPortableFile::loadImpl(skStream &stream)
 {
+    SKuint16 optMagic, code = EC_OK;
 
-    SKuint16 optMagic, code;
-
-    // Skip past the DOS stub program, and the PE signature 
+    // Skip past the DOS stub program, and the PE signature
     // since it is not part of the defined structure (+4)
-    stream.seek(m_headerOffs + 4, SEEK_CUR);
+    stream.seek((SKint64)m_headerOffs + 4, SEEK_CUR);
     stream.read(&m_header, sizeof(COFFHeader));
 
 
@@ -115,54 +115,59 @@ int skPortableFile::loadImpl(skStream& stream)
 
     if (m_arch == IS_NONE)
     {
-        // printf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
+        if (m_logFlags != LF_NONE)
+            printf("Invalid instruction set or conversion is not setup for:(0x%04x)\n", m_header.m_machine);
         return EC_UNKNOWN_FILE_FORMAT;
     }
 
-    // Pick out the magic for testing.
     stream.read(&optMagic, 2);
-    // put it back
-    stream.seek(-2, SEEK_CUR); 
+    stream.seek(-2, SEEK_CUR);
 
     if (optMagic == COFF_MAG_PE32)
     {
         if (sizeof(COFFOptionalHeader32) != m_header.m_optionalHeaderSize)
         {
-            //printf("COFFOptionalHeader32 not properly aligned %u-%u\n",
-            //         (SKuint32)sizeof(COFFOptionalHeader32),
-            //         m_header.m_optionalHeaderSize);
+            if (m_logFlags != LF_NONE)
+            {
+                printf("COFFOptionalHeader32 not properly aligned %u-%u\n",
+                       (SKuint32)sizeof(COFFOptionalHeader32),
+                       m_header.m_optionalHeaderSize);
+            }
             return EC_UNEXPECTED;
         }
 
         m_imageHeader = new COFFOptionalHeader32;
         stream.read(m_imageHeader, sizeof(COFFOptionalHeader32));
 
-        m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
+        m_sectionStart = 4 + (SKuint64)m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader32);
     }
     else if (optMagic == COFF_MAG_PE64)
     {
         if (sizeof(COFFOptionalHeader64) != m_header.m_optionalHeaderSize)
         {
-            //printf("COFFOptionalHeader64 not properly aligned %u-%u\n",
-            //         (SKuint32)sizeof(COFFOptionalHeader64),
-            //         m_header.m_optionalHeaderSize);
+            if (m_logFlags != LF_NONE)
+            {
+                printf("COFFOptionalHeader64 not properly aligned %u-%u\n",
+                         (SKuint32)sizeof(COFFOptionalHeader64),
+                         m_header.m_optionalHeaderSize);
+            }
             return EC_UNEXPECTED;
         }
 
         m_imageHeader = new COFFOptionalHeader64;
         stream.read(m_imageHeader, sizeof(COFFOptionalHeader64));
-        m_sectionStart = 4 + m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
+        m_sectionStart = 4 + (SKuint64)m_headerOffs + sizeof(COFFHeader) + sizeof(COFFOptionalHeader64);
     }
     else
     {
-        // printf("COFFOptionalHeader: Unknown header type!\n");
+        if (m_logFlags != LF_NONE)
+            printf("COFFOptionalHeader: Unknown header type!\n");
         return EC_UNKNOWN_FILE_FORMAT;
     }
 
     // Set the file format type now that it's known to be one or the other.
     m_fileFormatType = optMagic == COFF_MAG_PE32 ? FFT_32BIT : FFT_64BIT;
 
-    // seek to the section
     stream.seek(m_sectionStart, SEEK_SET);
 
     SKuint16 i16;
@@ -171,7 +176,7 @@ int skPortableFile::loadImpl(skStream& stream)
         COFFSectionHeader sh = {};
         stream.read(&sh, sizeof(COFFSectionHeader));
 
-        char *name = reinterpret_cast<char*>(sh.m_name);
+        char *name = reinterpret_cast<char *>(sh.m_name);
         if ((*name) == '\0' || name[7] != '\0')
             continue;
 
@@ -186,7 +191,6 @@ int skPortableFile::loadImpl(skStream& stream)
 
             if (size < m_len)
             {
-
                 // Read the section data
 
                 // save the location
@@ -211,14 +215,15 @@ int skPortableFile::loadImpl(skStream& stream)
             }
             else
             {
-                //printf("Error - Section size exceeds the amount of memory allocated.\n");
+                if (m_logFlags != LF_NONE)
+                    printf("Error - Section size exceeds the amount of memory allocated.\n");
                 return EC_OVERFLOW;
             }
         }
         else
         {
-            // this is an error, it shouldn't have duplicate symbols
-            // printf("Error - duplicate symbol name!\n");
+            if (m_logFlags != LF_NONE)
+                printf("Error - duplicate symbol name!\n");
             return EC_UNEXPECTED;
         }
     }
@@ -240,12 +245,12 @@ int skPortableFile::loadImpl(skStream& stream)
     {
         skPortableSection *pes = reinterpret_cast<skPortableSection *>(it.getNext().second);
 
+        code = EC_OK;
+
         skPortableSection::Directories::Iterator dit = pes->getDirectoryIterator();
-        while (dit.hasMoreElements())
+        while (dit.hasMoreElements() && code == EC_OK)
         {
             skPortableDirectory *dir = dit.getNext();
-
-            code = EC_OK;
             switch (dir->getType())
             {
             case CDE_RESOURCE:
@@ -270,14 +275,9 @@ int skPortableFile::loadImpl(skStream& stream)
             default:
                 break;
             }
-
-            // Stop execution immediately if 
-            // there is an error
-            if (code != EC_OK) 
-                return code;
         }
     }
-    return EC_OK;
+    return code;
 }
 
 
@@ -291,7 +291,6 @@ int skPortableFile::loadResourceDirectory(skPortableSection *section, skPortable
 
 int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDirectory *directory)
 {
-
     // resolve the relative virtual address.
     const SKuint32 addr = directory->getAddress();
     if (addr == (SKuint32)-1)
@@ -302,16 +301,16 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
 
     // Grab the initial pointer with the
     // offset to the directory table
-    SKbyte *ptr = (SKbyte*)section->getPointer() + addr;
+    SKbyte *ptr = (SKbyte *)section->getPointer() + addr;
 
 
 
     // Cast the pointer to the import directory structure.
     COFFImportDirectoryTable *idata = reinterpret_cast<COFFImportDirectoryTable *>(ptr);
 
-    const SKuint32 ival = sizeof(COFFImportDirectoryTable);
-    const SKsize maxl = section->getSize();
-    const SKuint32 len  = directory->getSize();
+    const SKuint32 ival   = sizeof(COFFImportDirectoryTable);
+    const SKsize   maxl   = section->getSize();
+    const SKuint32 len    = directory->getSize();
     const SKsize   ubound = maxl - addr;
 
     SKuint32 i = 0;
@@ -321,7 +320,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
         if (cidt.m_nameRVA == 0)
             break;
 
-        char *dllName = 0;
+        char *         dllName   = 0;
         const SKuint32 addrOfDLL = cidt.m_nameRVA - directory->getRVA();
         if (addrOfDLL < maxl)
             dllName = (char *)ptr + addrOfDLL;
@@ -329,7 +328,7 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
 
         SKuint32 addrOfHint = cidt.m_nameHintRVA, va;
 
-        for (; addrOfHint; addrOfHint+=4) // += 8 for PE32+
+        for (; addrOfHint; addrOfHint += 4)  // += 8 for PE32+
         {
             va = addrOfHint - directory->getRVA();
             if (va > ubound)
@@ -346,7 +345,6 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
                 // lookup by ordinal
                 printf("Lookup by ordinal is not implemented\n");
                 break;
-
             }
             else  // look up by name
             {
@@ -354,10 +352,10 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
                 if (hint == SK_NPOS32)
                     continue;
 
-                SKuint16 *sp   = (SKuint16 *)(ptr + hint);
+                SKuint16 *sp = (SKuint16 *)(ptr + hint);
 
                 const SKuint16 exnt = *(sp++);
-                SKbyte * cp   = (SKbyte *)(sp); 
+                SKbyte *       cp   = (SKbyte *)(sp);
 
                 skString name = cp;
                 if (!name.empty())
@@ -366,11 +364,10 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
                     if (idx == SK_NPOS32)
                     {
                         skSymbol *sym = new skPortableSymbol(
-                            this, 
-                            name, 
-                            dllName, 
-                            exnt  
-                        );
+                            this,
+                            name,
+                            dllName,
+                            exnt);
                         m_symTable.insert(name, sym);
                     }
                 }
@@ -384,24 +381,23 @@ int skPortableFile::loadImportDirectory(skPortableSection *section, skPortableDi
 
 
 
-
 template <typename COFFOptionalHeaderVaryingBase>
 void skPortableFile::sortDataDirectories(void)
 {
     // Find the locations of the data directories
     COFFOptionalHeaderVaryingBase *hdr = reinterpret_cast<COFFOptionalHeaderVaryingBase *>(m_imageHeader);
-    
-    int i;
+
+    int                    i;
     SectionTable::Iterator it = m_sectionLookup.iterator();
     while (it.hasMoreElements())
     {
-        skPortableSection *pes = reinterpret_cast<skPortableSection *>(it.getNext().second);
+        skPortableSection *      pes = reinterpret_cast<skPortableSection *>(it.getNext().second);
         const COFFSectionHeader &csh = pes->getHeader();
 
         for (i = 0; i < CDE_MAX; ++i)
         {
             COFFDataDirectory &dd = hdr->m_directories[i];
-            
+
             if (dd.m_virtualAddress >= csh.m_virtualAddress &&
                 dd.m_virtualAddress < csh.m_virtualAddress + csh.m_sizeOfRawData)
             {
@@ -410,4 +406,3 @@ void skPortableFile::sortDataDirectories(void)
         }
     }
 }
-

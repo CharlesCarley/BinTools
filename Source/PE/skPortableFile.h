@@ -40,7 +40,7 @@ private:
 
 
     friend class skBinaryFile;
-    skPortableFile(SKint16 dos_offset);
+    skPortableFile(int flags, SKint16 dos_offset);
 
 public:
     virtual ~skPortableFile();

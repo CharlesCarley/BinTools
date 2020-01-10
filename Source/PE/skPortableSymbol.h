@@ -28,8 +28,6 @@
 
 #include "skSymbol.h"
 
-
-
 class skPortableSymbol : public skSymbol
 {
 private:
@@ -37,11 +35,9 @@ private:
     skString m_name;
     skString m_dll;
 
-
 public: 
     skPortableSymbol(skBinaryFile* owner, const skString& name, const skString& location, const SKuint64& rva);
     virtual ~skPortableSymbol();
-
 
     inline const skString& getSymbolName(void) const
     {

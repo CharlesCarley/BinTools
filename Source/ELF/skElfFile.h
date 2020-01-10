@@ -38,7 +38,7 @@ private:
 
 
     friend class skBinaryFile;
-    skElfFile();
+    skElfFile(int flags);
 
 public:
     virtual ~skElfFile();

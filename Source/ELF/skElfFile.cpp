@@ -34,7 +34,8 @@
 #include "skSection.h"
 
 
-skElfFile::skElfFile() :
+skElfFile::skElfFile(int flags) :
+    skBinaryFile(flags),
     m_strtab(0)
 {
     // Make sure this type of instance is visible in the base class.
@@ -122,7 +123,8 @@ int skElfFile::loadImpl(skStream& stream)
 
     if (m_arch == IS_NONE)
     {
-        // printf("Unknown machine architecture found in the file header\n");
+        if (m_logFlags != LF_NONE)
+            printf("Unknown machine architecture found in the file header\n");
         return EC_UNKNOWN_FILE_FORMAT;
     }
 
@@ -167,7 +169,8 @@ int skElfFile::loadSections(skStream& stream)
 
     if (offe > m_len)
     {
-        //printf("Error - The section header's offset exceeds the amount of allocated memory.\n");
+        if (m_logFlags != LF_NONE)
+            printf("Error - The section header's offset exceeds the amount of allocated memory.\n");
         return EC_OVERFLOW;
     }
 
@@ -225,18 +228,26 @@ int skElfFile::loadSections(skStream& stream)
                         (size_t)sp.m_offset,
                         header);
 
-                    m_sectionLookup.insert(name, section);
+                    if (!m_sectionLookup.insert(name, section))
+                    {
+                        if (m_logFlags != LF_NONE)
+                            printf("Failed to store the section '%s'\n", name);
+                    }
                 }
                 else
                 {
-                    // SKuint64 len = sp.m_offset + sp.m_size;
-                    // printf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
+                    if (m_logFlags != LF_NONE)
+                    {
+                        SKuint64 len = (SKuint64)sp.m_offset + (SKuint64)sp.m_size;
+                        printf("Error - Section size exceeds the amount of allocated memory (%s, %llu).\n", name, len - m_len);
+                    }
                     return EC_OVERFLOW;
                 }
             }
             else
             {
-                // printf("Error - duplicate section name!\n");
+                if (m_logFlags != LF_NONE)
+                    printf("Error - duplicate section name!\n");
                 return EC_DUPLICATE;
             }
         }
@@ -265,21 +276,21 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
 
         if (hdr.m_entSize == 0)
         {
-            // printf("Error - No entries in the string table.\n");
+            if (m_logFlags != LF_NONE)
+                printf("Error - No entries in the string table.\n");
             return EC_UNEXPECTED;
         }
 
         const SKuint64 entryLen = hdr.m_size / hdr.m_entSize;
-
         i = 0;
         while (i < entryLen)
         {
             const skElfSymbolHeader& syml = (*symPtr);
 
-            // Make sure that the index is at least in range.
             if (syml.m_name >= str->getSize())
             {
-                //printf("Error - The size of the symbol name exceeds the size of the string table.\n");
+                if (m_logFlags != LF_NONE)
+                    printf("Error - The size of the symbol name exceeds the size of the string table.\n");
                 return EC_OVERFLOW;
             }
 
@@ -288,11 +299,10 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                 ++cp;
 
             skString strl = cp;
-
             if (!strl.empty())
             {
                 const SKsize idx = m_symTable.find(strl);
-                if (idx == SK_NPOS32)
+                if (idx == m_symTable.npos)
                 {
                     skElfSymbol64 sdp;
                     if (m_fileFormatType == FFT_32BIT)
@@ -303,10 +313,13 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                     skSymbol* elfSym = new skElfSymbol(this, strl, sdp);
                     m_symTable.insert(strl, elfSym);
                 }
+                else if (m_logFlags != LF_NONE)
+                    printf("Failed to locate the symbol '%s'\n", strl.c_str());
             }
             else
             {
-                // printf("Empty symbol name found while parsing symbol table\n");
+                if (m_logFlags != LF_NONE)
+                    printf("Empty symbol name found while parsing symbol table\n");
                 return EC_UNEXPECTED;
             }
             ++symPtr;
