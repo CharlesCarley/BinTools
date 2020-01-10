@@ -31,11 +31,6 @@ set(CMAKE_MODULE_PATH
 )
 subdirs(CMake)
 include(Configure)
-
-
-# This is used for controlling the external Utils project without 
-# having to modify the build scripts
-
 log_config()
 
 if (NOT BinTools_Utils_EXTERNAL)
@@ -48,7 +43,12 @@ if (NOT BinTools_Utils_EXTERNAL)
 endif()
 
 subdirs(Extern/capstone)
-
 subdirs(Source)
-subdirs(Test)               
-subdirs(Tools)     
+
+if (BinTools_BUILD_TEST_FILES)
+    subdirs(Test)               
+endif()
+
+if (BinTools_BUILD_INFO_TOOLS)
+    subdirs(Tools)
+endif()

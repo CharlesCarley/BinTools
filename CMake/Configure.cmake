@@ -21,8 +21,9 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
-option(BinTools_USE_FOLDERS     "Organize into folders" OFF)
-
+option(BinTools_USE_FOLDERS         "Organize into folders" OFF)
+option(BinTools_BUILD_TEST_FILES    "Build the test binaries locally" ON)
+option(BinTools_BUILD_INFO_TOOLS    "Build the bindump and hexdump programs" ON)
 
 
 
@@ -39,8 +40,8 @@ else()
    set(BinTools_Utils_LIBRARY  Utils)
 
     set(UTILS_TestDir      ${BinTools_SOURCE_DIR}/Extern/Utils/CMake)
-    if (NOT IS_DIRECTORY ${UTILS_TestDir})
 
+    if (NOT IS_DIRECTORY ${UTILS_TestDir})
         message(STATUS "Cloning Utils into ${BinTools_SOURCE_DIR}/Extern/Utils")
         execute_process( 
             WORKING_DIRECTORY ${BinTools_SOURCE_DIR} 
@@ -53,8 +54,6 @@ else()
             message("Failed to clone Utils. See ${BinTools_BINARY_DIR}/GetSubmoduleUpdate.txt for more information.")
         endif()
     endif()
-
-
 endif()
 
 
