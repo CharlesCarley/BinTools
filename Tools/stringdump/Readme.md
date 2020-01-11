@@ -10,6 +10,8 @@ stringdump <options> <path to file>
 
   Options:
       -h          Display this help message.
+      -l          Min number of characters to qualify as a string.
+      -an         Match only alpha numeric characters.            
       -ar         Specify a start address and a range.
                       Input is in base 10 [0, file-length].
 

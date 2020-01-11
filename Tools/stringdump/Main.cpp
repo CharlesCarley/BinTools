@@ -38,6 +38,8 @@ struct b2ProgramInfo
 {
     skFileStream m_stream;
     SKuint32     m_addressRange[2];
+    SKint32      m_minLimit;
+    bool         m_alphaNum;
 };
 
 
@@ -50,7 +52,7 @@ void b2Free(b2ProgramInfo &ctx);
 
 int main(int argc, char **argv)
 {
-    b2ProgramInfo ctx = {skFileStream(), {(SKuint32)-1, (SKuint32)-1}};
+    b2ProgramInfo ctx = {skFileStream(), {(SKuint32)-1, (SKuint32)-1}, -1, false};
 
     if (b2ParseCommandLine(ctx, argc, argv) == -1)
     {
@@ -71,6 +73,8 @@ void b2Usage(void)
     std::cout << "                                                                  \n";
     std::cout << "  Options:                                                        \n";
     std::cout << "      -h          Display this help message.                      \n";
+    std::cout << "      -l          Min number of characters to qualify as a string.\n";
+    std::cout << "      -an         Match only alpha numeric characters.            \n";
     std::cout << "      -ar         Specify a start address and a range.            \n";
     std::cout << "                      Input is in base 10 [0, file-length].       \n";
     std::cout << "                                                                  \n";
@@ -123,11 +127,20 @@ int b2ParseCommandLine(b2ProgramInfo &ctx, int argc, char **argv)
                         return -1;
                     }
                 }
+                else if (sw == 'n')
+                    ctx.m_alphaNum = true;
                 else
                 {
                     printf("unknown argument 'a%c'\n", sw);
                     return -1;
                 }
+                break;
+            }
+            case 'l':
+            {
+                if (offs < alen)
+                    sw = ch[offs++];
+                ctx.m_minLimit = std::strtol(argv[++i], 0, 10);
                 break;
             }
             case 'h':
@@ -203,13 +216,25 @@ void b2Print(b2ProgramInfo &ctx)
             {
                 SKbyte b = buffer[i];
                 inASCII  = b >= 0x20 && b < 0x7F;
-                if (inASCII)
+                if (inASCII && !ctx.m_alphaNum)
                     tmp.append(b);
+                else if (inASCII && ctx.m_alphaNum)
+                {
+                    if (b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z' || b >= '0' && b <= '9')
+                        tmp.append(b);
+                }
                 else if (!tmp.empty() && !inASCII)
                 {
                     inASCII = false;
-                    printf("%s\n", tmp.c_str());
-                    tmp.resize(0);
+                    if (ctx.m_minLimit != -1 && tmp.size() < ctx.m_minLimit)
+                    {
+                        tmp.resize(0);
+                    }
+                    else
+                    {
+                        printf("%s\n", tmp.c_str());
+                        tmp.resize(0);
+                    }
                 }
             }
             tr += br;
