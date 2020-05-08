@@ -22,6 +22,6 @@
 # 3. This notice may not be removed or altered from any source distribution.
 # ------------------------------------------------------------------------------
 set(ToolsDirectory ${CMAKE_SOURCE_DIR}/Tools)
-subdirs(bindump hexdump bin2html stringdump)
+subdirs(bindump hexdump)
 
 
