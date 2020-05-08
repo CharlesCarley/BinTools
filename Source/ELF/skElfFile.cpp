@@ -313,7 +313,7 @@ int skElfFile::loadSymbolTable(const char* strLookup, const char* symLookup)
                     skSymbol* elfSym = new skElfSymbol(this, strl, sdp);
                     m_symTable.insert(strl, elfSym);
                 }
-                else if (m_logFlags != LF_NONE)
+                else if (m_logFlags == LF_VERBOSE)
                     printf("Failed to locate the symbol '%s'\n", strl.c_str());
             }
             else

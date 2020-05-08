@@ -69,6 +69,7 @@ enum skLogFlag
 {
     LF_NONE,
     LF_ONLY_ERROR,
+    LF_VERBOSE
 };
 
 
